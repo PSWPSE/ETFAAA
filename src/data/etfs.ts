@@ -1474,3 +1474,85 @@ export const getETFsByTheme = (themeId: string, market?: 'korea' | 'us'): ETF[] 
     etf.themes.some(t => t.toLowerCase().includes(theme.name.toLowerCase().slice(0, 2)))
   );
 };
+
+// 확장된 ETF 정보 (52주 고가/저가 등)
+export const getExtendedETFInfo = (etf: ETF) => {
+  // 52주 고가/저가 생성 (현재가 기준 ±30% 범위)
+  const high52w = Math.round(etf.price * (1 + 0.15 + Math.random() * 0.15));
+  const low52w = Math.round(etf.price * (1 - 0.15 - Math.random() * 0.15));
+  
+  // 당일 고가/저가
+  const dayHigh = Math.round(etf.price * (1 + Math.random() * 0.03));
+  const dayLow = Math.round(etf.price * (1 - Math.random() * 0.03));
+  
+  // 전일 종가
+  const prevClose = etf.price - etf.change;
+  
+  // 거래대금 (거래량 * 가격)
+  const turnover = etf.volume * etf.price;
+  
+  // 추적지수 결정
+  const trackingIndexMap: Record<string, string> = {
+    'KOSPI200': 'KOSPI 200',
+    'KOSDAQ150': 'KOSDAQ 150',
+    'KRX300': 'KRX 300',
+    '반도체': 'KRX 반도체',
+    'AI': 'KRX AI',
+    'S&P500': 'S&P 500',
+    'NASDAQ': 'NASDAQ 100',
+    '배당': 'Dow Jones Select Dividend',
+  };
+  
+  let trackingIndex = '기초지수';
+  for (const [key, value] of Object.entries(trackingIndexMap)) {
+    if (etf.themes.some(t => t.includes(key)) || etf.name.includes(key)) {
+      trackingIndex = value;
+      break;
+    }
+  }
+  
+  // 추적오차 (0.01% ~ 0.5%)
+  const trackingError = 0.01 + Math.random() * 0.49;
+  
+  // 레버리지 배수
+  let leverage = 1;
+  if (etf.name.includes('2X') || etf.name.includes('레버리지')) leverage = 2;
+  if (etf.name.includes('3X')) leverage = 3;
+  if (etf.name.includes('인버스')) leverage = -1;
+  if (etf.name.includes('인버스2X')) leverage = -2;
+  
+  // 상장거래소
+  const listingExchange = etf.id.startsWith('kr') ? 'KRX' : 'NYSE/NASDAQ';
+  
+  return {
+    ...etf,
+    high52w,
+    low52w,
+    dayHigh,
+    dayLow,
+    prevClose,
+    turnover,
+    trackingIndex,
+    trackingError,
+    leverage: leverage !== 1 ? leverage : undefined,
+    listingExchange,
+  };
+};
+
+// 유사 ETF 찾기
+export const getSimilarETFs = (etfId: string, limit: number = 5): ETF[] => {
+  const etf = getETFById(etfId);
+  if (!etf) return [];
+  
+  // 같은 카테고리 또는 테마의 ETF 찾기
+  const similar = etfs
+    .filter(e => 
+      e.id !== etfId && 
+      (e.category === etf.category || 
+       e.themes.some(t => etf.themes.includes(t)))
+    )
+    .sort((a, b) => b.volume - a.volume)
+    .slice(0, limit);
+  
+  return similar;
+};

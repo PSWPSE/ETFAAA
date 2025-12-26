@@ -16,6 +16,19 @@ export interface ETF {
   inceptionDate: string;
   nav: number;
   aum: number;
+  // 52주 정보
+  high52w?: number;
+  low52w?: number;
+  // 거래 정보
+  turnover?: number; // 거래대금 (원)
+  prevClose?: number; // 전일종가
+  dayHigh?: number; // 당일고가
+  dayLow?: number; // 당일저가
+  // 추가 정보
+  trackingIndex?: string; // 추적지수
+  trackingError?: number; // 추적오차
+  listingExchange?: string; // 상장거래소
+  leverage?: number; // 레버리지 배수 (해당시)
 }
 
 // 가격 히스토리

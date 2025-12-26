@@ -45,6 +45,7 @@
   display: flex;
   align-items: center;
   gap: var(--spacing-sm);
+  flex-wrap: wrap;
 }
 
 .etfIssuer {
@@ -75,9 +76,224 @@
   gap: var(--spacing-sm);
 }
 
+/* Price Range Card (52주) */
+.priceRangeCard {
+  background: var(--color-white);
+}
+
+.priceRangeHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-md);
+}
+
+.priceRangeHint {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-tertiary);
+}
+
+.priceRangeHint strong {
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+.priceRange {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.priceRangeLabels {
+  display: flex;
+  justify-content: space-between;
+}
+
+.priceRangeLow,
+.priceRangeHigh {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.priceRangeHigh {
+  text-align: right;
+  align-items: flex-end;
+}
+
+.priceRangeLowLabel,
+.priceRangeHighLabel {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-tertiary);
+}
+
+.priceRangeLowValue,
+.priceRangeHighValue {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.priceRangePercent {
+  font-size: var(--font-size-xs);
+  font-weight: 500;
+}
+
+.priceRangeBar {
+  position: relative;
+  height: 8px;
+  background: linear-gradient(90deg, #EF4444 0%, #FBBF24 30%, #22C55E 70%, #22C55E 100%);
+  border-radius: var(--radius-full);
+  margin-top: var(--spacing-sm);
+}
+
+.priceRangeBarFill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  background: transparent;
+  border-radius: var(--radius-full);
+}
+
+.priceRangeIndicator {
+  position: absolute;
+  top: -28px;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.priceRangeIndicatorValue {
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  color: var(--color-primary);
+  background: var(--color-white);
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-primary);
+  white-space: nowrap;
+}
+
+.priceRangeIndicator::after {
+  content: '';
+  width: 12px;
+  height: 12px;
+  background: var(--color-primary);
+  border: 2px solid var(--color-white);
+  border-radius: 50%;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+  margin-top: 4px;
+}
+
+/* Quick Actions */
+.quickActions {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--spacing-sm);
+}
+
+.quickActionButton {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md);
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.quickActionButton:hover {
+  border-color: var(--color-primary);
+  background: rgba(30, 58, 95, 0.03);
+}
+
+.quickActionButton svg:first-child {
+  color: var(--color-primary);
+  flex-shrink: 0;
+}
+
+.quickActionButton span {
+  flex: 1;
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  color: var(--color-text-primary);
+  text-align: left;
+}
+
+.quickActionButton svg:last-child {
+  color: var(--color-text-tertiary);
+  flex-shrink: 0;
+}
+
+/* Chart Header */
+.chartHeader {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-sm);
+}
+
+.chartPeriodSelector {
+  display: flex;
+  gap: var(--spacing-xs);
+}
+
+.chartPeriodButton {
+  padding: var(--spacing-xs) var(--spacing-sm);
+  background: var(--color-bg-secondary);
+  border: 1px solid transparent;
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  min-height: 32px;
+}
+
+.chartPeriodButton:hover {
+  background: var(--color-border);
+}
+
+.chartPeriodButton.active {
+  background: var(--color-primary);
+  color: var(--color-white);
+}
+
 /* Chart Container */
 .chartContainer {
   margin-top: var(--spacing-sm);
+  overflow: hidden;
+}
+
+/* Trading Grid */
+.tradingGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--spacing-sm);
+}
+
+.tradingItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-sm);
+  background: var(--color-bg);
+  border-radius: var(--radius-md);
+}
+
+.tradingLabel {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+.tradingValue {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-text-primary);
 }
 
 /* Card Title */
@@ -95,7 +311,65 @@
   gap: var(--spacing-md);
 }
 
-/* Returns List */
+/* Returns Card */
+.returnsCard {
+  display: flex;
+  flex-direction: column;
+}
+
+.returnsChartContainer {
+  margin-bottom: var(--spacing-md);
+  overflow: hidden;
+}
+
+/* Returns Summary */
+.returnsSummary {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--spacing-sm);
+}
+
+.returnsSummaryCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: var(--spacing-md);
+  border-radius: var(--radius-md);
+  text-align: center;
+}
+
+.returnsSummaryCard.positive {
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.08) 0%, rgba(34, 197, 94, 0.15) 100%);
+  border: 1px solid rgba(34, 197, 94, 0.2);
+}
+
+.returnsSummaryCard.negative {
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.08) 0%, rgba(239, 68, 68, 0.15) 100%);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.returnsSummaryLabel {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-tertiary);
+  font-weight: 500;
+}
+
+.returnsSummaryValue {
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+}
+
+.returnsSummaryCard.positive .returnsSummaryValue {
+  color: #16A34A;
+}
+
+.returnsSummaryCard.negative .returnsSummaryValue {
+  color: #DC2626;
+}
+
+/* Returns List (fallback) */
 .returnsList {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -232,7 +506,7 @@
 .dividendSummary {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: var(--spacing-md);
+  gap: var(--spacing-sm);
   margin-bottom: var(--spacing-lg);
 }
 
@@ -251,7 +525,7 @@
 }
 
 .dividendValue {
-  font-size: var(--font-size-xl);
+  font-size: var(--font-size-lg);
   font-weight: 700;
   color: var(--color-primary);
 }
@@ -320,9 +594,34 @@
   border-radius: var(--radius-md);
 }
 
+.riskItemHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
 .riskLabel {
   font-size: var(--font-size-xs);
   color: var(--color-text-tertiary);
+}
+
+.riskInfoButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  background: transparent;
+  border: none;
+  color: var(--color-text-tertiary);
+  cursor: pointer;
+  border-radius: 50%;
+  transition: all var(--transition-fast);
+}
+
+.riskInfoButton:hover {
+  background: var(--color-border);
+  color: var(--color-text-secondary);
 }
 
 .riskValue {
@@ -351,6 +650,89 @@
   transition: width var(--transition-slow);
 }
 
+/* Similar ETFs */
+.similarCard {
+  margin-top: var(--spacing-sm);
+}
+
+.similarList {
+  display: flex;
+  flex-direction: column;
+}
+
+.similarItem {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) 0;
+  border-bottom: 1px solid var(--color-border-light);
+  background: transparent;
+  border-left: none;
+  border-right: none;
+  border-top: none;
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+  transition: all var(--transition-fast);
+}
+
+.similarItem:last-child {
+  border-bottom: none;
+}
+
+.similarItem:hover {
+  background: var(--color-bg);
+  margin: 0 calc(-1 * var(--spacing-md));
+  padding-left: var(--spacing-md);
+  padding-right: var(--spacing-md);
+  width: calc(100% + var(--spacing-md) * 2);
+}
+
+.similarInfo {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.similarName {
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  color: var(--color-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.similarMeta {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-tertiary);
+}
+
+.similarPrice {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+}
+
+.similarPriceValue {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.similarChange {
+  font-size: var(--font-size-xs);
+  font-weight: 500;
+}
+
+.similarArrow {
+  color: var(--color-text-tertiary);
+  flex-shrink: 0;
+}
+
 /* Desktop */
 @media (min-width: 768px) {
   .etfHeader {
@@ -363,9 +745,19 @@
     align-items: flex-end;
   }
   
+  .chartHeader {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: flex-start;
+  }
+  
   .overviewGrid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .returnsChartContainer {
+    height: 220px;
   }
   
   .holdingsContainer {
@@ -384,5 +776,19 @@
   .returnsList {
     grid-template-columns: repeat(4, 1fr);
   }
+  
+  .tradingGrid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  
+  .dividendSummary {
+    grid-template-columns: repeat(4, 1fr);
+  }
 }
 
+/* Large Desktop */
+@media (min-width: 1200px) {
+  .quickActions {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
