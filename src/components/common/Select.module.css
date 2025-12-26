@@ -1,0 +1,82 @@
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.fullWidth {
+  width: 100%;
+}
+
+.label {
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  color: var(--color-text-secondary);
+}
+
+.selectWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.select {
+  width: 100%;
+  padding: 0 36px 0 var(--spacing-md);
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-base);
+  color: var(--color-text-primary);
+  cursor: pointer;
+  appearance: none;
+  transition: all var(--transition-fast);
+}
+
+.select:hover {
+  border-color: var(--color-text-tertiary);
+}
+
+.select:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(30, 58, 95, 0.1);
+}
+
+/* Sizes */
+.sm {
+  height: 32px;
+  font-size: var(--font-size-sm);
+}
+
+.md {
+  height: 44px;
+}
+
+.lg {
+  height: 52px;
+  font-size: var(--font-size-lg);
+}
+
+.icon {
+  position: absolute;
+  right: 12px;
+  color: var(--color-text-tertiary);
+  pointer-events: none;
+}
+
+/* Error State */
+.hasError .select {
+  border-color: var(--color-danger);
+}
+
+.hasError .select:focus {
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+}
+
+.error {
+  font-size: var(--font-size-xs);
+  color: var(--color-danger);
+  margin: 0;
+}
+

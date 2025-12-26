@@ -1,0 +1,534 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  padding-bottom: 100px;
+}
+
+/* Market Selector */
+.marketSelectorWrapper {
+  display: flex;
+  justify-content: center;
+  padding-bottom: var(--spacing-sm);
+}
+
+/* Search Bar */
+.searchBar {
+  position: sticky;
+  top: var(--header-height);
+  z-index: 10;
+  background: var(--color-bg);
+  margin: calc(var(--spacing-md) * -1);
+  margin-bottom: 0;
+  padding: var(--spacing-md);
+}
+
+.searchInputWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.searchIcon {
+  position: absolute;
+  left: 14px;
+  color: var(--color-text-tertiary);
+  pointer-events: none;
+}
+
+.searchInput {
+  width: 100%;
+  height: 48px;
+  padding: 0 44px;
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  font-size: var(--font-size-base);
+  color: var(--color-text-primary);
+  transition: all var(--transition-fast);
+}
+
+.searchInput:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(30, 58, 95, 0.1);
+}
+
+.clearButton {
+  position: absolute;
+  right: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-full);
+  color: var(--color-text-tertiary);
+  transition: all var(--transition-fast);
+}
+
+.clearButton:hover {
+  background: var(--color-bg-secondary);
+  color: var(--color-text-primary);
+}
+
+/* Control Bar */
+.controlBar {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.controlButton {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  transition: all var(--transition-fast);
+  min-height: var(--touch-target-min);
+}
+
+.controlButton:hover {
+  border-color: var(--color-text-tertiary);
+}
+
+.controlButton.active {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: var(--color-white);
+}
+
+.controlButton.hasFilter {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.filterCount {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  background: var(--color-primary);
+  color: var(--color-white);
+  border-radius: var(--radius-full);
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.controlButton.active .filterCount {
+  background: var(--color-white);
+  color: var(--color-primary);
+}
+
+.sortDropdown {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  min-height: var(--touch-target-min);
+}
+
+.sortSelect {
+  background: transparent;
+  border: none;
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  color: var(--color-text-primary);
+  cursor: pointer;
+  padding-right: 4px;
+}
+
+.sortOrderButton {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-primary);
+  padding: 0 4px;
+}
+
+/* Filter Panel */
+.filterPanel {
+  animation: slideDown var(--transition-fast);
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.filterSection {
+  margin-bottom: var(--spacing-md);
+}
+
+.filterSection:last-of-type {
+  margin-bottom: 0;
+}
+
+.filterTitle {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin-bottom: var(--spacing-sm);
+}
+
+.filterChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-xs);
+}
+
+.filterChip {
+  padding: var(--spacing-xs) var(--spacing-sm);
+  background: var(--color-bg-secondary);
+  border: 1px solid transparent;
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  transition: all var(--transition-fast);
+  min-height: 36px;
+}
+
+.filterChip:hover {
+  background: var(--color-border);
+}
+
+.filterChip.selected {
+  background: rgba(30, 58, 95, 0.1);
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.resetButton {
+  margin-top: var(--spacing-md);
+}
+
+/* Results Info */
+.resultsInfo {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-tertiary);
+}
+
+/* ETF List */
+.etfList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.etfCard {
+  position: relative;
+  overflow: visible;
+}
+
+.etfCardContent {
+  padding: var(--spacing-md);
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.etfCardContent:hover {
+  background: var(--color-bg);
+}
+
+.etfCardContent:active {
+  background: var(--color-bg-secondary);
+}
+
+.etfMain {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  padding-right: 50px;
+}
+
+.etfHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-sm);
+}
+
+.etfName {
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  color: var(--color-text-primary);
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.etfChange {
+  font-size: var(--font-size-base);
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.etfMeta {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-tertiary);
+}
+
+.etfDivider {
+  color: var(--color-border);
+}
+
+.etfStats {
+  display: flex;
+  gap: var(--spacing-lg);
+}
+
+.etfStat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.statLabel {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-tertiary);
+}
+
+.statValue {
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  color: var(--color-text-primary);
+}
+
+.etfTags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-xs);
+}
+
+.compareButton {
+  position: absolute;
+  top: 50%;
+  right: var(--spacing-md);
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 0 var(--spacing-sm);
+  height: 32px;
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-xs);
+  font-weight: 500;
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+}
+
+.compareButton:hover:not(:disabled) {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: var(--color-white);
+}
+
+.compareButton.added {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: var(--color-white);
+}
+
+.compareButton:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+/* Empty State */
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-2xl);
+  text-align: center;
+  color: var(--color-text-tertiary);
+}
+
+/* Floating Compare Bar */
+.floatingCompareBar {
+  position: fixed;
+  bottom: calc(var(--bottom-nav-height) + 12px);
+  left: var(--spacing-md);
+  right: var(--spacing-md);
+  z-index: 100;
+  animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.compareBarContent {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md);
+  background: var(--color-primary);
+  border-radius: var(--radius-xl);
+  box-shadow: 0 8px 32px rgba(30, 58, 95, 0.35);
+}
+
+.compareBarInfo {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  flex: 1;
+  min-width: 0;
+}
+
+.compareBarIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: var(--radius-md);
+  color: var(--color-white);
+  flex-shrink: 0;
+}
+
+.compareBarText {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.compareBarTitle {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-white);
+}
+
+.compareBarNames {
+  font-size: var(--font-size-xs);
+  color: rgba(255, 255, 255, 0.75);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.compareBarActions {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  flex-shrink: 0;
+}
+
+.compareBarClear {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: var(--radius-md);
+  color: rgba(255, 255, 255, 0.8);
+  transition: all var(--transition-fast);
+}
+
+.compareBarClear:hover {
+  background: rgba(255, 255, 255, 0.25);
+  color: var(--color-white);
+}
+
+.compareBarButton {
+  padding: var(--spacing-sm) var(--spacing-lg);
+  background: var(--color-white);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-primary);
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+  min-height: 40px;
+}
+
+.compareBarButton:hover {
+  background: var(--color-bg);
+  transform: translateY(-1px);
+}
+
+.compareBarButton:active {
+  transform: translateY(0);
+}
+
+/* Desktop */
+@media (min-width: 768px) {
+  .searchBar {
+    position: static;
+    margin: 0;
+    padding: 0;
+  }
+  
+  .etfList {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-md);
+  }
+  
+  .floatingCompareBar {
+    bottom: var(--spacing-lg);
+    left: calc(var(--sidebar-width) + var(--spacing-lg));
+    right: var(--spacing-lg);
+    max-width: 600px;
+    margin: 0 auto;
+  }
+  
+  .compareBarNames {
+    max-width: 250px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .etfStats {
+    gap: var(--spacing-xl);
+  }
+  
+  .floatingCompareBar {
+    max-width: 700px;
+  }
+  
+  .compareBarNames {
+    max-width: 350px;
+  }
+}
+

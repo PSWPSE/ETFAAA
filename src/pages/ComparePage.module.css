@@ -1,0 +1,283 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  padding-bottom: 100px;
+}
+
+/* Market Selector */
+.marketSelectorWrapper {
+  display: flex;
+  justify-content: center;
+  padding-bottom: var(--spacing-sm);
+}
+
+/* Empty State */
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-2xl);
+  text-align: center;
+  min-height: 50vh;
+}
+
+.emptyIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 80px;
+  height: 80px;
+  background: var(--color-bg-secondary);
+  border-radius: var(--radius-full);
+  color: var(--color-text-tertiary);
+}
+
+.emptyState h2 {
+  font-size: var(--font-size-xl);
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+.emptyState p {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  margin: 0;
+  line-height: 1.6;
+}
+
+/* Selected List */
+.selectedList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-sm);
+}
+
+.selectedItem {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: var(--color-white);
+  border: 1px solid var(--color-border-light);
+  border-left-width: 3px;
+  border-radius: var(--radius-md);
+}
+
+.selectedInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.selectedName {
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  color: var(--color-text-primary);
+  max-width: 150px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.selectedTicker {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-tertiary);
+}
+
+.removeButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-full);
+  color: var(--color-text-tertiary);
+  transition: all var(--transition-fast);
+}
+
+.removeButton:hover {
+  background: var(--color-bg-secondary);
+  color: var(--color-danger);
+}
+
+.addButton {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: var(--color-bg-secondary);
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-md);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  transition: all var(--transition-fast);
+  min-height: var(--touch-target-min);
+}
+
+.addButton:hover {
+  background: var(--color-bg);
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.clearButton {
+  align-self: flex-start;
+}
+
+/* Chart Header with Period Selector */
+.chartHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--spacing-md);
+  flex-wrap: wrap;
+}
+
+.periodSelector {
+  display: flex;
+  background: var(--color-bg-secondary);
+  border-radius: var(--radius-md);
+  padding: 3px;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.periodButton {
+  padding: var(--spacing-xs) var(--spacing-sm);
+  min-width: 40px;
+  min-height: 32px;
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  background: transparent;
+  transition: all var(--transition-fast);
+}
+
+.periodButton:hover {
+  color: var(--color-text-primary);
+}
+
+.periodButton.active {
+  background: var(--color-white);
+  color: var(--color-primary);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Chart Container */
+.chartContainer {
+  margin-top: var(--spacing-sm);
+  overflow: hidden;
+  width: 100%;
+  position: relative;
+}
+
+.chartContainer svg {
+  overflow: hidden !important;
+}
+
+.chartContainer .recharts-wrapper {
+  overflow: hidden !important;
+}
+
+.chartContainer .recharts-surface {
+  overflow: hidden !important;
+}
+
+/* Metrics Info */
+.metricsInfo {
+  margin-top: var(--spacing-sm);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--spacing-xs) var(--spacing-sm);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-tertiary);
+}
+
+.metricsInfo span {
+  padding: 2px 6px;
+  background: var(--color-bg-secondary);
+  border-radius: var(--radius-sm);
+}
+
+/* Comparison Table */
+.compareTable {
+  overflow-x: auto;
+}
+
+.tableHeader {
+  display: flex;
+  background: var(--color-bg-secondary);
+  border-bottom: 1px solid var(--color-border-light);
+  position: sticky;
+  top: 0;
+}
+
+.tableHeaderCell {
+  flex: 1;
+  min-width: 100px;
+  padding: var(--spacing-md);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-text-primary);
+  text-align: center;
+}
+
+.tableHeaderCell:first-child {
+  text-align: left;
+  background: var(--color-white);
+  position: sticky;
+  left: 0;
+  z-index: 1;
+}
+
+.tableRow {
+  display: flex;
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+.tableRow:last-child {
+  border-bottom: none;
+}
+
+.tableCell {
+  flex: 1;
+  min-width: 100px;
+  padding: var(--spacing-md);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-primary);
+  text-align: center;
+}
+
+.tableCell:first-child {
+  text-align: left;
+  color: var(--color-text-secondary);
+  font-weight: 500;
+  background: var(--color-white);
+  position: sticky;
+  left: 0;
+  z-index: 1;
+}
+
+/* Desktop */
+@media (min-width: 768px) {
+  .selectedItem {
+    padding: var(--spacing-sm) var(--spacing-lg);
+  }
+  
+  .selectedName {
+    max-width: 200px;
+  }
+  
+  .tableHeaderCell,
+  .tableCell {
+    min-width: 120px;
+  }
+}
+

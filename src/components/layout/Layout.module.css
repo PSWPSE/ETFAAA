@@ -1,0 +1,33 @@
+.layout {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--color-bg);
+}
+
+.main {
+  flex: 1;
+  padding-top: var(--header-height);
+  padding-bottom: calc(var(--bottom-nav-height) + var(--safe-area-bottom, 0px));
+  transition: padding-left var(--transition-normal);
+}
+
+.content {
+  max-width: var(--content-max-width);
+  margin: 0 auto;
+  padding: var(--spacing-md);
+}
+
+/* Desktop with sidebar */
+@media (min-width: 1024px) {
+  .main {
+    padding-left: var(--sidebar-width);
+    padding-bottom: 0;
+  }
+  
+  .content {
+    padding: var(--spacing-lg);
+  }
+}
+

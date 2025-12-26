@@ -1,0 +1,61 @@
+.marketSelector {
+  display: flex;
+  gap: 8px;
+  padding: 4px;
+  background-color: var(--color-gray-100);
+  border-radius: 10px;
+}
+
+.marketButton {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 8px;
+  background-color: transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-gray-600);
+  min-height: 44px;
+}
+
+.marketButton:hover {
+  background-color: var(--color-gray-200);
+}
+
+.marketButton.active {
+  background-color: var(--color-primary);
+  color: white;
+  box-shadow: 0 2px 8px rgba(30, 58, 95, 0.25);
+}
+
+.flag {
+  font-size: 18px;
+  line-height: 1;
+}
+
+.label {
+  white-space: nowrap;
+}
+
+/* 모바일 스타일 */
+@media (max-width: 767px) {
+  .marketSelector {
+    gap: 4px;
+    padding: 3px;
+  }
+
+  .marketButton {
+    padding: 6px 12px;
+    font-size: 13px;
+    min-height: 40px;
+  }
+
+  .flag {
+    font-size: 16px;
+  }
+}
+
