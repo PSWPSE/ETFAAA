@@ -1,5 +1,8 @@
 # Dependencies
 node_modules/
+
+# Vite cache
+.vite/
 .pnp
 .pnp.js
 
