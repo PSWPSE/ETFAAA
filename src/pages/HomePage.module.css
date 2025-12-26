@@ -1,129 +1,203 @@
+/* 홈페이지 - 큐레이팅 공간 */
+
 .page {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-md);
-  padding-bottom: 100px;
-}
-
-/* Market Selector */
-.marketSelectorSection {
-  display: flex;
-  justify-content: center;
-  padding-bottom: var(--spacing-sm);
-}
-
-/* ==================== */
-/* 시황 전광판 (Ticker Board) */
-/* ==================== */
-.tickerSection {
-  background: linear-gradient(145deg, #0f172a 0%, #1e293b 100%);
-  border-radius: var(--radius-lg);
+  gap: var(--spacing-xl);
   padding: var(--spacing-md);
-  overflow: hidden;
-  position: relative;
+  padding-bottom: calc(var(--bottom-nav-height) + var(--spacing-2xl));
+  background: var(--color-bg);
+  min-height: 100vh;
 }
 
-/* 카테고리 탭 */
-.tickerTabs {
+/* ==================== 헤더 ==================== */
+.header {
   display: flex;
   align-items: center;
+  justify-content: space-between;
+}
+
+.searchBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  color: var(--color-text-secondary);
+  border-radius: var(--radius-md);
+  transition: all var(--transition-fast);
+}
+
+.searchBtn:hover {
+  background: var(--color-white);
+  color: var(--color-primary);
+}
+
+/* ==================== 차별화 서비스 (상단 부각) ==================== */
+.quickServices {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.serviceCard {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md) var(--spacing-lg);
+  background: var(--color-white);
+  border-radius: var(--radius-lg);
+  text-align: left;
+  transition: all var(--transition-fast);
+  border: 1px solid var(--color-border-light);
+  box-shadow: 0 1px 3px rgba(30, 58, 95, 0.04);
+}
+
+.serviceCard:hover {
+  border-color: var(--color-primary);
+  box-shadow: 0 4px 12px rgba(30, 58, 95, 0.1);
+  transform: translateY(-1px);
+}
+
+.serviceIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: rgba(30, 58, 95, 0.06);
+  color: var(--color-primary);
+  border-radius: var(--radius-md);
+  flex-shrink: 0;
+  transition: all var(--transition-fast);
+}
+
+.serviceCard:hover .serviceIcon {
+  background: var(--color-primary);
+  color: var(--color-white);
+}
+
+.serviceInfo {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.serviceName {
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.serviceDesc {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-tertiary);
+}
+
+.serviceArrow {
+  color: var(--color-text-tertiary);
+  flex-shrink: 0;
+}
+
+/* ==================== 시황 전광판 ==================== */
+.marketTicker {
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(135deg, #1a2332 0%, #243347 100%);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(26, 35, 50, 0.15);
+}
+
+.tickerHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: rgba(0, 0, 0, 0.15);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.tickerTabs {
+  display: flex;
   gap: var(--spacing-xs);
-  margin-bottom: var(--spacing-md);
 }
 
 .tickerTab {
   display: flex;
   align-items: center;
   gap: 4px;
-  padding: 6px 12px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: var(--radius-full);
-  font-size: 11px;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  font-size: var(--font-size-xs);
   font-weight: 500;
   color: rgba(255, 255, 255, 0.5);
+  border-radius: var(--radius-sm);
   transition: all var(--transition-fast);
 }
 
 .tickerTab:hover {
-  background: rgba(255, 255, 255, 0.1);
-  color: rgba(255, 255, 255, 0.8);
+  color: rgba(255, 255, 255, 0.75);
 }
 
 .tickerTab.active {
-  background: rgba(59, 130, 246, 0.2);
-  border-color: rgba(59, 130, 246, 0.5);
-  color: #60a5fa;
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
 }
 
-.tickerIndicator {
+.tickerTime {
   display: flex;
   align-items: center;
-  gap: 4px;
-  margin-left: auto;
-  padding: 4px 8px;
-  background: rgba(239, 68, 68, 0.1);
-  border-radius: var(--radius-full);
+  gap: 6px;
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.5);
 }
 
-.liveIndicator {
+.tickerTime::before {
+  content: '';
   width: 6px;
   height: 6px;
-  background: #ef4444;
   border-radius: 50%;
-  animation: pulse 1.5s ease-in-out infinite;
+  background: #22c55e;
+  box-shadow: 0 0 8px rgba(34, 197, 94, 0.6);
+  animation: livePulse 1.5s ease-in-out infinite;
 }
 
-@keyframes pulse {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.5; transform: scale(0.8); }
+@keyframes livePulse {
+  0%, 100% { opacity: 1; box-shadow: 0 0 8px rgba(34, 197, 94, 0.6); }
+  50% { opacity: 0.5; box-shadow: 0 0 4px rgba(34, 197, 94, 0.3); }
 }
 
-.liveText {
-  font-size: 9px;
-  font-weight: 700;
-  color: #ef4444;
-  letter-spacing: 0.5px;
-}
-
-/* 시세 그리드 */
-.tickerGrid {
+.tickerBoard {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: var(--spacing-xs);
 }
 
-@media (min-width: 768px) {
-  .tickerGrid {
-    grid-template-columns: repeat(4, 1fr);
-  }
-}
-
-.tickerGrid.fadeOut {
+.tickerItem {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: var(--spacing-md) var(--spacing-md);
+  background: transparent;
+  border-right: 1px solid rgba(255, 255, 255, 0.06);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  animation: tickerSlideIn 0.4s ease forwards;
   opacity: 0;
-  transform: translateY(-8px);
-  transition: all 0.15s ease-out;
+  position: relative;
 }
 
-.tickerGrid.fadeIn {
-  opacity: 1;
-  transform: translateY(0);
-  transition: all 0.3s ease-out;
+.tickerItem:nth-child(2n) {
+  border-right: none;
 }
 
-.tickerCard {
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: var(--radius-md);
-  padding: var(--spacing-sm);
-  transition: all var(--transition-fast);
-  animation: slideIn 0.4s ease-out backwards;
+.tickerItem:nth-last-child(-n+2) {
+  border-bottom: none;
 }
 
-@keyframes slideIn {
+@keyframes tickerSlideIn {
   from {
     opacity: 0;
-    transform: translateY(10px);
+    transform: translateY(8px);
   }
   to {
     opacity: 1;
@@ -131,93 +205,83 @@
   }
 }
 
-.tickerCard:hover {
-  background: rgba(255, 255, 255, 0.06);
-  border-color: rgba(255, 255, 255, 0.12);
-}
-
-.tickerHeader {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  margin-bottom: 6px;
-}
-
-.tickerSymbol {
-  font-size: 10px;
-  font-weight: 700;
-  color: rgba(255, 255, 255, 0.4);
+.tickerItemName {
+  font-size: var(--font-size-xs);
+  color: rgba(255, 255, 255, 0.55);
   letter-spacing: 0.3px;
 }
 
-.tickerName {
-  font-size: 11px;
-  font-weight: 500;
-  color: rgba(255, 255, 255, 0.7);
-}
-
-.tickerBody {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: var(--spacing-xs);
-}
-
-.tickerValue {
-  font-size: var(--font-size-base);
+.tickerItemValue {
+  font-family: var(--font-family-numeric);
+  font-size: var(--font-size-xl);
   font-weight: 700;
   color: #fff;
-  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum' on, 'lnum' on;
   letter-spacing: -0.02em;
 }
 
-.tickerChange {
-  display: flex;
+.tickerItemUnit {
+  font-size: 10px;
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.4);
+  margin-left: 3px;
+}
+
+.tickerItemChange {
+  display: inline-flex;
   align-items: center;
-  gap: 2px;
-  font-size: 11px;
+  gap: 3px;
+  font-family: var(--font-family-numeric);
+  font-size: var(--font-size-sm);
   font-weight: 600;
-  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum' on, 'lnum' on;
+  padding: 2px 6px;
+  border-radius: 4px;
+  width: fit-content;
 }
 
-.tickerChange.up {
-  color: #f87171;
+.tickerItemChange.up {
+  color: #22c55e;
+  background: rgba(34, 197, 94, 0.15);
 }
 
-.tickerChange.down {
-  color: #60a5fa;
+.tickerItemChange.down {
+  color: #ef4444;
+  background: rgba(239, 68, 68, 0.15);
 }
 
-.tickerArrow {
-  font-size: 8px;
+.tickerIndicator {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  padding: var(--spacing-sm);
+  background: rgba(0, 0, 0, 0.15);
 }
 
-/* 프로그레스 바 */
-.tickerProgress {
-  margin-top: var(--spacing-sm);
-  height: 2px;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 1px;
-  overflow: hidden;
+.indicatorDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  cursor: pointer;
+  transition: all var(--transition-fast);
 }
 
-.tickerProgressBar {
-  height: 100%;
-  background: linear-gradient(90deg, #3b82f6 0%, #60a5fa 100%);
-  border-radius: 1px;
-  animation: progressFill 5s linear forwards;
+.indicatorDot:hover {
+  background: rgba(255, 255, 255, 0.4);
 }
 
-@keyframes progressFill {
-  from { width: 0%; }
-  to { width: 100%; }
+.indicatorDot.active {
+  background: #fff;
+  width: 18px;
+  border-radius: 3px;
 }
 
-/* Section */
+/* ==================== 섹션 공통 ==================== */
 .section {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-sm);
+  gap: var(--spacing-md);
 }
 
 .sectionHeader {
@@ -226,131 +290,209 @@
   justify-content: space-between;
 }
 
-.sectionTitle {
+.sectionTitleGroup {
   display: flex;
   align-items: center;
-  gap: var(--spacing-xs);
+  gap: var(--spacing-sm);
+}
+
+.sectionTitle {
   font-size: var(--font-size-lg);
-  font-weight: 600;
+  font-weight: 700;
   color: var(--color-text-primary);
 }
 
-.sectionIcon {
+.fireIcon {
+  color: #F97316;
+}
+
+.targetIcon {
   color: var(--color-primary);
 }
 
-.moreButton {
+.zapIcon {
+  color: #FBBF24;
+}
+
+.liveIndicator {
   display: flex;
   align-items: center;
   gap: 4px;
-  font-size: var(--font-size-sm);
-  font-weight: 500;
-  color: var(--color-text-tertiary);
-  padding: var(--spacing-xs) var(--spacing-sm);
+  padding: 3px 8px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  color: var(--chart-up);
+  background: rgba(239, 68, 68, 0.08);
   border-radius: var(--radius-sm);
-  transition: all var(--transition-fast);
 }
 
-.moreButton:hover {
-  color: var(--color-primary);
-  background: rgba(30, 58, 95, 0.05);
+.liveIndicator::before {
+  content: '';
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--chart-up);
+  animation: liveBlink 1.5s ease-in-out infinite;
 }
 
-/* Themes Grid */
-.themesGrid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: var(--spacing-sm);
+@keyframes liveBlink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
 }
 
-.themeCard {
+.moreBtn {
   display: flex;
   align-items: center;
-  gap: var(--spacing-sm);
-}
-
-.themeIcon {
-  font-size: var(--font-size-2xl);
-}
-
-.themeInfo {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
   gap: 2px;
-  min-width: 0;
-}
-
-.themeName {
   font-size: var(--font-size-sm);
-  font-weight: 600;
-  color: var(--color-text-primary);
-}
-
-.themeReturn {
-  font-size: var(--font-size-xs);
-  font-weight: 500;
-}
-
-.themeCount {
-  font-size: var(--font-size-xs);
   color: var(--color-text-tertiary);
+  padding: var(--spacing-xs);
+  margin-right: calc(var(--spacing-xs) * -1);
+  border-radius: var(--radius-sm);
+  transition: color var(--transition-fast);
 }
 
-/* ETF List */
-.etfList {
+.moreBtn:hover {
+  color: var(--color-primary);
+}
+
+/* ==================== 티커 배너 (동적 효과) ==================== */
+.tickerBanner {
   display: flex;
   flex-direction: column;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md) var(--spacing-lg);
+  background: linear-gradient(135deg, rgba(30, 58, 95, 0.03) 0%, rgba(74, 144, 164, 0.03) 100%);
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(30, 58, 95, 0.08);
 }
 
-.etfItem {
+.tickerContent {
   display: flex;
   align-items: center;
-  gap: var(--spacing-sm);
-  padding: var(--spacing-md);
-  border-bottom: 1px solid var(--color-border-light);
-  cursor: pointer;
-  transition: background var(--transition-fast);
+  gap: var(--spacing-md);
+  animation: fadeSlideIn 0.5s ease;
 }
 
-.etfItem:last-child {
-  border-bottom: none;
+@keyframes fadeSlideIn {
+  from { opacity: 0; transform: translateX(-10px); }
+  to { opacity: 1; transform: translateX(0); }
 }
 
-.etfItem:hover {
-  background: var(--color-bg);
-}
-
-.etfItem:active {
-  background: var(--color-bg-secondary);
-}
-
-.etfRank {
+.tickerRank {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 24px;
-  height: 24px;
+  width: 28px;
+  height: 28px;
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  color: var(--color-white);
+  background: var(--color-primary);
+  border-radius: var(--radius-sm);
+}
+
+.tickerName {
+  flex: 1;
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  color: var(--color-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tickerChange {
+  font-family: var(--font-family-numeric);
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+  font-feature-settings: 'tnum' on, 'lnum' on;
+}
+
+.tickerVolume {
+  font-family: var(--font-family-numeric);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-tertiary);
+  white-space: nowrap;
+  padding: 2px 8px;
+  background: rgba(30, 58, 95, 0.05);
+  border-radius: var(--radius-sm);
+  font-feature-settings: 'tnum' on, 'lnum' on;
+}
+
+.tickerDots {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+}
+
+.tickerDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--color-border);
+  transition: all var(--transition-fast);
+}
+
+.tickerDot.active {
+  background: var(--color-primary);
+  width: 18px;
+  border-radius: 3px;
+}
+
+/* ==================== 리스트 공통 ==================== */
+.listCard {
+  padding: 0 !important;
+  overflow: hidden;
+}
+
+.listItem {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md) var(--spacing-lg);
+  text-align: left;
+  width: 100%;
+  border-bottom: 1px solid var(--color-border-light);
+  transition: all var(--transition-fast);
+}
+
+.listItem:last-child {
+  border-bottom: none;
+}
+
+.listItem:hover {
+  background: var(--color-bg);
+}
+
+.listItem.highlighted {
+  background: rgba(30, 58, 95, 0.04);
+  border-left: 3px solid var(--color-primary);
+}
+
+.listRank {
+  width: 20px;
   font-size: var(--font-size-sm);
   font-weight: 700;
   color: var(--color-text-tertiary);
+  text-align: center;
+  flex-shrink: 0;
 }
 
-.etfItem:nth-child(1) .etfRank,
-.etfItem:nth-child(2) .etfRank,
-.etfItem:nth-child(3) .etfRank {
+.listItem:nth-child(-n+3) .listRank {
   color: var(--color-primary);
 }
 
-.etfInfo {
+.listInfo {
   flex: 1;
+  min-width: 0;
   display: flex;
   flex-direction: column;
   gap: 2px;
-  min-width: 0;
 }
 
-.etfName {
+.listName {
   font-size: var(--font-size-sm);
   font-weight: 500;
   color: var(--color-text-primary);
@@ -359,65 +501,706 @@
   text-overflow: ellipsis;
 }
 
-.etfTicker {
+.listMeta {
+  font-family: var(--font-family-numeric);
   font-size: var(--font-size-xs);
   color: var(--color-text-tertiary);
+  font-feature-settings: 'tnum' on, 'lnum' on;
 }
 
-.etfPrice {
+.listPriceGroup {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
   gap: 2px;
+  flex-shrink: 0;
 }
 
-.etfPriceValue,
-.etfVolume {
+.listPrice {
+  font-family: var(--font-family-numeric);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-tertiary);
+  font-feature-settings: 'tnum' on, 'lnum' on;
+}
+
+.listChange {
+  font-family: var(--font-family-numeric);
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  font-feature-settings: 'tnum' on, 'lnum' on;
+}
+
+/* ==================== 52주 고가/저가 ==================== */
+.highLowGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-sm);
+}
+
+.highLowCard {
+  background: var(--color-white);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(30, 58, 95, 0.04);
+}
+
+.highLowHeader {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-sm) var(--spacing-md);
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  background: var(--color-bg);
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+.highIcon {
+  color: var(--chart-up);
+}
+
+.lowIcon {
+  color: var(--chart-down);
+}
+
+.highLowList {
+  display: flex;
+  flex-direction: column;
+}
+
+.highLowItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) var(--spacing-md);
+  text-align: left;
+  border-bottom: 1px solid var(--color-border-light);
+  transition: background var(--transition-fast);
+}
+
+.highLowItem:last-child {
+  border-bottom: none;
+}
+
+.highLowItem:hover {
+  background: var(--color-bg);
+}
+
+.highLowInfo {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.highLowName {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--color-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.highLowProgress {
+  height: 4px;
+  background: var(--color-border-light);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.highLowBar {
+  height: 100%;
+  background: var(--chart-up);
+  border-radius: 2px;
+  transition: width var(--transition-normal);
+}
+
+.highLowProgressLow {
+  height: 4px;
+  background: var(--color-border-light);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.highLowBarLow {
+  height: 100%;
+  background: var(--chart-down);
+  border-radius: 2px;
+  transition: width var(--transition-normal);
+}
+
+.highLowDataGroup {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 1px;
+  flex-shrink: 0;
+}
+
+.highLowRatio {
+  font-family: var(--font-family-numeric);
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  color: var(--chart-up);
+  font-feature-settings: 'tnum' on, 'lnum' on;
+}
+
+.highLowGap {
+  font-family: var(--font-family-numeric);
+  font-size: 10px;
+  color: var(--color-text-tertiary);
+  font-feature-settings: 'tnum' on, 'lnum' on;
+}
+
+.highLowRatioLow {
+  font-family: var(--font-family-numeric);
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  color: var(--chart-down);
+  font-feature-settings: 'tnum' on, 'lnum' on;
+}
+
+.highLowGapLow {
+  font-family: var(--font-family-numeric);
+  font-size: 10px;
+  color: var(--color-text-tertiary);
+  font-feature-settings: 'tnum' on, 'lnum' on;
+}
+
+.highLowRankNum {
+  width: 16px;
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  color: var(--color-text-tertiary);
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.highLowItem:nth-child(-n+3) .highLowRankNum {
+  color: var(--color-primary);
+}
+
+/* ==================== 정렬 탭 ==================== */
+.sortTabs {
+  display: flex;
+  gap: var(--spacing-xs);
+}
+
+.sortTab {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  font-size: var(--font-size-xs);
+  font-weight: 500;
+  color: var(--color-text-tertiary);
+  background: var(--color-white);
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-sm);
+  transition: all var(--transition-fast);
+}
+
+.sortTab:hover {
+  color: var(--color-text-secondary);
+  border-color: var(--color-border);
+}
+
+.sortTab.active {
+  color: var(--color-primary);
+  background: rgba(30, 58, 95, 0.06);
+  border-color: rgba(30, 58, 95, 0.15);
+}
+
+/* ==================== 오늘 사면 배당받는 ETF ==================== */
+.dividendItem {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md) var(--spacing-lg);
+  text-align: left;
+  width: 100%;
+  border-bottom: 1px solid var(--color-border-light);
+  transition: all var(--transition-fast);
+}
+
+.dividendItem:last-child {
+  border-bottom: none;
+}
+
+.dividendItem:hover {
+  background: var(--color-bg);
+}
+
+.dividendRank {
+  flex-shrink: 0;
+}
+
+.ddayBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 40px;
+  padding: 4px 8px;
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+  color: var(--color-primary);
+  background: rgba(30, 58, 95, 0.06);
+  border-radius: var(--radius-sm);
+}
+
+.ddayBadge.urgent {
+  color: var(--chart-up);
+  background: rgba(239, 68, 68, 0.08);
+}
+
+.dividendInfo {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.dividendName {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dividendMetaRow {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  flex-wrap: wrap;
+}
+
+.dividendMetaItem {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-tertiary);
+}
+
+.dividendMetaItem strong {
+  color: var(--color-text-secondary);
+  font-weight: 500;
+}
+
+.dividendDataGroup {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.dividendYieldValue {
+  font-family: var(--font-family-numeric);
+  font-size: var(--font-size-base);
+  font-weight: 700;
+  color: var(--color-primary);
+  font-feature-settings: 'tnum' on, 'lnum' on;
+}
+
+.dividendAmount {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-tertiary);
+}
+
+/* ==================== 더보기/전체보기 버튼 ==================== */
+.showMoreBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-xs);
+  width: 100%;
+  padding: var(--spacing-sm);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  background: var(--color-white);
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-md);
+  transition: all var(--transition-fast);
+  margin-top: var(--spacing-sm);
+}
+
+.showMoreBtn:hover {
+  background: var(--color-bg);
+  border-color: var(--color-border);
+}
+
+.showMoreBtn svg {
+  transition: transform var(--transition-fast);
+}
+
+.showMoreBtn svg.rotated {
+  transform: rotate(180deg);
+}
+
+.viewAllBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-xs);
+  width: 100%;
+  padding: var(--spacing-md);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  color: var(--color-primary);
+  background: rgba(30, 58, 95, 0.04);
+  border-radius: var(--radius-md);
+  transition: all var(--transition-fast);
+  margin-top: var(--spacing-sm);
+}
+
+.viewAllBtn:hover {
+  background: rgba(30, 58, 95, 0.08);
+}
+
+/* ==================== 기간 배지 ==================== */
+.periodBadge {
+  padding: 2px 8px;
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--color-text-tertiary);
+  background: var(--color-bg-secondary);
+  border-radius: var(--radius-sm);
+}
+
+/* ==================== 핫 테마 ==================== */
+.themeItem {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md) var(--spacing-lg);
+  text-align: left;
+  width: 100%;
+  border-bottom: 1px solid var(--color-border-light);
+  transition: all var(--transition-fast);
+}
+
+.themeItem:last-child {
+  border-bottom: none;
+}
+
+.themeItem:hover {
+  background: var(--color-bg);
+}
+
+.themeRank {
+  flex-shrink: 0;
+}
+
+.rankNumber {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  color: var(--color-text-tertiary);
+  background: var(--color-bg-secondary);
+  border-radius: var(--radius-sm);
+}
+
+.rankNumber.top {
+  color: var(--color-white);
+  background: var(--color-primary);
+}
+
+.themeInfo {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.themeNameRow {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.themeName {
   font-size: var(--font-size-sm);
   font-weight: 600;
   color: var(--color-text-primary);
 }
 
-.etfChange {
+.hotBadge {
+  padding: 2px 6px;
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--chart-up);
+  background: rgba(239, 68, 68, 0.08);
+  border-radius: var(--radius-sm);
+  letter-spacing: 0.5px;
+}
+
+.themeMetaRow {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  flex-wrap: wrap;
+}
+
+.themeMetaItem {
   font-size: var(--font-size-xs);
+  color: var(--color-text-tertiary);
+}
+
+.themeMetaItem strong {
+  color: var(--color-text-secondary);
   font-weight: 500;
 }
 
-/* Desktop Styles */
+.themeDataGroup {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.themeReturnValue {
+  font-family: var(--font-family-numeric);
+  font-size: var(--font-size-base);
+  font-weight: 700;
+  font-feature-settings: 'tnum' on, 'lnum' on;
+}
+
+.themeSubReturn {
+  font-size: 10px;
+  color: var(--color-text-tertiary);
+}
+
+/* ==================== 반응형 - 태블릿 (768px+) ==================== */
 @media (min-width: 768px) {
-  .tickerSection {
+  .page {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: var(--spacing-xl) var(--spacing-2xl);
+    gap: var(--spacing-2xl);
+  }
+  
+  /* 시황 전광판 */
+  .tickerBoard {
+    grid-template-columns: repeat(4, 1fr);
+  }
+  
+  .tickerItem {
     padding: var(--spacing-lg);
   }
   
-  .tickerTabs {
-    margin-bottom: var(--spacing-lg);
+  .tickerItemValue {
+    font-size: var(--font-size-lg);
   }
   
-  .tickerTab {
-    padding: 8px 16px;
-    font-size: 12px;
+  /* 서비스 카드 */
+  .quickServices {
+    flex-direction: row;
+    gap: var(--spacing-md);
   }
   
-  .tickerCard {
-    padding: var(--spacing-md);
+  .serviceCard {
+    flex: 1;
+    padding: var(--spacing-lg);
   }
   
-  .tickerValue {
+  .serviceArrow {
+    display: none;
+  }
+  
+  /* 급등 배너 */
+  .tickerBanner {
+    padding: var(--spacing-lg) var(--spacing-xl);
+  }
+  
+  .tickerContent {
+    gap: var(--spacing-lg);
+  }
+  
+  .tickerName {
     font-size: var(--font-size-lg);
   }
   
   .tickerChange {
-    font-size: 12px;
+    font-size: var(--font-size-xl);
   }
   
-  .themesGrid {
-    grid-template-columns: repeat(4, 1fr);
+  /* 리스트 */
+  .listItem {
+    padding: var(--spacing-lg) var(--spacing-xl);
+  }
+  
+  .listName {
+    font-size: var(--font-size-base);
+  }
+  
+  /* 52주 고저가 */
+  .highLowGrid {
+    gap: var(--spacing-md);
+  }
+  
+  .highLowItem {
+    padding: var(--spacing-md);
+  }
+  
+  .highLowName {
+    font-size: var(--font-size-sm);
+  }
+  
+  /* 배당 ETF */
+  .dividendItem {
+    padding: var(--spacing-lg) var(--spacing-xl);
+  }
+  
+  .dividendName {
+    font-size: var(--font-size-base);
+  }
+  
+  .dividendYieldValue {
+    font-size: var(--font-size-lg);
+  }
+  
+  /* 핫 테마 */
+  .themeItem {
+    padding: var(--spacing-lg) var(--spacing-xl);
+  }
+  
+  .themeName {
+    font-size: var(--font-size-base);
+  }
+  
+  .themeReturnValue {
+    font-size: var(--font-size-lg);
   }
 }
 
+/* ==================== 반응형 - 데스크탑 (1024px+) ==================== */
 @media (min-width: 1024px) {
   .page {
+    max-width: 1100px;
+    padding: var(--spacing-2xl);
+    gap: var(--spacing-2xl);
+  }
+  
+  /* 시황 전광판 - 5열 */
+  .tickerBoard {
+    grid-template-columns: repeat(5, 1fr);
+  }
+  
+  .tickerItem {
+    padding: var(--spacing-lg) var(--spacing-xl);
+  }
+  
+  .tickerItemName {
+    font-size: var(--font-size-sm);
+  }
+  
+  .tickerItemValue {
+    font-size: var(--font-size-xl);
+  }
+  
+  .tickerItemChange {
+    font-size: var(--font-size-base);
+  }
+  
+  /* 서비스 카드 - 더 큰 패딩 */
+  .serviceCard {
+    padding: var(--spacing-xl);
+  }
+  
+  .serviceIcon {
+    width: 48px;
+    height: 48px;
+  }
+  
+  .serviceIcon svg {
+    width: 24px;
+    height: 24px;
+  }
+  
+  .serviceName {
+    font-size: var(--font-size-lg);
+  }
+  
+  .serviceDesc {
+    font-size: var(--font-size-sm);
+  }
+  
+  /* 2열 레이아웃: 급등 + 52주 */
+  .twoColumnLayout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
     gap: var(--spacing-xl);
+  }
+  
+  /* 리스트 */
+  .listName {
+    font-size: var(--font-size-base);
+  }
+  
+  .listChange {
+    font-size: var(--font-size-lg);
+  }
+  
+  /* 52주 고저가 */
+  .highLowName {
+    font-size: var(--font-size-sm);
+  }
+  
+  .highLowRatio,
+  .highLowRatioLow {
+    font-size: var(--font-size-base);
+  }
+  
+  /* 배당 ETF - 더 큰 D-day */
+  .ddayBadge {
+    min-width: 48px;
+    padding: 6px 10px;
+    font-size: var(--font-size-sm);
+  }
+  
+  .dividendYieldValue {
+    font-size: var(--font-size-xl);
+  }
+  
+  /* 핫 테마 */
+  .rankNumber {
+    width: 28px;
+    height: 28px;
+    font-size: var(--font-size-base);
+  }
+  
+  .themeReturnValue {
+    font-size: var(--font-size-xl);
   }
 }
 
+/* ==================== 반응형 - 와이드 (1400px+) ==================== */
+@media (min-width: 1400px) {
+  .page {
+    max-width: 1300px;
+  }
+  
+  .tickerBoard {
+    grid-template-columns: repeat(5, 1fr);
+  }
+  
+  .tickerItem {
+    padding: var(--spacing-xl);
+  }
+  
+  .tickerItemValue {
+    font-size: var(--font-size-2xl);
+  }
+}

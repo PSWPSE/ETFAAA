@@ -1556,3 +1556,492 @@ export const getSimilarETFs = (etfId: string, limit: number = 5): ETF[] => {
   
   return similar;
 };
+
+// 섹터별 비중 (구성종목 탭용)
+export const getSectorAllocation = (etfId: string) => {
+  const etf = getETFById(etfId);
+  if (!etf) return [];
+  
+  // 카테고리에 따른 섹터 비중 생성
+  const sectorTemplates: Record<string, { name: string; weight: number }[]> = {
+    '반도체': [
+      { name: '반도체', weight: 45 },
+      { name: '전자장비', weight: 25 },
+      { name: 'IT서비스', weight: 15 },
+      { name: '소프트웨어', weight: 10 },
+      { name: '기타', weight: 5 },
+    ],
+    '국내주식': [
+      { name: '금융', weight: 20 },
+      { name: '제조업', weight: 25 },
+      { name: 'IT', weight: 20 },
+      { name: '에너지', weight: 15 },
+      { name: '소비재', weight: 12 },
+      { name: '기타', weight: 8 },
+    ],
+    '해외주식': [
+      { name: 'IT', weight: 30 },
+      { name: '헬스케어', weight: 15 },
+      { name: '금융', weight: 15 },
+      { name: '소비재', weight: 15 },
+      { name: '산업재', weight: 12 },
+      { name: '기타', weight: 13 },
+    ],
+  };
+  
+  const template = sectorTemplates[etf.category] || sectorTemplates['국내주식'];
+  return template.map(s => ({
+    ...s,
+    weight: s.weight + (Math.random() * 4 - 2), // 약간의 변동
+  }));
+};
+
+// 국가별 비중 (구성종목 탭용)
+export const getCountryAllocation = (etfId: string) => {
+  const etf = getETFById(etfId);
+  if (!etf) return [];
+  
+  if (etf.id.startsWith('kr')) {
+    return [{ name: '한국', weight: 100, code: 'KR' }];
+  }
+  
+  // 미국 ETF의 경우
+  if (etf.themes.some(t => t.includes('S&P') || t.includes('NASDAQ'))) {
+    return [{ name: '미국', weight: 100, code: 'US' }];
+  }
+  
+  // 글로벌 ETF
+  return [
+    { name: '미국', weight: 60, code: 'US' },
+    { name: '일본', weight: 10, code: 'JP' },
+    { name: '영국', weight: 8, code: 'GB' },
+    { name: '프랑스', weight: 6, code: 'FR' },
+    { name: '독일', weight: 5, code: 'DE' },
+    { name: '기타', weight: 11, code: 'OTHER' },
+  ];
+};
+
+// 배당 차트 데이터 (배당 탭용)
+export const getDividendChartData = (etfId: string) => {
+  const dividends = getDividends(etfId);
+  if (dividends.length === 0) return [];
+  
+  // 최근 8분기 배당 데이터
+  return dividends.slice(0, 8).reverse().map(d => ({
+    date: d.payDate.slice(0, 7), // YYYY-MM
+    amount: d.amount,
+  }));
+};
+
+// 배당 예측 정보 (배당 탭용)
+export const getDividendForecast = (etfId: string) => {
+  const etf = getETFById(etfId);
+  if (!etf) return null;
+  
+  const today = new Date();
+  
+  // etfId 해시로 일부 ETF에 7일 이내 배당락일 할당 (시연용)
+  const hash = etfId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  const isNearDividend = hash % 5 === 0; // 약 20% ETF가 7일 이내
+  
+  let daysUntilEx: number;
+  if (isNearDividend && etf.dividendYield > 0) {
+    daysUntilEx = (hash % 6) + 1; // 1~6일
+  } else {
+    const nextQuarter = new Date(today.getFullYear(), Math.floor(today.getMonth() / 3) * 3 + 3, 15);
+    daysUntilEx = Math.ceil((nextQuarter.getTime() - today.getTime()) / (24 * 60 * 60 * 1000));
+  }
+  
+  const exDate = new Date(today.getTime() + daysUntilEx * 24 * 60 * 60 * 1000);
+  
+  return {
+    nextExDate: exDate.toISOString().slice(0, 10),
+    nextPayDate: new Date(exDate.getTime() + 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10),
+    estimatedAmount: Math.round(etf.price * (etf.dividendYield / 100 / 4)),
+    frequency: etf.dividendYield > 3 ? '월배당' : '분기배당',
+    daysUntilEx,
+  };
+};
+
+// 확장된 위험 지표 (위험지표 탭용)
+export const getExtendedRiskMetrics = (etfId: string) => {
+  const baseMetrics = getRiskMetrics(etfId);
+  
+  return {
+    ...baseMetrics,
+    // 추가 지표
+    alpha: (Math.random() * 4 - 2).toFixed(2), // -2% ~ 2%
+    r2: (0.85 + Math.random() * 0.14).toFixed(2), // 0.85 ~ 0.99
+    treynorRatio: (Math.random() * 0.3).toFixed(2), // 0 ~ 0.3
+    informationRatio: (Math.random() * 1 - 0.5).toFixed(2), // -0.5 ~ 0.5
+    sortino: (Math.random() * 2).toFixed(2), // 0 ~ 2
+    calmarRatio: (Math.random() * 1.5).toFixed(2), // 0 ~ 1.5
+    var95: (Math.random() * 5 + 2).toFixed(2), // 2% ~ 7%
+    cvar95: (Math.random() * 3 + 3).toFixed(2), // 3% ~ 6%
+    upCapture: (90 + Math.random() * 20).toFixed(1), // 90% ~ 110%
+    downCapture: (85 + Math.random() * 25).toFixed(1), // 85% ~ 110%
+  };
+};
+
+// 월별 수익률 히트맵 데이터
+export const getMonthlyReturns = (etfId: string) => {
+  const years = [2022, 2023, 2024];
+  const months = ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'];
+  
+  return years.map(year => ({
+    year,
+    returns: months.map((month, idx) => ({
+      month,
+      value: Math.random() * 20 - 10, // -10% ~ +10%
+    })),
+  }));
+};
+
+// 운용 현황
+export const getFundOperationInfo = (etfId: string) => {
+  const etf = getETFById(etfId);
+  if (!etf) return null;
+  
+  return {
+    fundManager: etf.issuer,
+    custodian: etf.issuer === '삼성자산운용' ? '삼성증권' : 
+               etf.issuer === '미래에셋자산운용' ? '미래에셋증권' : '한국예탁결제원',
+    ap: ['NH투자증권', '삼성증권', 'KB증권', '미래에셋증권'].slice(0, 2 + Math.floor(Math.random() * 2)),
+    creationUnit: Math.floor(50000 + Math.random() * 50000),
+    managementFee: (etf.expenseRatio * 0.7).toFixed(3),
+    otherFee: (etf.expenseRatio * 0.3).toFixed(3),
+    rebalanceFrequency: '분기',
+    indexProvider: etf.id.startsWith('kr') ? 'KRX' : 'S&P Dow Jones',
+  };
+};
+
+// ETF 등급 시스템 (etf.com 스타일)
+export const getETFGrades = (etfId: string) => {
+  const etf = getETFById(etfId);
+  if (!etf) return null;
+  
+  // 효율성 점수 (비용 기반)
+  let efficiencyScore = 0;
+  if (etf.expenseRatio <= 0.1) efficiencyScore = 95;
+  else if (etf.expenseRatio <= 0.2) efficiencyScore = 85;
+  else if (etf.expenseRatio <= 0.3) efficiencyScore = 75;
+  else if (etf.expenseRatio <= 0.5) efficiencyScore = 65;
+  else efficiencyScore = 55;
+  
+  // 거래용이성 점수 (거래량 기반)
+  let tradabilityScore = 0;
+  if (etf.volume >= 5000000) tradabilityScore = 95;
+  else if (etf.volume >= 1000000) tradabilityScore = 85;
+  else if (etf.volume >= 500000) tradabilityScore = 75;
+  else if (etf.volume >= 100000) tradabilityScore = 65;
+  else tradabilityScore = 55;
+  
+  // 적합성 점수 (추적오차 기반)
+  const trackingError = 0.01 + Math.random() * 0.49;
+  let fitScore = 0;
+  if (trackingError <= 0.1) fitScore = 95;
+  else if (trackingError <= 0.2) fitScore = 85;
+  else if (trackingError <= 0.3) fitScore = 75;
+  else fitScore = 65;
+  
+  // 전체 등급
+  const overallScore = Math.round((efficiencyScore + tradabilityScore + fitScore) / 3);
+  
+  const getGrade = (score: number) => {
+    if (score >= 90) return 'A';
+    if (score >= 80) return 'B';
+    if (score >= 70) return 'C';
+    if (score >= 60) return 'D';
+    return 'F';
+  };
+  
+  return {
+    overall: { score: overallScore, grade: getGrade(overallScore) },
+    efficiency: { score: efficiencyScore, grade: getGrade(efficiencyScore), desc: '비용 효율성' },
+    tradability: { score: tradabilityScore, grade: getGrade(tradabilityScore), desc: '거래 용이성' },
+    fit: { score: fitScore, grade: getGrade(fitScore), desc: '지수 추적 정확도' },
+  };
+};
+
+// 펀더멘털 지표
+export const getFundamentals = (etfId: string) => {
+  const etf = getETFById(etfId);
+  if (!etf) return null;
+  
+  // 주식 ETF인 경우에만 펀더멘털 제공
+  if (etf.category === '채권' || etf.category === '원자재' || etf.category === '통화') {
+    return null;
+  }
+  
+  return {
+    pe: (15 + Math.random() * 15).toFixed(2), // P/E 비율
+    pb: (1.5 + Math.random() * 3).toFixed(2), // P/B 비율
+    ps: (2 + Math.random() * 4).toFixed(2), // P/S 비율
+    pcf: (10 + Math.random() * 10).toFixed(2), // P/CF 비율
+    roe: (10 + Math.random() * 20).toFixed(2), // ROE
+    roa: (5 + Math.random() * 10).toFixed(2), // ROA
+    debtToEquity: (0.3 + Math.random() * 1.2).toFixed(2), // 부채비율
+    earningsGrowth: (-5 + Math.random() * 30).toFixed(2), // 이익성장률
+    revenueGrowth: (-2 + Math.random() * 20).toFixed(2), // 매출성장률
+    dividendGrowth: (0 + Math.random() * 15).toFixed(2), // 배당성장률
+    avgMarketCap: etf.marketCap / 1000000000, // 평균 시가총액 (십억원)
+    medianMarketCap: etf.marketCap / 1500000000,
+  };
+};
+
+// 기술적 지표
+export const getTechnicalIndicators = (etfId: string) => {
+  const etf = getETFById(etfId);
+  if (!etf) return null;
+  
+  const price = etf.price;
+  const change = etf.changePercent;
+  
+  // RSI 계산 (모의)
+  const rsi = Math.max(20, Math.min(80, 50 + change * 5));
+  
+  // MACD
+  const macd = change * 100;
+  const signal = macd * 0.8;
+  const histogram = macd - signal;
+  
+  // 이동평균
+  const ma5 = price * (1 + (Math.random() - 0.5) * 0.02);
+  const ma10 = price * (1 + (Math.random() - 0.5) * 0.03);
+  const ma20 = price * (1 + (Math.random() - 0.5) * 0.05);
+  const ma50 = price * (1 + (Math.random() - 0.5) * 0.08);
+  const ma200 = price * (1 + (Math.random() - 0.5) * 0.15);
+  
+  // 추세 판단
+  const shortTermTrend = price > ma20 ? 'bullish' : 'bearish';
+  const longTermTrend = price > ma200 ? 'bullish' : 'bearish';
+  
+  // 지지/저항선
+  const support1 = Math.round(price * 0.95);
+  const support2 = Math.round(price * 0.90);
+  const resistance1 = Math.round(price * 1.05);
+  const resistance2 = Math.round(price * 1.10);
+  
+  // 볼린저 밴드
+  const bbUpper = Math.round(ma20 * 1.04);
+  const bbLower = Math.round(ma20 * 0.96);
+  const bbWidth = ((bbUpper - bbLower) / ma20 * 100).toFixed(2);
+  
+  // 모멘텀 지표
+  const momentum = (Math.random() * 40 - 20).toFixed(2);
+  const stochastic = Math.round(Math.random() * 100);
+  const williams = Math.round(-Math.random() * 100);
+  
+  return {
+    rsi: Math.round(rsi),
+    rsiStatus: rsi > 70 ? 'overbought' : rsi < 30 ? 'oversold' : 'neutral',
+    macd: {
+      value: macd.toFixed(2),
+      signal: signal.toFixed(2),
+      histogram: histogram.toFixed(2),
+      trend: histogram > 0 ? 'bullish' : 'bearish',
+    },
+    movingAverages: {
+      ma5: Math.round(ma5),
+      ma10: Math.round(ma10),
+      ma20: Math.round(ma20),
+      ma50: Math.round(ma50),
+      ma200: Math.round(ma200),
+    },
+    trend: {
+      shortTerm: shortTermTrend,
+      longTerm: longTermTrend,
+    },
+    supportResistance: {
+      support1,
+      support2,
+      resistance1,
+      resistance2,
+    },
+    bollingerBands: {
+      upper: bbUpper,
+      middle: Math.round(ma20),
+      lower: bbLower,
+      width: bbWidth,
+    },
+    momentum: {
+      value: momentum,
+      stochastic,
+      williams,
+    },
+  };
+};
+
+// $10,000 성장 시뮬레이션 데이터
+export const getGrowthSimulation = (etfId: string, years: number = 5) => {
+  const etf = getETFById(etfId);
+  if (!etf) return [];
+  
+  const returns = getReturns(etfId);
+  const annualReturn = returns.year1 / 100 || 0.08; // 연평균 수익률
+  
+  const data = [];
+  const startValue = 10000000; // 1000만원 (한국 기준)
+  let value = startValue;
+  
+  const today = new Date();
+  
+  for (let i = years * 12; i >= 0; i--) {
+    const date = new Date(today);
+    date.setMonth(date.getMonth() - i);
+    
+    // 월별 변동 (연간 수익률 기반 + 랜덤 변동)
+    const monthlyReturn = annualReturn / 12;
+    const volatility = (Math.random() - 0.5) * 0.04;
+    value = value * (1 + monthlyReturn + volatility);
+    
+    data.push({
+      date: date.toISOString().slice(0, 7),
+      value: Math.round(value),
+      benchmark: Math.round(startValue * Math.pow(1 + (annualReturn * 0.8) / 12, (years * 12) - i)),
+    });
+  }
+  
+  return data;
+};
+
+// 자금 흐름 데이터
+export const getFundFlows = (etfId: string) => {
+  const etf = getETFById(etfId);
+  if (!etf) return null;
+  
+  // 월별 자금 흐름 데이터
+  const monthlyFlows = [];
+  for (let i = 11; i >= 0; i--) {
+    const date = new Date();
+    date.setMonth(date.getMonth() - i);
+    monthlyFlows.push({
+      date: date.toISOString().slice(0, 7),
+      inflow: Math.round(Math.random() * etf.aum * 0.01),
+      outflow: Math.round(Math.random() * etf.aum * 0.008),
+      net: 0, // 계산됨
+    });
+    monthlyFlows[monthlyFlows.length - 1].net = 
+      monthlyFlows[monthlyFlows.length - 1].inflow - monthlyFlows[monthlyFlows.length - 1].outflow;
+  }
+  
+  // 기간별 순유입
+  const week1 = Math.round((Math.random() - 0.4) * etf.aum * 0.002);
+  const month1 = Math.round((Math.random() - 0.4) * etf.aum * 0.01);
+  const month3 = Math.round((Math.random() - 0.4) * etf.aum * 0.03);
+  const ytd = Math.round((Math.random() - 0.4) * etf.aum * 0.08);
+  const year1 = Math.round((Math.random() - 0.4) * etf.aum * 0.1);
+  
+  return {
+    monthly: monthlyFlows,
+    summary: {
+      week1,
+      month1,
+      month3,
+      ytd,
+      year1,
+    },
+    cumulativeAUM: etf.aum,
+    rank: Math.floor(Math.random() * 100) + 1, // 카테고리 내 순위
+  };
+};
+
+// 세금 정보
+export const getTaxInfo = (etfId: string) => {
+  const etf = getETFById(etfId);
+  if (!etf) return null;
+  
+  const isKorean = etf.id.startsWith('kr');
+  
+  return {
+    taxEfficiency: Math.round(85 + Math.random() * 15), // 85-100%
+    capitalGainsDistribution: isKorean ? '국내 ETF는 매도 차익에 대해 비과세' : '15.4% (배당소득세)',
+    dividendTaxRate: '15.4%',
+    foreignTaxWithheld: isKorean ? 'N/A' : '15%',
+    taxLossHarvesting: isKorean ? '가능' : '가능 (환율 주의)',
+    notes: isKorean 
+      ? '국내 상장 ETF는 거래차익 비과세, 배당금 15.4% 원천징수'
+      : '해외 ETF는 양도차익 22% (250만원 초과분), 배당금 15.4%',
+    structureType: etf.name.includes('합성') ? '합성(Synthetic)' : '실물(Physical)',
+    replicationMethod: etf.name.includes('합성') ? '스왑 기반' : '실물 복제',
+  };
+};
+
+// 경쟁 ETF 비교 데이터
+export const getCompetingETFs = (etfId: string) => {
+  const etf = getETFById(etfId);
+  if (!etf) return [];
+  
+  const similarETFs = getSimilarETFs(etfId, 5);
+  
+  return similarETFs.map(similar => {
+    const similarReturns = getReturns(similar.id);
+    return {
+      id: similar.id,
+      name: similar.name,
+      ticker: similar.ticker,
+      issuer: similar.issuer,
+      price: similar.price,
+      changePercent: similar.changePercent,
+      aum: similar.aum,
+      expenseRatio: similar.expenseRatio,
+      dividendYield: similar.dividendYield,
+      volume: similar.volume,
+      returns: {
+        month1: similarReturns.month1,
+        month3: similarReturns.month3,
+        year1: similarReturns.year1,
+        ytd: similarReturns.ytd,
+      },
+    };
+  });
+};
+
+// 관련 뉴스 (모의 데이터)
+export const getRelatedNews = (etfId: string) => {
+  const etf = getETFById(etfId);
+  if (!etf) return [];
+  
+  const themes = etf.themes;
+  const now = new Date();
+  
+  const newsTemplates = [
+    { title: `${etf.name}, 최근 한 달 ${etf.changePercent > 0 ? '상승세' : '조정 국면'}`, source: '연합인포맥스' },
+    { title: `${themes[0] || '시장'} 관련 ETF 투자 전략`, source: '한국경제' },
+    { title: `${etf.issuer}, 신규 ETF 상품 라인업 확대`, source: '이데일리' },
+    { title: `글로벌 ${themes[0] || '시장'} 동향과 ETF 투자`, source: '매일경제' },
+    { title: `ETF 수익률 TOP10에 ${themes[0] || etf.category} 상품 다수`, source: '서울경제' },
+  ];
+  
+  return newsTemplates.slice(0, 5).map((news, idx) => ({
+    id: `news-${idx}`,
+    title: news.title,
+    source: news.source,
+    date: new Date(now.getTime() - idx * 24 * 60 * 60 * 1000 * (1 + Math.random() * 3)).toISOString().slice(0, 10),
+    url: '#',
+    summary: `${etf.name}에 대한 시장 분석 및 투자 전망...`,
+  }));
+};
+
+// 비용 분석 데이터 (실부담비용)
+export const getCostAnalysis = (etfId: string) => {
+  const etf = getETFById(etfId);
+  if (!etf) return null;
+  
+  const ter = etf.expenseRatio;
+  const tradingCost = 0.05 + Math.random() * 0.1; // 매매중개수수료
+  const otherCost = 0.02 + Math.random() * 0.05; // 기타비용
+  const totalCost = ter + tradingCost + otherCost;
+  
+  return {
+    ter, // Total Expense Ratio
+    tradingCost: Number(tradingCost.toFixed(3)),
+    otherCost: Number(otherCost.toFixed(3)),
+    totalCost: Number(totalCost.toFixed(3)),
+    historicalCost: [
+      { year: '2022', cost: totalCost + (Math.random() - 0.5) * 0.1 },
+      { year: '2023', cost: totalCost + (Math.random() - 0.5) * 0.05 },
+      { year: '2024', cost: totalCost },
+    ],
+  };
+};
