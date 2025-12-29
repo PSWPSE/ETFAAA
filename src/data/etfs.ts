@@ -20,6 +20,13 @@ export const koreanETFs: ETF[] = [
     inceptionDate: '2002-10-14',
     nav: 35850,
     aum: 8500000000000,
+    holdings: [
+      { ticker: '005930', name: '삼성전자', weight: 28.5 },
+      { ticker: '000660', name: 'SK하이닉스', weight: 5.2 },
+      { ticker: '035420', name: 'NAVER', weight: 3.8 },
+      { ticker: '051910', name: 'LG화학', weight: 2.9 },
+      { ticker: '005380', name: '현대차', weight: 2.1 },
+    ],
   },
   {
     id: 'kr-2',
@@ -38,6 +45,13 @@ export const koreanETFs: ETF[] = [
     inceptionDate: '2008-04-03',
     nav: 35780,
     aum: 4200000000000,
+    holdings: [
+      { ticker: '005930', name: '삼성전자', weight: 29.1 },
+      { ticker: '000660', name: 'SK하이닉스', weight: 5.4 },
+      { ticker: '035420', name: 'NAVER', weight: 3.7 },
+      { ticker: '051910', name: 'LG화학', weight: 3.0 },
+      { ticker: '005380', name: '현대차', weight: 2.2 },
+    ],
   },
   {
     id: 'kr-3',
@@ -56,6 +70,13 @@ export const koreanETFs: ETF[] = [
     inceptionDate: '2015-10-30',
     nav: 12880,
     aum: 1200000000000,
+    holdings: [
+      { ticker: '247540', name: '에코프로비엠', weight: 8.3 },
+      { ticker: '086520', name: '에코프로', weight: 7.1 },
+      { ticker: '066970', name: '엘앤에프', weight: 5.9 },
+      { ticker: '005930', name: '삼성전자', weight: 4.2 },
+      { ticker: '035720', name: '카카오', weight: 3.8 },
+    ],
   },
   {
     id: 'kr-4',
@@ -74,6 +95,12 @@ export const koreanETFs: ETF[] = [
     inceptionDate: '2011-07-15',
     nav: 35680,
     aum: 2300000000000,
+    holdings: [
+      { ticker: '005930', name: '삼성전자', weight: 27.9 },
+      { ticker: '000660', name: 'SK하이닉스', weight: 5.3 },
+      { ticker: '035420', name: 'NAVER', weight: 3.9 },
+      { ticker: '051910', name: 'LG화학', weight: 2.8 },
+    ],
   },
   // 반도체
   {
@@ -93,6 +120,12 @@ export const koreanETFs: ETF[] = [
     inceptionDate: '2006-06-27',
     nav: 42700,
     aum: 2800000000000,
+    holdings: [
+      { ticker: '005930', name: '삼성전자', weight: 45.8 },
+      { ticker: '000660', name: 'SK하이닉스', weight: 32.5 },
+      { ticker: '042700', name: '한미반도체', weight: 4.2 },
+      { ticker: '039030', name: '이오테크닉스', weight: 3.1 },
+    ],
   },
   {
     id: 'kr-6',
@@ -111,6 +144,11 @@ export const koreanETFs: ETF[] = [
     inceptionDate: '2006-06-27',
     nav: 38560,
     aum: 1800000000000,
+    holdings: [
+      { ticker: '005930', name: '삼성전자', weight: 43.2 },
+      { ticker: '000660', name: 'SK하이닉스', weight: 35.1 },
+      { ticker: '042700', name: '한미반도체', weight: 4.8 },
+    ],
   },
   // 2차전지
   {

@@ -1,3 +1,10 @@
+// 구성종목 (간단 버전)
+export interface SimpleHolding {
+  ticker: string;
+  name: string;
+  weight: number;
+}
+
 // ETF 기본 정보
 export interface ETF {
   id: string;
@@ -29,6 +36,7 @@ export interface ETF {
   trackingError?: number; // 추적오차
   listingExchange?: string; // 상장거래소
   leverage?: number; // 레버리지 배수 (해당시)
+  holdings?: SimpleHolding[]; // 보유 종목
 }
 
 // 가격 히스토리
