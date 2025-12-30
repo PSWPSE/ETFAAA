@@ -247,7 +247,7 @@ export default function ComparePage() {
             <Search className={styles.searchIcon} size={20} />
             <input
               type="text"
-              className={styles.searchInput}
+              className={`${styles.searchInput} ${selectedETFs.length < 2 ? styles.required : ''}`}
               placeholder="ETF 이름 또는 코드로 검색... (예: KODEX 200, SPY)"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -567,6 +567,53 @@ export default function ComparePage() {
             {/* 수익률 탭 */}
             {activeTab === 'returns' && (
               <div className={styles.returnsSection}>
+                {/* 수익률 비교 바 차트 */}
+                <Card padding="md" className={styles.chartCard}>
+                  <CardHeader title="기간별 수익률 비교" subtitle="각 기간별로 ETF 수익률을 직접 비교" />
+                  <div className={styles.chartContainer}>
+                    <ResponsiveContainer width="100%" height={350}>
+                      <BarChart data={returnsCompareData} margin={{ top: 20, right: 30, left: 10, bottom: 20 }}>
+                        <XAxis 
+                          dataKey="period" 
+                          tick={{ fontSize: 12, fill: '#6B7280', fontWeight: 600 }}
+                          axisLine={{ stroke: '#E5E7EB' }}
+                          tickLine={false}
+                        />
+                        <YAxis 
+                          tick={{ fontSize: 11, fill: '#9CA3AF' }}
+                          axisLine={false}
+                          tickLine={false}
+                          tickFormatter={(v) => `${v}%`}
+                        />
+                        <Tooltip 
+                          formatter={(value: number, name: string) => [`${value.toFixed(2)}%`, name]}
+                          labelFormatter={(label) => `기간: ${label}`}
+                          contentStyle={{
+                            background: '#fff',
+                            border: '1px solid #E5E7EB',
+                            borderRadius: '8px',
+                            fontSize: '13px',
+                            boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
+                          }}
+                        />
+                        <Legend 
+                          wrapperStyle={{ paddingTop: '16px' }}
+                          iconType="circle"
+                        />
+                        {selectedETFs.map((etf, index) => (
+                          <Bar 
+                            key={etf.id}
+                            dataKey={etf.name} 
+                            fill={COLORS[index]} 
+                            radius={[4, 4, 0, 0]}
+                            maxBarSize={60}
+                          />
+                        ))}
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                </Card>
+
                 {/* 수익률 테이블 */}
                 <Card padding="none" className={styles.infoCard}>
                   <div className={styles.compareTable}>
@@ -715,53 +762,6 @@ export default function ComparePage() {
                         })()}
                       </div>
                     </div>
-                  </div>
-                </Card>
-
-                {/* 수익률 비교 바 차트 */}
-                <Card padding="md" className={styles.chartCard}>
-                  <CardHeader title="기간별 수익률 비교" subtitle="각 기간별로 ETF 수익률을 직접 비교" />
-                  <div className={styles.chartContainer}>
-                    <ResponsiveContainer width="100%" height={350}>
-                      <BarChart data={returnsCompareData} margin={{ top: 20, right: 30, left: 10, bottom: 20 }}>
-                        <XAxis 
-                          dataKey="period" 
-                          tick={{ fontSize: 12, fill: '#6B7280', fontWeight: 600 }}
-                          axisLine={{ stroke: '#E5E7EB' }}
-                          tickLine={false}
-                        />
-                        <YAxis 
-                          tick={{ fontSize: 11, fill: '#9CA3AF' }}
-                          axisLine={false}
-                          tickLine={false}
-                          tickFormatter={(v) => `${v}%`}
-                        />
-                        <Tooltip 
-                          formatter={(value: number, name: string) => [`${value.toFixed(2)}%`, name]}
-                          labelFormatter={(label) => `기간: ${label}`}
-                          contentStyle={{
-                            background: '#fff',
-                            border: '1px solid #E5E7EB',
-                            borderRadius: '8px',
-                            fontSize: '13px',
-                            boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
-                          }}
-                        />
-                        <Legend 
-                          wrapperStyle={{ paddingTop: '16px' }}
-                          iconType="circle"
-                        />
-                        {selectedETFs.map((etf, index) => (
-                          <Bar 
-                            key={etf.id}
-                            dataKey={etf.name} 
-                            fill={COLORS[index]} 
-                            radius={[4, 4, 0, 0]}
-                            maxBarSize={60}
-                          />
-                        ))}
-                      </BarChart>
-                    </ResponsiveContainer>
                   </div>
                 </Card>
               </div>

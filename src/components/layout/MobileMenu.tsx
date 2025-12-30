@@ -41,7 +41,7 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
             </div>
             <div className={styles.logoText}>
               <span className={styles.logoTitle}>ETF AAA</span>
-              <span className={styles.logoSubtitle}>ETF 정보 서비스</span>
+              <span className={styles.logoSubtitle}>프리미엄 ETF 서비스</span>
             </div>
           </div>
           <button className={styles.closeButton} onClick={onClose}>

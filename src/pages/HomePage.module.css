@@ -5,6 +5,7 @@
   margin: calc(var(--spacing-sm) * -1);
   margin-top: 0;
   padding: var(--spacing-md);
+  padding-top: var(--spacing-sm);
   padding-bottom: 100px;
 }
 
@@ -22,6 +23,115 @@
     margin-top: calc(var(--spacing-md) * -1);
     padding: var(--spacing-2xl);
     padding-bottom: 120px;
+  }
+}
+
+/* ==================== 국가 선택 섹션 ==================== */
+.marketSelector {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-md);
+  padding: 10px 16px;
+  background: rgba(250, 251, 252, 0.6);
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(229, 231, 235, 0.5);
+  margin-top: calc(var(--spacing-sm) * -1);
+  margin-bottom: calc(var(--spacing-sm) * -0.5);
+}
+
+.marketSelectorHeader {
+  display: flex;
+  align-items: center;
+}
+
+.marketSelectorTitle {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text-tertiary);
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+
+.marketOptions {
+  display: flex;
+  gap: 6px;
+}
+
+.marketOption {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: var(--color-white);
+  border: 1.5px solid var(--color-border-light);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.marketOption:hover {
+  border-color: rgba(59, 130, 246, 0.3);
+  background: rgba(59, 130, 246, 0.02);
+}
+
+.marketOption.active {
+  border-color: var(--color-primary);
+  background: rgba(59, 130, 246, 0.06);
+  box-shadow: 0 1px 3px rgba(59, 130, 246, 0.1);
+}
+
+.marketFlag {
+  font-size: 16px;
+  line-height: 1;
+}
+
+.marketName {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  transition: color 0.15s ease;
+}
+
+.marketOption.active .marketName {
+  color: var(--color-primary);
+}
+
+/* Responsive styles for market selector */
+@media (min-width: 768px) {
+  .marketSelector {
+    padding: 12px 20px;
+    margin-top: calc(var(--spacing-md) * -1);
+    margin-bottom: calc(var(--spacing-md) * -0.5);
+  }
+  
+  .marketSelectorTitle {
+    font-size: 13px;
+  }
+  
+  .marketOptions {
+    gap: 8px;
+  }
+  
+  .marketOption {
+    padding: 8px 16px;
+    gap: 8px;
+  }
+  
+  .marketFlag {
+    font-size: 18px;
+  }
+  
+  .marketName {
+    font-size: 14px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .marketSelector {
+    margin-top: calc(var(--spacing-lg) * -1);
+    margin-bottom: calc(var(--spacing-lg) * -0.5);
   }
 }
 

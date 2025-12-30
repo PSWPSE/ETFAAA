@@ -50,7 +50,7 @@ export default function CalendarPage() {
   const today = new Date().toISOString().split('T')[0];
   const [customStartDate, setCustomStartDate] = useState(today);
   const [customEndDate, setCustomEndDate] = useState(today);
-  const { selectedMarket } = useETFStore();
+  const { selectedMarket, setSelectedMarket } = useETFStore();
   
   // 배당 정보 섹션 ref
   const eventsRef = useRef<HTMLDivElement>(null);
@@ -345,17 +345,28 @@ export default function CalendarPage() {
   
   return (
     <div className={styles.page}>
-      {/* Summary */}
-      <div className={styles.summary}>
-        <Card padding="md" className={styles.summaryCard}>
-          <span className={styles.summaryLabel}>이번 달 기준일</span>
-          <span className={styles.summaryValue}>{monthlyDividends.exCount}건</span>
-        </Card>
-        <Card padding="md" className={styles.summaryCard}>
-          <span className={styles.summaryLabel}>이번 달 지급</span>
-          <span className={styles.summaryValue}>{monthlyDividends.payCount}건</span>
-        </Card>
-      </div>
+      {/* 국가 선택 섹션 */}
+      <section className={styles.marketSelector}>
+        <div className={styles.marketSelectorHeader}>
+          <h3 className={styles.marketSelectorTitle}>홈 화면에서 보여줄 ETF 국가 선택</h3>
+        </div>
+        <div className={styles.marketOptions}>
+          <button
+            className={`${styles.marketOption} ${selectedMarket === 'korea' ? styles.active : ''}`}
+            onClick={() => setSelectedMarket('korea')}
+          >
+            <span className={styles.marketFlag}>🇰🇷</span>
+            <span className={styles.marketName}>한국</span>
+          </button>
+          <button
+            className={`${styles.marketOption} ${selectedMarket === 'us' ? styles.active : ''}`}
+            onClick={() => setSelectedMarket('us')}
+          >
+            <span className={styles.marketFlag}>🇺🇸</span>
+            <span className={styles.marketName}>미국</span>
+          </button>
+        </div>
+      </section>
       
       {/* Calendar Card */}
       <Card padding="md">

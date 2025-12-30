@@ -1,8 +1,29 @@
 .page {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-md);
+  gap: var(--spacing-2xl);
+  margin: calc(var(--spacing-sm) * -1);
+  margin-top: 0;
+  padding: var(--spacing-md);
+  padding-top: var(--spacing-sm);
   padding-bottom: 100px;
+}
+
+@media (min-width: 768px) {
+  .page {
+    gap: 48px;
+    padding: var(--spacing-xl) var(--spacing-2xl);
+    padding-bottom: 120px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .page {
+    margin: calc(var(--spacing-lg) * -1);
+    margin-top: calc(var(--spacing-md) * -1);
+    padding: var(--spacing-2xl);
+    padding-bottom: 120px;
+  }
 }
 
 /* Result Container - ETF 선택 후 분석 결과 */
@@ -462,6 +483,22 @@
   position: relative;
   z-index: 10;
   overflow: visible;
+  transition: all 0.3s ease;
+}
+
+.selectorCard.required {
+  border: 2px solid #EF4444 !important;
+  box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.1), 0 4px 12px rgba(239, 68, 68, 0.15) !important;
+  animation: pulseRequired 2s ease-in-out infinite;
+}
+
+@keyframes pulseRequired {
+  0%, 100% {
+    box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.1), 0 4px 12px rgba(239, 68, 68, 0.15);
+  }
+  50% {
+    box-shadow: 0 0 0 6px rgba(239, 68, 68, 0.15), 0 6px 16px rgba(239, 68, 68, 0.2);
+  }
 }
 
 .selectorLabel {

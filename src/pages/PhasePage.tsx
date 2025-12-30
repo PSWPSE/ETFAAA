@@ -375,7 +375,7 @@ export default function PhasePage() {
       {!selectedETF && (
         <>
           {/* ETF Search */}
-          <Card padding="md" className={styles.selectorCard}>
+          <Card padding="md" className={`${styles.selectorCard} ${styles.required}`}>
             <label className={styles.selectorLabel}>
               {selectedMarket === 'korea' ? '한국' : '미국'} ETF 국면 분석
             </label>

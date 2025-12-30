@@ -36,7 +36,7 @@ const MARKET_DATA = {
 
 export default function HomePage() {
   const navigate = useNavigate();
-  const { selectedMarket } = useETFStore();
+  const { selectedMarket, setSelectedMarket } = useETFStore();
   const [tickerIndex, setTickerIndex] = useState(0);
   const [marketCategory, setMarketCategory] = useState(0);
   const [categoryPage, setCategoryPage] = useState(0); // 각 카테고리 내 페이지
@@ -226,6 +226,29 @@ export default function HomePage() {
 
   return (
     <div className={styles.page}>
+      {/* 국가 선택 섹션 */}
+      <section className={styles.marketSelector}>
+        <div className={styles.marketSelectorHeader}>
+          <h3 className={styles.marketSelectorTitle}>홈 화면에서 보여줄 ETF 국가 선택</h3>
+        </div>
+        <div className={styles.marketOptions}>
+          <button
+            className={`${styles.marketOption} ${selectedMarket === 'korea' ? styles.active : ''}`}
+            onClick={() => setSelectedMarket('korea')}
+          >
+            <span className={styles.marketFlag}>🇰🇷</span>
+            <span className={styles.marketName}>한국</span>
+          </button>
+          <button
+            className={`${styles.marketOption} ${selectedMarket === 'us' ? styles.active : ''}`}
+            onClick={() => setSelectedMarket('us')}
+          >
+            <span className={styles.marketFlag}>🇺🇸</span>
+            <span className={styles.marketName}>미국</span>
+          </button>
+        </div>
+      </section>
+      
       {/* 시황 전광판 */}
       <section className={styles.marketTicker}>
         <div className={styles.tickerHeader}>

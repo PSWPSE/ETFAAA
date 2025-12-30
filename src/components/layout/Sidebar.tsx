@@ -38,7 +38,7 @@ export default function Sidebar() {
           </div>
           <div className={styles.logoTextContainer}>
             <span className={styles.logoText}>ETF AAA</span>
-            <span className={styles.logoSubtext}>ETF 정보 서비스</span>
+            <span className={styles.logoSubtext}>프리미엄 ETF 서비스</span>
           </div>
         </NavLink>
       </div>

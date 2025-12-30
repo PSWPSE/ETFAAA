@@ -1,14 +1,28 @@
 .page {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-lg);
-  padding-top: var(--spacing-md);
+  gap: var(--spacing-2xl);
+  margin: calc(var(--spacing-sm) * -1);
+  margin-top: 0;
+  padding: var(--spacing-md);
+  padding-top: var(--spacing-sm);
   padding-bottom: 100px;
 }
 
 @media (min-width: 768px) {
   .page {
-    padding-top: var(--spacing-lg);
+    gap: 48px;
+    padding: var(--spacing-xl) var(--spacing-2xl);
+    padding-bottom: 120px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .page {
+    margin: calc(var(--spacing-lg) * -1);
+    margin-top: calc(var(--spacing-md) * -1);
+    padding: var(--spacing-2xl);
+    padding-bottom: 120px;
   }
 }
 
@@ -410,6 +424,29 @@
   position: relative;
   display: flex;
   align-items: center;
+  transition: all 0.3s ease;
+}
+
+.searchInputWrapper.required {
+  border-radius: var(--radius-md);
+  padding: 2px;
+  background: linear-gradient(135deg, #EF4444 0%, #EF4444 100%);
+  box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.1), 0 4px 12px rgba(239, 68, 68, 0.15);
+  animation: pulseRequired 2s ease-in-out infinite;
+}
+
+.searchInputWrapper.required .searchInput {
+  border: none;
+  background: var(--color-white);
+}
+
+@keyframes pulseRequired {
+  0%, 100% {
+    box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.1), 0 4px 12px rgba(239, 68, 68, 0.15);
+  }
+  50% {
+    box-shadow: 0 0 0 6px rgba(239, 68, 68, 0.15), 0 6px 16px rgba(239, 68, 68, 0.2);
+  }
 }
 
 .searchInputIcon {
@@ -802,29 +839,7 @@
 }
 
 /* Holdings Search Result */
-.holdingsTopRow {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: var(--spacing-md);
-  margin-bottom: 0;
-}
-
-.holdingsTopRow .priceBlock {
-  gap: 6px;
-  opacity: 0.7;
-}
-
-.holdingsTopRow .priceMain {
-  font-size: var(--font-size-sm);
-  font-weight: 600;
-  color: var(--color-text-secondary);
-}
-
-.holdingsTopRow .changeMain {
-  font-size: var(--font-size-xs);
-  font-weight: 700;
-}
+/* holdingsTopRow removed - now using primaryInfo for consistency */
 
 .holdingsMiddleRow {
   display: flex;
@@ -832,6 +847,7 @@
   gap: 8px;
   padding-top: var(--spacing-sm);
   border-top: 1px solid var(--color-border-light);
+  margin-top: var(--spacing-sm);
 }
 
 .holdingLabel {
@@ -878,8 +894,8 @@
 
 /* SECONDARY INFO */
 .secondaryInfo {
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: auto 1fr;
   align-items: center;
   gap: var(--spacing-md);
   padding-top: var(--spacing-sm);
@@ -889,27 +905,43 @@
 .metaGroup {
   display: flex;
   align-items: center;
-  gap: var(--spacing-sm);
+  gap: var(--spacing-md);
   flex-wrap: wrap;
+  justify-content: flex-end;
+  min-width: 0;
 }
 
 .metaItem {
   display: flex;
-  align-items: baseline;
-  gap: 4px;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
 }
 
 .metaLabel {
   font-size: 10px;
-  font-weight: 700;
+  font-weight: 600;
   color: var(--color-text-tertiary);
+  min-width: 52px;
+  display: inline-block;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
 }
 
 .metaValue {
   font-size: var(--font-size-xs);
-  font-weight: 600;
-  color: var(--color-text-secondary);
+  font-weight: 700;
+  color: var(--color-primary);
   font-family: var(--font-family-numeric);
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.08) 0%, rgba(59, 130, 246, 0.04) 100%);
+  padding: 2px 6px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.metaValue:hover {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.12) 0%, rgba(59, 130, 246, 0.06) 100%);
+  transform: translateY(-1px);
 }
 
 .metaDivider {
@@ -922,6 +954,8 @@
   gap: 6px;
   flex-shrink: 0;
   flex-wrap: wrap;
+  justify-content: flex-start;
+  align-items: center;
 }
 
 .primaryTag {
@@ -933,11 +967,15 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.03em;
+  white-space: nowrap;
+  line-height: 1.4;
 }
 
 .secondaryTag {
   padding: 4px 8px;
   background: var(--color-bg-secondary);
+  white-space: nowrap;
+  line-height: 1.4;
   color: var(--color-text-secondary);
   border-radius: var(--radius-sm);
   font-size: 10px;
@@ -1109,14 +1147,6 @@
     font-size: var(--font-size-xs);
   }
 
-  .holdingsTopRow .priceMain {
-    font-size: 12px;
-  }
-
-  .holdingsTopRow .changeMain {
-    font-size: 11px;
-  }
-
   .holdingWeight {
     font-size: var(--font-size-base);
     min-width: 50px;
@@ -1124,6 +1154,47 @@
 
   .holdingBar {
     height: 6px;
+  }
+  
+  .secondaryInfo {
+    grid-template-columns: auto 1fr;
+    gap: 8px;
+    align-items: start;
+  }
+  
+  .tagGroup {
+    justify-content: flex-start;
+    gap: 4px;
+  }
+  
+  .metaGroup {
+    gap: 8px;
+    justify-content: flex-end;
+    flex-wrap: nowrap;
+  }
+  
+  .metaItem {
+    gap: 3px;
+  }
+  
+  .metaValue {
+    font-size: 10px;
+    padding: 1px 3px;
+  }
+  
+  .metaLabel {
+    font-size: 8px;
+    min-width: 40px;
+  }
+  
+  .primaryTag {
+    font-size: 9px;
+    padding: 3px 6px;
+  }
+  
+  .secondaryTag {
+    font-size: 9px;
+    padding: 3px 6px;
   }
 }
 
@@ -1153,14 +1224,6 @@
     font-size: var(--font-size-sm);
   }
 
-  .holdingsTopRow .priceMain {
-    font-size: var(--font-size-sm);
-  }
-
-  .holdingsTopRow .changeMain {
-    font-size: 11px;
-  }
-
   .holdingWeight {
     font-size: var(--font-size-lg);
     min-width: 55px;
@@ -1168,6 +1231,26 @@
 
   .holdingBar {
     height: 7px;
+  }
+  
+  .secondaryInfo {
+    grid-template-columns: auto 1fr;
+  }
+  
+  .tagGroup {
+    justify-content: flex-start;
+  }
+  
+  .metaGroup {
+    justify-content: flex-end;
+  }
+  
+  .metaValue {
+    font-size: 12px;
+  }
+  
+  .metaLabel {
+    font-size: 10px;
   }
 }
 
@@ -1202,5 +1285,27 @@
   .rangeInput {
     height: 40px;
     font-size: 14px;
+  }
+  
+  .secondaryInfo {
+    grid-template-columns: auto 1fr;
+  }
+  
+  .tagGroup {
+    justify-content: flex-start;
+  }
+  
+  .metaGroup {
+    justify-content: flex-end;
+  }
+  
+  .metaValue {
+    font-size: var(--font-size-sm);
+    padding: 3px 8px;
+  }
+  
+  .metaLabel {
+    font-size: 11px;
+    min-width: 56px;
   }
 }

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Search, Bell, Menu, X, ChevronLeft } from 'lucide-react';
+import { Search, Menu, X, ChevronLeft } from 'lucide-react';
 import { useETFStore } from '../../store/etfStore';
 import MobileMenu from './MobileMenu';
 import styles from './Header.module.css';
@@ -10,7 +10,7 @@ export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
-  const { searchQuery, setSearchQuery, selectedMarket, setSelectedMarket } = useETFStore();
+  const { searchQuery, setSearchQuery } = useETFStore();
   
   const isDetailPage = location.pathname.startsWith('/etf/');
   const pageTitle = getPageTitle(location.pathname);
@@ -41,46 +41,32 @@ export default function Header() {
                 <ChevronLeft size={24} />
               </button>
             ) : (
-              <>
-                {/* Mobile Menu Button */}
-                <button 
-                  className={`${styles.iconButton} ${styles.menuButton}`}
-                  onClick={() => setIsMenuOpen(true)}
-                  aria-label="메뉴"
-                >
-                  <Menu size={22} />
-                </button>
-                
-                <div className={styles.logo} onClick={() => navigate('/')}>
-                  <div className={styles.logoIcon}>
-                    <svg viewBox="0 0 32 32" fill="none">
-                      <rect width="32" height="32" rx="6" fill="var(--color-primary)"/>
-                      <path d="M8 10L16 6L24 10V22L16 26L8 22V10Z" stroke="white" strokeWidth="2" fill="none"/>
-                      <path d="M16 6V26" stroke="white" strokeWidth="1.5"/>
-                      <path d="M8 10L24 22M24 10L8 22" stroke="white" strokeWidth="1.5"/>
-                    </svg>
-                  </div>
-                  <span className={styles.logoText}>ETF AAA</span>
-                </div>
-              </>
+              <button 
+                className={`${styles.iconButton} ${styles.menuButton}`}
+                onClick={() => setIsMenuOpen(true)}
+                aria-label="메뉴"
+              >
+                <Menu size={22} />
+              </button>
             )}
           </div>
           
-          {/* Center - Title (mobile) or Search (desktop) */}
+          {/* Center - Logo or Title */}
           <div className={styles.center}>
             {isDetailPage ? (
               <h1 className={styles.pageTitle}>{pageTitle}</h1>
             ) : (
-              <form className={styles.searchForm} onSubmit={handleSearch}>
-                <Search size={18} className={styles.searchIcon} />
-                <input
-                  type="text"
-                  className={styles.searchInput}
-                  placeholder="ETF 검색 (이름, 종목코드)"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-              </form>
+              <div className={styles.logo} onClick={() => navigate('/')}>
+                <div className={styles.logoIcon}>
+                  <svg viewBox="0 0 32 32" fill="none">
+                    <rect width="32" height="32" rx="6" fill="var(--color-primary)"/>
+                    <path d="M8 10L16 6L24 10V22L16 26L8 22V10Z" stroke="white" strokeWidth="2" fill="none"/>
+                    <path d="M16 6V26" stroke="white" strokeWidth="1.5"/>
+                    <path d="M8 10L24 22M24 10L8 22" stroke="white" strokeWidth="1.5"/>
+                  </svg>
+                </div>
+                <span className={styles.logoText}>ETF AAA</span>
+              </div>
             )}
           </div>
           
@@ -95,20 +81,6 @@ export default function Header() {
                 <Search size={22} />
               </button>
             )}
-            <button className={styles.iconButton} aria-label="알림">
-              <Bell size={22} />
-              <span className={styles.notiBadge} />
-            </button>
-            <button 
-              className={`${styles.iconButton} ${styles.marketToggle}`}
-              onClick={() => setSelectedMarket(selectedMarket === 'korea' ? 'us' : 'korea')}
-              aria-label="시장 전환"
-              title={selectedMarket === 'korea' ? '미국 시장으로 전환' : '한국 시장으로 전환'}
-            >
-              <span className={styles.marketFlag}>
-                {selectedMarket === 'korea' ? '🇰🇷' : '🇺🇸'}
-              </span>
-            </button>
           </div>
         </div>
         

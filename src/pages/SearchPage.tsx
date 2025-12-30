@@ -302,7 +302,7 @@ export default function SearchPage() {
                                   <span>·</span>
                                   <span>{formatPrice(etf.price)}원</span>
                                   <span>·</span>
-                                  <span>배당 {etf.dividendYield.toFixed(2)}%</span>
+                                  <span>배당수익률 {etf.dividendYield.toFixed(2)}%</span>
                                 </div>
                               </div>
                             ))}
@@ -562,7 +562,7 @@ export default function SearchPage() {
         {searchType === 'name' && (
           <div className={styles.searchInterface}>
             <h3 className={styles.sectionTitle}>ETF 종목명 또는 코드를 입력하세요</h3>
-            <div className={styles.searchInputWrapper}>
+            <div className={`${styles.searchInputWrapper} ${!nameQuery.trim() ? styles.required : ''}`}>
               <Search className={styles.searchInputIcon} size={20} />
               <input type="text" className={styles.searchInput} placeholder="예: KODEX 200, 069500, SPY"
                 value={nameQuery} onChange={(e) => setNameQuery(e.target.value)} onKeyPress={(e) => e.key === 'Enter' && handleSearch()} />
@@ -573,7 +573,7 @@ export default function SearchPage() {
         {searchType === 'holdings' && (
           <div className={styles.searchInterface}>
             <h3 className={styles.sectionTitle}>이 종목이 담긴 ETF를 찾아보세요</h3>
-            <div className={styles.searchInputWrapper}>
+            <div className={`${styles.searchInputWrapper} ${!holdingsQuery.trim() ? styles.required : ''}`}>
               <Search className={styles.searchInputIcon} size={20} />
               <input type="text" className={styles.searchInput} placeholder="예: 삼성전자, AAPL, NVDA"
                 value={holdingsQuery} onChange={(e) => setHoldingsQuery(e.target.value)} onKeyPress={(e) => e.key === 'Enter' && handleSearch()} />
@@ -606,7 +606,7 @@ export default function SearchPage() {
               ) : (
                 <select className={styles.sortSelect} value={sortBy} onChange={(e) => setSortBy(e.target.value as SortOption)}>
                   <option value="marketCap">시가총액순</option>
-                  <option value="dividend">배당률순</option>
+                  <option value="dividend">배당수익률순</option>
                   <option value="change">등락률순</option>
                 </select>
               )}
@@ -634,8 +634,8 @@ export default function SearchPage() {
                     {searchType === 'holdings' && matchingHolding ? (
                       /* Holdings Search Result Layout */
                       <>
-                        {/* Top Row: Name + Code + Price + Change */}
-                        <div className={styles.holdingsTopRow}>
+                        {/* Primary Info - Same as Screener */}
+                        <div className={styles.primaryInfo}>
                           <div className={styles.nameBlock}>
                             <h3 className={styles.name}>{etf.name}</h3>
                             <span className={styles.code}>{etf.ticker}</span>
@@ -648,7 +648,7 @@ export default function SearchPage() {
                           </div>
                         </div>
                         
-                        {/* Middle Row: Holding Weight Visualization */}
+                        {/* Holding Weight Visualization */}
                         <div className={styles.holdingsMiddleRow}>
                           <span className={styles.holdingLabel}>보유비중</span>
                           <div className={styles.holdingVisualization}>
@@ -678,21 +678,21 @@ export default function SearchPage() {
                         
                         {/* Secondary Info */}
                         <div className={styles.secondaryInfo}>
-                          <div className={styles.metaGroup}>
-                            <span className={styles.metaItem}>
-                              <span className={styles.metaLabel}>시총</span>
-                              <span className={styles.metaValue}>{formatLargeNumber(etf.marketCap)}</span>
-                            </span>
-                            <span className={styles.metaItem}>
-                              <span className={styles.metaLabel}>배당</span>
-                              <span className={styles.metaValue}>{etf.dividendYield.toFixed(2)}%</span>
-                            </span>
-                          </div>
                           <div className={styles.tagGroup}>
                             <span className={styles.primaryTag}>{etf.category}</span>
                             {etf.themes.slice(0, 2).map(theme => (
                               <span key={theme} className={styles.secondaryTag}>{theme}</span>
                             ))}
+                          </div>
+                          <div className={styles.metaGroup}>
+                            <span className={styles.metaItem}>
+                              <span className={styles.metaLabel}>시가총액</span>
+                              <span className={styles.metaValue}>{formatLargeNumber(etf.marketCap)}</span>
+                            </span>
+                            <span className={styles.metaItem}>
+                              <span className={styles.metaLabel}>배당수익률</span>
+                              <span className={styles.metaValue}>{etf.dividendYield.toFixed(2)}%</span>
+                            </span>
                           </div>
                         </div>
                       </>
