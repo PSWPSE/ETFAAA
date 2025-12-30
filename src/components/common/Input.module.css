@@ -47,8 +47,7 @@
 
 .input:focus {
   outline: none;
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(30, 58, 95, 0.1);
+  /* 테두리 효과 제거 - 커서 깜박임만 표시 */
 }
 
 .hasLeftIcon {
@@ -83,7 +82,7 @@
 }
 
 .hasError .input:focus {
-  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+  /* 테두리 효과 제거 - 커서 깜박임만 표시 */
 }
 
 .error {

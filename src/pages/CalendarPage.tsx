@@ -1,6 +1,6 @@
 import { useState, useMemo, useRef } from 'react';
 import { ChevronLeft, ChevronRight, CalendarDays, ChevronUp, ChevronDown, Calendar } from 'lucide-react';
-import { Card, Badge, MarketSelector } from '../components/common';
+import { Card, Badge } from '../components/common';
 import { koreanETFs, usETFs, getDividends, getReturns } from '../data/etfs';
 import { useETFStore } from '../store/etfStore';
 import { formatPrice, formatPercent } from '../utils/format';
@@ -345,11 +345,6 @@ export default function CalendarPage() {
   
   return (
     <div className={styles.page}>
-      {/* Market Selector */}
-      <div className={styles.marketSelectorWrapper}>
-        <MarketSelector />
-      </div>
-
       {/* Summary */}
       <div className={styles.summary}>
         <Card padding="md" className={styles.summaryCard}>

@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, SortDesc, Search, X, LayoutGrid, List } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
-import { Card, CardHeader, Button, MarketSelector } from '../components/common';
+import { Card, CardHeader, Button } from '../components/common';
 import { koreanThemes, usThemes, koreanETFs, usETFs, getReturns } from '../data/etfs';
 import { useETFStore } from '../store/etfStore';
 import { formatPercent, formatLargeNumber } from '../utils/format';
@@ -200,11 +200,6 @@ export default function ThemePage() {
   if (!themeId) {
     return (
       <div className={styles.page}>
-        {/* Market Selector */}
-        <div className={styles.marketSelectorWrapper}>
-          <MarketSelector />
-        </div>
-        
         {/* 검색 바 */}
         <div className={styles.searchBar}>
           <div className={styles.searchInputWrapper}>

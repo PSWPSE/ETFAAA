@@ -10,7 +10,7 @@ export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
-  const { searchQuery, setSearchQuery } = useETFStore();
+  const { searchQuery, setSearchQuery, selectedMarket, setSelectedMarket } = useETFStore();
   
   const isDetailPage = location.pathname.startsWith('/etf/');
   const pageTitle = getPageTitle(location.pathname);
@@ -99,6 +99,16 @@ export default function Header() {
               <Bell size={22} />
               <span className={styles.notiBadge} />
             </button>
+            <button 
+              className={`${styles.iconButton} ${styles.marketToggle}`}
+              onClick={() => setSelectedMarket(selectedMarket === 'korea' ? 'us' : 'korea')}
+              aria-label="시장 전환"
+              title={selectedMarket === 'korea' ? '미국 시장으로 전환' : '한국 시장으로 전환'}
+            >
+              <span className={styles.marketFlag}>
+                {selectedMarket === 'korea' ? '🇰🇷' : '🇺🇸'}
+              </span>
+            </button>
           </div>
         </div>
         
@@ -137,7 +147,7 @@ function getPageTitle(pathname: string): string {
   if (pathname.startsWith('/etf/')) return 'ETF 상세';
   if (pathname === '/search') return '검색';
   if (pathname === '/compare') return '비교분석';
-  if (pathname === '/simulator') return '투자 시뮬레이션';
+  if (pathname === '/simulator') return '투자 실험실';
   if (pathname === '/calendar') return '배당 캘린더';
   if (pathname === '/phase') return '국면 분석';
   if (pathname === '/correlation') return '연관도 분석';

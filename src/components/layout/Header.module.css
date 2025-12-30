@@ -142,6 +142,23 @@
   border: 2px solid var(--color-white);
 }
 
+.marketToggle {
+  background: var(--color-bg-secondary);
+}
+
+.marketToggle:hover {
+  background: var(--color-primary);
+  transform: scale(1.05);
+}
+
+.marketFlag {
+  font-size: 20px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .mobileSearchButton {
   display: flex;
 }

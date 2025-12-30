@@ -6,7 +6,7 @@ const navItems = [
   { path: '/', icon: Home, label: '홈' },
   { path: '/search', icon: Search, label: 'ETF 검색' },
   { path: '/compare', icon: BarChart3, label: '비교분석' },
-  { path: '/simulator', icon: Calculator, label: '투자 시뮬레이션' },
+  { path: '/simulator', icon: Calculator, label: '투자 실험실' },
   { path: '/calendar', icon: Calendar, label: '배당 캘린더' },
   { path: '/phase', icon: Activity, label: '국면분석' },
   { path: '/correlation', icon: GitBranch, label: '연관도 분석' },

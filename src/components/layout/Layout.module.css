@@ -16,7 +16,8 @@
 .content {
   max-width: var(--content-max-width);
   margin: 0 auto;
-  padding: var(--spacing-md);
+  padding: 0 var(--spacing-sm);
+  padding-top: var(--spacing-sm);
 }
 
 /* Desktop with sidebar */
@@ -27,7 +28,9 @@
   }
   
   .content {
-    padding: var(--spacing-lg);
+    padding: 0 var(--spacing-lg);
+    padding-top: var(--spacing-md);
   }
 }
+
 

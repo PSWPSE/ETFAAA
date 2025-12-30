@@ -1483,6 +1483,8 @@ export const correlations: Correlation[] = [
 // 필터 옵션
 export const filterOptions = {
   issuers: ['삼성자산운용', '미래에셋자산운용', 'KB자산운용', '한화자산운용'],
+  koreanIssuers: ['삼성자산운용', '미래에셋자산운용', 'KB자산운용', '한화자산운용', '키움투자자산운용', 'NH-Amundi자산운용', '신한자산운용', 'KBSTAR자산운용', '타임폴리오자산운용', 'SOL자산운용'],
+  usIssuers: ['Vanguard', 'BlackRock', 'State Street', 'Invesco', 'Charles Schwab', 'Fidelity', 'First Trust', 'ProShares', 'iShares', 'SPDR'],
   categories: ['국내주식', '해외주식', '채권', '원자재', '부동산', '통화'],
   themes: themes.map(t => t.name),
 };

@@ -146,6 +146,16 @@ body {
   outline-offset: 2px;
 }
 
+/* Remove outline from inputs, textareas, and selects */
+input:focus,
+input:focus-visible,
+textarea:focus,
+textarea:focus-visible,
+select:focus,
+select:focus-visible {
+  outline: none;
+}
+
 /* Links */
 a {
   color: inherit;

@@ -1,13 +1,13 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Sparkles, SlidersHorizontal, Package, ArrowRight, Send } from 'lucide-react';
+import { Search, Sparkles, SlidersHorizontal, Package, ArrowRight, Send, FileText } from 'lucide-react';
 import { Card, Button } from '../components/common';
 import { useETFStore } from '../store/etfStore';
 import { koreanETFs, usETFs, filterOptions } from '../data/etfs';
 import { formatPrice, formatPercent, formatLargeNumber, getChangeClass } from '../utils/format';
 import styles from './SearchPage.module.css';
 
-type SearchType = 'ai' | 'screener' | 'holdings';
+type SearchType = 'name' | 'ai' | 'screener' | 'holdings';
 
 interface ChatMessage {
   id: string;
@@ -19,24 +19,31 @@ interface ChatMessage {
 
 const investRegions = ['한국', '미국', '중국(홍콩포함)', '일본', '영국', '프랑스', '독일', '베트남', '인도', '글로벌', '유럽', '선진국', '신흥국', '라틴아메리카', '기타'];
 const assetTypes = ['주식', '채권', '원자재', '혼합', '대체', '머니마켓'];
-const listingCountries = ['한국 상장', '미국 상장', '중국 상장', '홍콩 상장', '일본 상장'];
+const listingCountries = ['한국 상장 ETF', '미국 상장 ETF'];
 const leverageTypes = ['+1배', '+1.25~1.75배', '+2배', '+3배'];
 const inverseTypes = ['-1배', '-1.25~-1.75배', '-2배', '-3배'];
 const domesticAUM = ['500억 미만', '5백억~1천억 미만', '1천억~5천억 미만', '5천억 이상'];
 const foreignAUM = ['1천만 달러 미만', '1천만~1억 달러 미만', '1억~10억 달러 미만', '10억~100억 달러 미만', '100억 달러 이상'];
 const dividendFrequencies = ['월', '분기', '반기', '연간', '비정기'];
 const returnPeriods = ['1개월', '3개월', '6개월', '1년', '3년'];
+const sectors = ['기술', '금융', '헬스케어', '에너지', '산업재', '필수소비재', '임의소비재', '통신', '유틸리티', '부동산', '소재'];
+const tradingVolumes = ['1만주 미만', '1만~10만주', '10만~50만주', '50만~100만주', '100만주 이상'];
+const expenseRatios = ['0.1% 미만', '0.1~0.3%', '0.3~0.5%', '0.5~0.7%', '0.7% 이상'];
+const listingPeriods = ['1년 미만', '1~3년', '3~5년', '5~10년', '10년 이상'];
+const hedgeTypes = ['환헤지', '환노출', '혼합'];
+const pensionTypes = ['전체', '개인연금', '퇴직연금'];
 
 type SortOption = 'marketCap' | 'dividend' | 'change';
 type HoldingSortOption = 'weight' | 'change';
 
 export default function SearchPage() {
   const navigate = useNavigate();
-  const [searchType, setSearchType] = useState<SearchType>('ai');
+  const [searchType, setSearchType] = useState<SearchType>('name');
   const [hasSearched, setHasSearched] = useState(false);
   const [sortBy, setSortBy] = useState<SortOption>('marketCap');
   const [holdingSortBy, setHoldingSortBy] = useState<HoldingSortOption>('weight');
   
+  const [nameQuery, setNameQuery] = useState('');
   const [aiQuery, setAiQuery] = useState('');
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const chatEndRef = useRef<HTMLDivElement>(null);
@@ -56,6 +63,15 @@ export default function SearchPage() {
   const [dividendMax, setDividendMax] = useState('');
   const [returnMin, setReturnMin] = useState('');
   const [returnMax, setReturnMax] = useState('');
+  
+  // 추가 필터
+  const [selectedSectors, setSelectedSectors] = useState<string[]>([]);
+  const [selectedTradingVolumes, setSelectedTradingVolumes] = useState<string[]>([]);
+  const [selectedExpenseRatios, setSelectedExpenseRatios] = useState<string[]>([]);
+  const [selectedListingPeriods, setSelectedListingPeriods] = useState<string[]>([]);
+  const [selectedHedgeTypes, setSelectedHedgeTypes] = useState<string[]>([]);
+  const [issuerMarket, setIssuerMarket] = useState<'korea' | 'us'>('korea');
+  const [selectedPensionTypes, setSelectedPensionTypes] = useState<string[]>([]);
   
   const store = useETFStore();
   const { selectedMarket, selectedIssuers, setSelectedIssuers } = store;
@@ -155,12 +171,18 @@ export default function SearchPage() {
     if (searchType === 'ai') {
       handleAIChat();
       return;
+    } else if (searchType === 'name') {
+      const query = nameQuery.toLowerCase();
+      filtered = etfs.filter(etf => 
+        etf.name.toLowerCase().includes(query) || 
+        etf.ticker.toLowerCase().includes(query)
+      );
     } else if (searchType === 'screener') {
       if (selectedIssuers.length > 0) filtered = filtered.filter(etf => selectedIssuers.includes(etf.issuer));
       const divMin = dividendMin ? parseFloat(dividendMin) : 0;
       const divMax = dividendMax ? parseFloat(dividendMax) : 100;
       if (dividendMin || dividendMax) filtered = filtered.filter(etf => etf.dividendYield >= divMin && etf.dividendYield <= divMax);
-    } else {
+    } else if (searchType === 'holdings') {
       const query = holdingsQuery.toLowerCase();
       filtered = etfs.filter(etf => {
         if (!etf.holdings) return false;
@@ -176,6 +198,7 @@ export default function SearchPage() {
   
   const resetSearch = () => {
     setHasSearched(false);
+    setNameQuery('');
     setAiQuery('');
     setChatMessages([]);
     setHoldingsQuery('');
@@ -193,10 +216,18 @@ export default function SearchPage() {
     setReturnMin('');
     setReturnMax('');
     setSelectedIssuers([]);
+    setSelectedSectors([]);
+    setSelectedTradingVolumes([]);
+    setSelectedExpenseRatios([]);
+    setSelectedListingPeriods([]);
+    setSelectedHedgeTypes([]);
+    setIssuerMarket('korea');
+    setSelectedPensionTypes([]);
   };
   
   const searchTabs = [
-    { id: 'ai' as SearchType, label: 'AI비서', icon: Sparkles, desc: '대화하며 ETF 찾기' },
+    { id: 'name' as SearchType, label: '종목명/코드', icon: FileText, desc: 'ETF 이름/코드로 찾기' },
+    { id: 'ai' as SearchType, label: 'AI 검색', icon: Sparkles, desc: '대화하며 ETF 찾기' },
     { id: 'screener' as SearchType, label: '스크리너', icon: SlidersHorizontal, desc: '상세 조건으로 필터링' },
     { id: 'holdings' as SearchType, label: '보유종목', icon: Package, desc: '종목명으로 ETF 찾기' },
   ];
@@ -204,20 +235,23 @@ export default function SearchPage() {
   return (
     <div className={styles.page}>
       {/* Search Method Selector */}
-      <div className={styles.searchTypeTabs}>
-        {searchTabs.map((tab) => {
-          const Icon = tab.icon;
-          return (
-            <button key={tab.id} className={`${styles.searchTypeTab} ${searchType === tab.id ? styles.active : ''}`}
-              onClick={() => { setSearchType(tab.id); resetSearch(); }}>
-              <Icon size={20} />
-              <span className={styles.tabLabel}>{tab.label}</span>
-            </button>
-          );
-        })}
+      <div className={styles.searchMethodSection}>
+        <h2 className={styles.searchMethodTitle}>검색 방식을 선택하세요</h2>
+        <div className={styles.searchTypeTabs}>
+          {searchTabs.map((tab) => {
+            const Icon = tab.icon;
+            return (
+              <button key={tab.id} className={`${styles.searchTypeTab} ${searchType === tab.id ? styles.active : ''}`}
+                onClick={() => { setSearchType(tab.id); resetSearch(); }}>
+                <Icon size={20} />
+                <span className={styles.tabLabel}>{tab.label}</span>
+              </button>
+            );
+          })}
+        </div>
       </div>
       
-      <Card padding="lg" className={styles.searchCard}>
+      <Card padding="md" className={styles.searchCard}>
         {searchType === 'ai' && (
           <div className={styles.chatInterface}>
             <div className={styles.chatHeader}>
@@ -234,7 +268,7 @@ export default function SearchPage() {
               {chatMessages.length === 0 ? (
                 <div className={styles.chatEmpty}>
                   <Sparkles size={48} className={styles.chatEmptyIcon} />
-                  <p className={styles.chatEmptyText}>AI 비서에게 원하는 ETF를 물어보세요</p>
+                  <p className={styles.chatEmptyText}>이렇게 질문해 볼까요?</p>
                   <div className={styles.chatExamples}>
                     <button className={styles.exampleChip} onClick={() => setAiQuery('배당 높은 미국 기술주 ETF')}>
                       배당 높은 미국 기술주 ETF
@@ -289,7 +323,7 @@ export default function SearchPage() {
             
             {/* Chat Input */}
             <div className={styles.chatInputWrapper}>
-              <input type="text" className={styles.chatInput} placeholder="ETF에 대해 물어보세요..."
+              <input type="text" className={styles.chatInput} placeholder="AI와 대화를 시작해보세요."
                 value={aiQuery} onChange={(e) => setAiQuery(e.target.value)} 
                 onKeyPress={(e) => e.key === 'Enter' && handleAIChat()} />
               <button className={styles.sendButton} onClick={handleAIChat} disabled={!aiQuery.trim()}>
@@ -303,6 +337,17 @@ export default function SearchPage() {
           <div className={styles.searchInterface}>
             <h3 className={styles.sectionTitle}>원하는 조건으로 ETF를 찾아보세요</h3>
             <div className={styles.screenerFilters}>
+              
+              {/* 상장국가 */}
+              <div className={styles.filterSection}>
+                <h4 className={styles.filterTitle}>상장국가</h4>
+                <div className={styles.filterChips}>
+                  {listingCountries.map(country => (
+                    <button key={country} className={`${styles.filterChip} ${selectedListingCountries.includes(country) ? styles.selected : ''}`}
+                      onClick={() => toggleArrayItem(selectedListingCountries, setSelectedListingCountries, country)}>{country}</button>
+                  ))}
+                </div>
+              </div>
               
               {/* 투자지역 */}
               <div className={styles.filterSection}>
@@ -322,17 +367,6 @@ export default function SearchPage() {
                   {assetTypes.map(type => (
                     <button key={type} className={`${styles.filterChip} ${selectedAssetTypes.includes(type) ? styles.selected : ''}`}
                       onClick={() => toggleArrayItem(selectedAssetTypes, setSelectedAssetTypes, type)}>{type}</button>
-                  ))}
-                </div>
-              </div>
-              
-              {/* 상장국가 */}
-              <div className={styles.filterSection}>
-                <h4 className={styles.filterTitle}>상장국가</h4>
-                <div className={styles.filterChips}>
-                  {listingCountries.map(country => (
-                    <button key={country} className={`${styles.filterChip} ${selectedListingCountries.includes(country) ? styles.selected : ''}`}
-                      onClick={() => toggleArrayItem(selectedListingCountries, setSelectedListingCountries, country)}>{country}</button>
                   ))}
                 </div>
               </div>
@@ -433,14 +467,105 @@ export default function SearchPage() {
               {/* 운용사 */}
               <div className={styles.filterSection}>
                 <h4 className={styles.filterTitle}>운용사</h4>
+                <div className={styles.filterSubSection}>
+                  <div className={styles.issuerToggle}>
+                    <button 
+                      className={`${styles.toggleButton} ${issuerMarket === 'korea' ? styles.active : ''}`}
+                      onClick={() => setIssuerMarket('korea')}>
+                      한국 운용사
+                    </button>
+                    <button 
+                      className={`${styles.toggleButton} ${issuerMarket === 'us' ? styles.active : ''}`}
+                      onClick={() => setIssuerMarket('us')}>
+                      미국 운용사
+                    </button>
+                  </div>
+                  <div className={styles.filterChips}>
+                    {(issuerMarket === 'korea' ? filterOptions.koreanIssuers : filterOptions.usIssuers).map(issuer => (
+                      <button key={issuer} className={`${styles.filterChip} ${selectedIssuers.includes(issuer) ? styles.selected : ''}`}
+                        onClick={() => toggleIssuer(issuer)}>{issuer}</button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+              
+              {/* 연금 */}
+              <div className={styles.filterSection}>
+                <h4 className={styles.filterTitle}>연금</h4>
                 <div className={styles.filterChips}>
-                  {filterOptions.issuers.map(issuer => (
-                    <button key={issuer} className={`${styles.filterChip} ${selectedIssuers.includes(issuer) ? styles.selected : ''}`}
-                      onClick={() => toggleIssuer(issuer)}>{issuer}</button>
+                  {pensionTypes.map(type => (
+                    <button key={type} className={`${styles.filterChip} ${selectedPensionTypes.includes(type) ? styles.selected : ''}`}
+                      onClick={() => toggleArrayItem(selectedPensionTypes, setSelectedPensionTypes, type)}>{type}</button>
                   ))}
                 </div>
               </div>
               
+              {/* 섹터 */}
+              <div className={styles.filterSection}>
+                <h4 className={styles.filterTitle}>섹터</h4>
+                <div className={styles.filterChips}>
+                  {sectors.map(sector => (
+                    <button key={sector} className={`${styles.filterChip} ${selectedSectors.includes(sector) ? styles.selected : ''}`}
+                      onClick={() => toggleArrayItem(selectedSectors, setSelectedSectors, sector)}>{sector}</button>
+                  ))}
+                </div>
+              </div>
+              
+              {/* 거래량 */}
+              <div className={styles.filterSection}>
+                <h4 className={styles.filterTitle}>일평균 거래량</h4>
+                <div className={styles.filterChips}>
+                  {tradingVolumes.map(volume => (
+                    <button key={volume} className={`${styles.filterChip} ${selectedTradingVolumes.includes(volume) ? styles.selected : ''}`}
+                      onClick={() => toggleArrayItem(selectedTradingVolumes, setSelectedTradingVolumes, volume)}>{volume}</button>
+                  ))}
+                </div>
+              </div>
+              
+              {/* 총보수 */}
+              <div className={styles.filterSection}>
+                <h4 className={styles.filterTitle}>총보수 (연간)</h4>
+                <div className={styles.filterChips}>
+                  {expenseRatios.map(ratio => (
+                    <button key={ratio} className={`${styles.filterChip} ${selectedExpenseRatios.includes(ratio) ? styles.selected : ''}`}
+                      onClick={() => toggleArrayItem(selectedExpenseRatios, setSelectedExpenseRatios, ratio)}>{ratio}</button>
+                  ))}
+                </div>
+              </div>
+              
+              {/* 상장기간 */}
+              <div className={styles.filterSection}>
+                <h4 className={styles.filterTitle}>상장기간</h4>
+                <div className={styles.filterChips}>
+                  {listingPeriods.map(period => (
+                    <button key={period} className={`${styles.filterChip} ${selectedListingPeriods.includes(period) ? styles.selected : ''}`}
+                      onClick={() => toggleArrayItem(selectedListingPeriods, setSelectedListingPeriods, period)}>{period}</button>
+                  ))}
+                </div>
+              </div>
+              
+              {/* 환헤지 */}
+              <div className={styles.filterSection}>
+                <h4 className={styles.filterTitle}>환헤지 여부</h4>
+                <div className={styles.filterChips}>
+                  {hedgeTypes.map(type => (
+                    <button key={type} className={`${styles.filterChip} ${selectedHedgeTypes.includes(type) ? styles.selected : ''}`}
+                      onClick={() => toggleArrayItem(selectedHedgeTypes, setSelectedHedgeTypes, type)}>{type}</button>
+                  ))}
+                </div>
+              </div>
+              
+            </div>
+          </div>
+        )}
+        
+        {searchType === 'name' && (
+          <div className={styles.searchInterface}>
+            <h3 className={styles.sectionTitle}>ETF 종목명 또는 코드를 입력하세요</h3>
+            <div className={styles.searchInputWrapper}>
+              <Search className={styles.searchInputIcon} size={20} />
+              <input type="text" className={styles.searchInput} placeholder="예: KODEX 200, 069500, SPY"
+                value={nameQuery} onChange={(e) => setNameQuery(e.target.value)} onKeyPress={(e) => e.key === 'Enter' && handleSearch()} />
             </div>
           </div>
         )}
@@ -459,7 +584,7 @@ export default function SearchPage() {
         {searchType !== 'ai' && (
           <div className={styles.searchButtonWrapper}>
             <Button variant="primary" size="lg" onClick={handleSearch}
-              disabled={(searchType === 'holdings' && !holdingsQuery.trim())}
+              disabled={(searchType === 'name' && !nameQuery.trim()) || (searchType === 'holdings' && !holdingsQuery.trim())}
               className={styles.searchButton}>
               <Search size={20} />검색하기<ArrowRight size={20} />
             </Button>
@@ -488,7 +613,7 @@ export default function SearchPage() {
             </div>
           </div>
           {searchResults.length === 0 ? (
-            <Card padding="lg" className={styles.emptyResults}>
+            <Card padding="md" className={styles.emptyResults}>
               <div className={styles.emptyIcon}>🔍</div>
               <h4 className={styles.emptyTitle}>검색 결과가 없습니다</h4>
               <p className={styles.emptyDesc}>다른 조건으로 다시 검색해보세요</p>
