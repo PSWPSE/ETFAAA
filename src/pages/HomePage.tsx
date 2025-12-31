@@ -349,7 +349,11 @@ export default function HomePage() {
         </div>
         
         <div className={styles.tickerBanner}>
-          <div className={styles.tickerContent} key={tickerIndex}>
+          <button 
+            className={styles.tickerContent} 
+            key={tickerIndex}
+            onClick={() => navigate(`/etf/${hotNow[tickerIndex]?.id}`)}
+          >
             <div className={styles.tickerMainInfo}>
               <span className={styles.tickerRank}>#{tickerIndex + 1}</span>
               <span className={styles.tickerName}>{hotNow[tickerIndex]?.name}</span>
@@ -360,13 +364,13 @@ export default function HomePage() {
                 {formatPrice(hotNow[tickerIndex]?.price || 0)}원
               </span>
               <span className={`${styles.tickerChange} ${getChangeClass(hotNow[tickerIndex]?.changePercent || 0)}`}>
-                {hotNow[tickerIndex]?.changePercent >= 0 ? '▲' : '▼'} {formatPercent(Math.abs(hotNow[tickerIndex]?.changePercent || 0))}
+                {formatPercent(hotNow[tickerIndex]?.changePercent || 0)}
               </span>
             </div>
             <span className={styles.tickerVolume}>
               거래량 {formatLargeNumber(hotNow[tickerIndex]?.volume || 0)}
             </span>
-          </div>
+          </button>
           <div className={styles.tickerDots}>
             {hotNow.map((_, i) => (
               <span key={i} className={`${styles.tickerDot} ${i === tickerIndex ? styles.active : ''}`} />

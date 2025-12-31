@@ -1,7 +1,8 @@
 import { ReactNode } from 'react';
 import Header from './Header';
 import Sidebar from './Sidebar';
-import BottomNav from './BottomNav';
+import ComparisonBar from './ComparisonBar';
+// import BottomNav from './BottomNav';
 import styles from './Layout.module.css';
 
 interface LayoutProps {
@@ -18,7 +19,8 @@ export default function Layout({ children }: LayoutProps) {
           {children}
         </div>
       </main>
-      <BottomNav />
+      <ComparisonBar />
+      {/* <BottomNav /> */}
     </div>
   );
 }

@@ -1,0 +1,240 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xl);
+  margin: calc(var(--spacing-sm) * -1);
+  margin-top: 0;
+  padding: var(--spacing-md);
+  padding-top: var(--spacing-sm);
+  padding-bottom: 180px;
+}
+
+@media (min-width: 768px) {
+  .page {
+    gap: var(--spacing-2xl);
+    padding: var(--spacing-xl) var(--spacing-2xl);
+    padding-bottom: 200px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .page {
+    margin: calc(var(--spacing-lg) * -1);
+    margin-top: calc(var(--spacing-md) * -1);
+    padding: var(--spacing-2xl);
+    padding-bottom: 200px;
+  }
+}
+
+/* ==================== Header ==================== */
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.backButton {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  transition: all 0.2s ease;
+  width: fit-content;
+}
+
+.backButton:hover {
+  color: var(--color-primary);
+  border-color: var(--color-primary);
+  background: rgba(59, 130, 246, 0.02);
+}
+
+.titleGroup {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.headerIcon {
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.title {
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--color-text-primary);
+  letter-spacing: -0.02em;
+  margin-bottom: 6px;
+}
+
+.description {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+}
+
+.count {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-text-tertiary);
+}
+
+.count strong {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--color-primary);
+  margin: 0 4px;
+}
+
+@media (min-width: 768px) {
+  .title {
+    font-size: 28px;
+  }
+  
+  .description {
+    font-size: 15px;
+  }
+  
+  .count {
+    font-size: 15px;
+  }
+  
+  .count strong {
+    font-size: 20px;
+  }
+}
+
+/* Section specific icon colors */
+.titleGroup:has([class*="flame"]) .headerIcon {
+  color: #EF4444;
+  filter: drop-shadow(0 2px 4px rgba(239, 68, 68, 0.2));
+}
+
+.titleGroup:has([class*="snowflake"]) .headerIcon {
+  color: #3B82F6;
+  filter: drop-shadow(0 2px 4px rgba(59, 130, 246, 0.2));
+}
+
+.titleGroup:has([class*="trending-up"]) .headerIcon {
+  color: #10B981;
+  filter: drop-shadow(0 2px 4px rgba(16, 185, 129, 0.2));
+}
+
+.titleGroup:has([class*="trending-down"]) .headerIcon {
+  color: #DC2626;
+  filter: drop-shadow(0 2px 4px rgba(220, 38, 38, 0.2));
+}
+
+.titleGroup:has([class*="activity"]) .headerIcon {
+  color: #8B5CF6;
+  filter: drop-shadow(0 2px 4px rgba(139, 92, 246, 0.2));
+}
+
+.titleGroup:has([class*="triangle-alert"]) .headerIcon {
+  color: #F59E0B;
+  filter: drop-shadow(0 2px 4px rgba(245, 158, 11, 0.2));
+}
+
+/* ==================== List (From HomePage style) ==================== */
+.listCard {
+  padding: 0 !important;
+  overflow: hidden;
+}
+
+.listItem {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md) var(--spacing-lg);
+  text-align: left;
+  width: 100%;
+  border-bottom: 1px solid var(--color-border-light);
+  transition: all var(--transition-fast);
+}
+
+.listItem:last-child {
+  border-bottom: none;
+}
+
+.listItem:hover {
+  background: var(--color-bg);
+}
+
+.listRank {
+  width: 28px;
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  color: var(--color-text-tertiary);
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.listItem:nth-child(-n+3) .listRank {
+  color: var(--color-primary);
+}
+
+.listInfo {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.listName {
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  color: var(--color-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.listMeta {
+  font-family: var(--font-family-numeric);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-tertiary);
+  font-feature-settings: 'tnum' on, 'lnum' on;
+}
+
+.listPriceGroup {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.listPrice {
+  font-family: var(--font-family-numeric);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-tertiary);
+  font-feature-settings: 'tnum' on, 'lnum' on;
+}
+
+.listChange {
+  font-family: var(--font-family-numeric);
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  font-feature-settings: 'tnum' on, 'lnum' on;
+}
+
+/* ==================== Empty State ==================== */
+.emptyCard {
+  padding: var(--spacing-xl) !important;
+  text-align: center;
+}
+
+.emptyText {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-text-tertiary);
+}
+

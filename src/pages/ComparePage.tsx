@@ -1,5 +1,5 @@
 import { useMemo, useState, useRef, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { X, Plus, Search, ArrowRight, Info, TrendingUp, PieChart, BarChart2, Calendar, CheckCircle, XCircle } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, BarChart, Bar, Cell } from 'recharts';
 import { Card, CardHeader, Button } from '../components/common';
@@ -36,7 +36,8 @@ const PERIOD_OPTIONS = [
 
 export default function ComparePage() {
   const navigate = useNavigate();
-  const { selectedMarket } = useETFStore();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const { selectedMarket, compareList } = useETFStore();
   
   // 상태 관리
   const [selectedETFs, setSelectedETFs] = useState<ETF[]>([]);
@@ -51,6 +52,40 @@ export default function ComparePage() {
   
   // 시장별 ETF 선택
   const allETFs = selectedMarket === 'korea' ? koreanETFs : usETFs;
+  
+  // 페이지 진입 시 스크롤 최상단으로
+  useEffect(() => {
+    const autoCompare = searchParams.get('autoCompare');
+    
+    // autoCompare가 없으면 최상단으로 스크롤
+    if (autoCompare !== 'true') {
+      window.scrollTo(0, 0);
+    }
+  }, [searchParams]);
+  
+  // 비교 바에서 온 경우 자동으로 비교 실행
+  useEffect(() => {
+    const autoCompare = searchParams.get('autoCompare');
+    if (autoCompare === 'true' && compareList.length >= 2) {
+      // compareList의 ETF들을 selectedETFs에 설정
+      const etfsToCompare = compareList
+        .map(id => allETFs.find(etf => etf.id === id))
+        .filter((etf): etf is ETF => etf !== undefined);
+      
+      if (etfsToCompare.length >= 2) {
+        setSelectedETFs(etfsToCompare);
+        setShowResults(true);
+        
+        // URL 파라미터 제거 (히스토리 정리)
+        setSearchParams({}, { replace: true });
+        
+        // 결과 섹션으로 스크롤
+        setTimeout(() => {
+          resultsSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 100);
+      }
+    }
+  }, [searchParams, compareList, allETFs, setSearchParams]);
   
   // 검색 결과
   const searchResults = useMemo(() => {

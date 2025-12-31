@@ -6,14 +6,14 @@
   margin-top: 0;
   padding: var(--spacing-md);
   padding-top: var(--spacing-sm);
-  padding-bottom: 100px;
+  padding-bottom: 180px;
 }
 
 @media (min-width: 768px) {
   .page {
     gap: 48px;
     padding: var(--spacing-xl) var(--spacing-2xl);
-    padding-bottom: 120px;
+    padding-bottom: 200px;
   }
 }
 
@@ -22,7 +22,7 @@
     margin: calc(var(--spacing-lg) * -1);
     margin-top: calc(var(--spacing-md) * -1);
     padding: var(--spacing-2xl);
-    padding-bottom: 120px;
+    padding-bottom: 200px;
   }
 }
 
@@ -597,6 +597,27 @@
   flex-direction: column;
   gap: var(--spacing-xs);
   animation: fadeSlideIn 0.5s ease;
+  background: none;
+  border: none;
+  width: 100%;
+  padding: 0;
+  text-align: left;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+@media (hover: hover) {
+  .tickerContent:hover {
+    transform: translateY(-2px);
+  }
+  
+  .tickerContent:hover .tickerMainInfo {
+    color: var(--color-primary);
+  }
+}
+
+.tickerContent:active {
+  transform: translateY(0) scale(0.98);
 }
 
 @keyframes fadeSlideIn {

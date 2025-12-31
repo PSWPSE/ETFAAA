@@ -1,4 +1,5 @@
 import { useState, useMemo, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, CalendarDays, ChevronUp, ChevronDown, Calendar } from 'lucide-react';
 import { Card, Badge } from '../components/common';
 import { koreanETFs, usETFs, getDividends, getReturns } from '../data/etfs';
@@ -40,6 +41,7 @@ const pastPresets = rangePresets.filter(p => p.direction === 'past');
 const futurePresets = rangePresets.filter(p => p.direction === 'future');
 
 export default function CalendarPage() {
+  const navigate = useNavigate();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [sortField, setSortField] = useState<SortField>('etfName');
@@ -584,7 +586,11 @@ export default function CalendarPage() {
                 </thead>
                 <tbody>
                   {sortedEvents.map((event, index) => (
-                    <tr key={index}>
+                    <tr 
+                      key={index}
+                      onClick={() => navigate(`/etf/${event.etfId}`)}
+                      className={styles.clickableRow}
+                    >
                       <td>
                         <div className={styles.cellEtf}>
                           <span className={styles.cellName}>{event.etfName}</span>

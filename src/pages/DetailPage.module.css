@@ -3,19 +3,19 @@
 .page {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-2xl);
+  gap: var(--spacing-lg); /* 24px for mobile */
   margin: calc(var(--spacing-sm) * -1);
   margin-top: 0;
   padding: var(--spacing-md);
   padding-top: var(--spacing-sm);
-  padding-bottom: 100px;
+  padding-bottom: 180px;
 }
 
 @media (min-width: 768px) {
   .page {
     gap: 48px;
     padding: var(--spacing-xl) var(--spacing-2xl);
-    padding-bottom: 120px;
+    padding-bottom: 200px;
   }
 }
 
@@ -24,7 +24,7 @@
     margin: calc(var(--spacing-lg) * -1);
     margin-top: calc(var(--spacing-md) * -1);
     padding: var(--spacing-2xl);
-    padding-bottom: 120px;
+    padding-bottom: 200px;
   }
 }
 
@@ -42,135 +42,238 @@
 
 /* ==================== 헤더 카드 ==================== */
 .headerCard {
-  padding: var(--spacing-md) !important;
+  padding: var(--spacing-lg) var(--spacing-xl) !important;
 }
 
-.headerTop {
+/* 메인 헤더 영역 */
+.headerMain {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  gap: var(--spacing-md);
-  margin-bottom: var(--spacing-md);
+  gap: var(--spacing-xl);
+  margin-bottom: var(--spacing-xl);
+  padding-bottom: var(--spacing-lg);
+  border-bottom: 1px solid var(--color-border-light);
 }
 
+/* ETF 정보 영역 */
 .etfInfo {
   flex: 1;
   min-width: 0;
 }
 
-.badges {
+.etfTitleRow {
   display: flex;
-  gap: var(--spacing-xs);
-  margin-bottom: var(--spacing-xs);
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
 }
 
 .etfName {
-  font-size: var(--font-size-lg);
-  font-weight: 700;
+  font-size: 24px;
+  font-weight: 800;
   color: var(--color-text-primary);
-  line-height: 1.3;
-  margin-bottom: 2px;
-}
-
-.etfMeta {
-  font-size: var(--font-size-sm);
-  color: var(--color-text-tertiary);
-}
-
-.priceInfo {
-  text-align: right;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
   flex-shrink: 0;
 }
 
-.price {
-  display: block;
-  font-family: var(--font-family-numeric);
-  font-size: var(--font-size-xl);
-  font-weight: 700;
-  color: var(--color-text-primary);
-  font-feature-settings: 'tnum' on, 'lnum' on;
-  letter-spacing: -0.02em;
+.badges {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
 }
 
-.change {
-  display: inline-flex;
-  align-items: center;
-  gap: 2px;
-  font-family: var(--font-family-numeric);
-  font-size: var(--font-size-sm);
+.badges > * {
+  font-size: 11px;
+  padding: 3px 8px;
   font-weight: 600;
 }
 
-/* 핵심 지표 */
-.keyMetrics {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: var(--spacing-sm);
-  padding: var(--spacing-sm) 0;
-  border-top: 1px solid var(--color-border-light);
-  border-bottom: 1px solid var(--color-border-light);
-  margin-bottom: var(--spacing-md);
+.etfMeta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  margin-top: 4px;
 }
 
-.metricItem {
-  text-align: center;
+.issuer {
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.separator {
+  color: var(--color-border-light);
+}
+
+.category {
+  color: var(--color-text-tertiary);
+}
+
+/* 가격 정보 영역 */
+.priceSection {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.priceMain {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+}
+
+.price {
+  font-family: var(--font-family-numeric);
+  font-size: 26px;
+  font-weight: 800;
+  color: var(--color-text-primary);
+  font-feature-settings: 'tnum' on, 'lnum' on;
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+
+.currency {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text-tertiary);
+}
+
+.priceChange {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  background: var(--color-bg-secondary);
+  flex-shrink: 0;
+}
+
+.changeValue {
+  font-family: var(--font-family-numeric);
+  font-size: 14px;
+  font-weight: 700;
+  font-feature-settings: 'tnum' on, 'lnum' on;
+}
+
+/* 핵심 지표 그리드 */
+.metricsGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-lg);
+}
+
+.metricBox {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: var(--spacing-md);
+  background: var(--color-bg);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border-light);
+  transition: all var(--transition-fast);
+}
+
+.metricBox:hover {
+  background: var(--color-bg-secondary);
+  border-color: var(--color-border);
 }
 
 .metricLabel {
-  display: block;
-  font-size: 10px;
+  font-size: 11px;
+  font-weight: 600;
   color: var(--color-text-tertiary);
-  margin-bottom: 2px;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
 }
 
 .metricValue {
   font-family: var(--font-family-numeric);
-  font-size: var(--font-size-sm);
+  font-size: 18px;
   font-weight: 700;
   color: var(--color-text-primary);
   font-feature-settings: 'tnum' on, 'lnum' on;
 }
 
 /* 액션 버튼 */
-.actions {
+.headerActions {
   display: flex;
-  gap: var(--spacing-sm);
+  gap: 10px;
+}
+
+.headerActions > button:first-child {
+  min-width: 100px;
 }
 
 /* ==================== 투자 포인트 ==================== */
-.pointsRow {
-  display: flex;
-  gap: var(--spacing-xs);
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  padding: 2px 0;
+.investmentPointsCard {
+  padding: var(--spacing-lg) var(--spacing-xl) !important; /* headerCard와 동일한 좌우 패딩 */
+  background: linear-gradient(135deg, #ffffff 0%, #fafbfc 100%);
+  border: 1.5px solid var(--color-border-light);
 }
 
-.pointsRow::-webkit-scrollbar {
-  display: none;
+.investmentPointsHeader {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  margin-bottom: var(--spacing-md);
+}
+
+.investmentPointsHeader svg {
+  color: var(--color-primary);
+  flex-shrink: 0;
+}
+
+.investmentPointsTitle {
+  font-size: var(--font-size-base);
+  font-weight: 800;
+  color: var(--color-text-primary);
+  letter-spacing: -0.01em;
+}
+
+.pointsRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 0;
 }
 
 .pointItem {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 4px;
-  padding: 6px 12px;
-  background: var(--color-white);
-  border: 1px solid var(--color-border);
+  gap: 6px;
+  padding: 9px 18px;
+  background: linear-gradient(135deg, rgba(30, 58, 95, 0.06) 0%, rgba(30, 58, 95, 0.1) 100%);
+  border: 1.5px solid rgba(30, 58, 95, 0.18);
   border-radius: var(--radius-full);
-  font-size: var(--font-size-xs);
-  font-weight: 600;
-  color: var(--color-text-secondary);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--color-text-primary);
   white-space: nowrap;
+  transition: all var(--transition-fast);
+  box-shadow: 0 2px 4px rgba(30, 58, 95, 0.04);
+}
+
+.pointItem:hover {
+  background: linear-gradient(135deg, rgba(30, 58, 95, 0.1) 0%, rgba(30, 58, 95, 0.14) 100%);
+  border-color: rgba(30, 58, 95, 0.28);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(30, 58, 95, 0.08);
 }
 
 .pointItem svg {
   color: var(--color-primary);
+  flex-shrink: 0;
 }
 
 /* ==================== 차트 카드 ==================== */
 .chartCard {
-  padding: var(--spacing-md) !important;
+  padding: var(--spacing-lg) var(--spacing-xl) !important;
 }
 
 .chartHeader {
@@ -180,124 +283,241 @@
   margin-bottom: var(--spacing-md);
 }
 
+.chartHeader .sectionTitleWrapper {
+  margin-bottom: 0;
+}
+
 .periodSelector {
   display: flex;
-  gap: 4px;
+  gap: 6px;
+  background: var(--color-bg);
+  padding: 4px;
+  border-radius: 10px;
+  border: 1px solid var(--color-border-light);
 }
 
 .periodBtn {
-  padding: 6px 10px;
+  padding: 6px 12px;
   font-size: var(--font-size-xs);
-  font-weight: 600;
+  font-weight: 700;
   color: var(--color-text-tertiary);
-  border-radius: var(--radius-sm);
-  transition: all var(--transition-fast);
+  border-radius: 7px;
+  transition: all 0.2s ease;
+  letter-spacing: -0.01em;
+  min-width: 38px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
 }
 
 .periodBtn:hover {
   color: var(--color-text-secondary);
-  background: var(--color-bg-secondary);
+  background: rgba(30, 58, 95, 0.04);
 }
 
 .periodBtn.active {
-  color: var(--color-primary);
-  background: rgba(30, 58, 95, 0.08);
+  color: var(--color-white);
+  background: linear-gradient(135deg, var(--color-primary) 0%, #2a4a6f 100%);
+  box-shadow: 0 2px 6px rgba(30, 58, 95, 0.2);
 }
 
 .chartBody {
   margin: 0 calc(var(--spacing-sm) * -1);
 }
 
-.chartActions {
-  display: flex;
-  gap: var(--spacing-sm);
-  margin-top: var(--spacing-md);
-  padding-top: var(--spacing-md);
-  border-top: 1px solid var(--color-border-light);
-}
-
-.chartActionBtn {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--spacing-xs);
-  padding: var(--spacing-sm);
-  font-size: var(--font-size-sm);
-  font-weight: 500;
-  color: var(--color-text-secondary);
-  background: var(--color-bg);
-  border-radius: var(--radius-md);
-  transition: all var(--transition-fast);
-}
-
-.chartActionBtn:hover {
-  background: var(--color-bg-secondary);
-  color: var(--color-primary);
-}
-
-.chartActionBtn svg:last-child {
-  color: var(--color-text-tertiary);
-}
-
 /* ==================== 52주 범위 ==================== */
 .rangeCard {
-  padding: var(--spacing-md) !important;
+  padding: var(--spacing-lg) var(--spacing-xl) !important;
 }
 
 .rangeHeader {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
-  margin-bottom: var(--spacing-sm);
+  margin-bottom: var(--spacing-lg);
+  gap: var(--spacing-md);
+}
+
+.rangeHeaderLeft {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.rangeHeader .sectionTitleWrapper {
+  margin-bottom: 0;
+}
+
+.rangeDescription {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--color-text-tertiary);
+  margin: 0;
+  line-height: 1.4;
 }
 
 .rangePosition {
-  font-size: var(--font-size-sm);
-  font-weight: 700;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.rangePosition::before {
+  content: '현재 위치';
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.rangePosition span {
+  font-size: 20px;
+  font-weight: 800;
   color: var(--color-primary);
+  font-feature-settings: 'tnum' on, 'lnum' on;
+  letter-spacing: -0.02em;
 }
 
 .rangeBar {
-  margin-bottom: var(--spacing-sm);
+  position: relative;
+  margin-bottom: var(--spacing-md);
+  padding: var(--spacing-sm) 0;
 }
 
 .rangeTrack {
   position: relative;
-  height: 6px;
-  background: var(--color-bg-secondary);
-  border-radius: 3px;
+  height: 12px;
+  background: linear-gradient(to right, 
+    rgba(239, 68, 68, 0.15) 0%,
+    rgba(245, 158, 11, 0.15) 25%,
+    rgba(34, 197, 94, 0.15) 50%,
+    rgba(34, 197, 94, 0.15) 75%,
+    rgba(245, 158, 11, 0.15) 100%
+  );
+  border-radius: 6px;
+  overflow: visible;
+}
+
+.rangeTrack::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: var(--fill-width, 50%);
+  background: linear-gradient(90deg, 
+    rgba(30, 58, 95, 0.15) 0%, 
+    rgba(30, 58, 95, 0.25) 100%
+  );
+  border-radius: 6px;
+  transition: width 0.5s ease;
 }
 
 .rangeIndicator {
   position: absolute;
   top: 50%;
-  width: 14px;
-  height: 14px;
+  width: 20px;
+  height: 20px;
   background: var(--color-white);
   border: 3px solid var(--color-primary);
   border-radius: 50%;
   transform: translate(-50%, -50%);
-  box-shadow: var(--shadow-sm);
+  box-shadow: 0 3px 10px rgba(30, 58, 95, 0.3), 0 0 0 4px rgba(30, 58, 95, 0.1);
+  transition: all 0.3s ease;
+  z-index: 2;
+}
+
+.rangeIndicator::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 8px;
+  height: 8px;
+  background: var(--color-primary);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
 }
 
 .rangeLabels {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   font-size: var(--font-size-xs);
-  color: var(--color-text-tertiary);
+  font-feature-settings: 'tnum' on, 'lnum' on;
+  gap: var(--spacing-sm);
+}
+
+.rangeLabels > span:first-child {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  padding: 4px 10px;
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  border-radius: var(--radius-full);
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.rangeLabels > span:first-child::before {
+  content: '최저';
+  font-size: 9px;
+  color: rgba(239, 68, 68, 0.7);
+  font-weight: 600;
+  margin-right: 2px;
+}
+
+.rangeLabels > span:last-child {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  padding: 4px 10px;
+  background: rgba(34, 197, 94, 0.08);
+  border: 1px solid rgba(34, 197, 94, 0.2);
+  border-radius: var(--radius-full);
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.rangeLabels > span:last-child::before {
+  content: '최고';
+  font-size: 9px;
+  color: rgba(34, 197, 94, 0.7);
+  font-weight: 600;
+  margin-right: 2px;
 }
 
 .currentPrice {
-  font-weight: 600;
-  color: var(--color-primary);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 7px 16px;
+  font-size: var(--font-size-sm);
+  font-weight: 800;
+  color: var(--color-white);
+  background: linear-gradient(135deg, var(--color-primary) 0%, #2a4a6f 100%);
+  border: none;
+  border-radius: var(--radius-full);
+  box-shadow: 0 3px 8px rgba(30, 58, 95, 0.25);
+  letter-spacing: -0.01em;
 }
 
 /* ==================== 탭 ==================== */
 .tabs {
   background: var(--color-white);
-  border-radius: var(--radius-lg);
-  overflow: hidden;
+  border-radius: 16px;
+  overflow: visible;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  border: 1px solid var(--color-border);
 }
 
 .tabContent {
@@ -309,14 +529,29 @@
 
 /* ==================== 섹션 공통 ==================== */
 .section {
-  padding: var(--spacing-md) !important;
+  padding: var(--spacing-lg) var(--spacing-xl) !important; /* headerCard와 동일한 좌우 패딩 */
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+.sectionTitleWrapper {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  margin-bottom: var(--spacing-lg); /* 16px → 24px로 증가 */
+}
+
+.sectionTitleWrapper svg {
+  color: var(--color-primary);
+  flex-shrink: 0;
 }
 
 .sectionTitle {
-  font-size: var(--font-size-sm);
-  font-weight: 700;
+  font-size: var(--font-size-base);
+  font-weight: 800;
   color: var(--color-text-primary);
-  margin-bottom: var(--spacing-sm);
+  letter-spacing: -0.01em;
+  margin: 0;
 }
 
 .sectionHeader {
@@ -324,6 +559,21 @@
   align-items: center;
   justify-content: space-between;
   margin-bottom: var(--spacing-sm);
+}
+
+.sectionHeader .sectionTitle {
+  margin: 0;
+}
+
+.sectionHeaderLeft {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.sectionHeaderLeft svg {
+  color: var(--color-primary);
+  flex-shrink: 0;
 }
 
 .sectionMeta {
@@ -339,14 +589,21 @@
 .returnsGrid {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
-  gap: var(--spacing-xs);
+  gap: var(--spacing-sm); /* 8px → 12px */
 }
 
 .returnItem {
   text-align: center;
-  padding: var(--spacing-sm);
+  padding: var(--spacing-md); /* 더 넉넉한 패딩 */
   background: var(--color-bg);
   border-radius: var(--radius-md);
+  transition: all 0.2s ease;
+}
+
+.returnItem:hover {
+  background: rgba(250, 251, 252, 0.8);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
 }
 
 .returnLabel {
@@ -366,14 +623,14 @@
 .infoGrid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: var(--spacing-sm);
+  gap: var(--spacing-md); /* 12px → 16px */
 }
 
 .infoItem {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: var(--spacing-xs) 0;
+  padding: var(--spacing-sm) 0; /* 더 넉넉한 패딩 */
   border-bottom: 1px solid var(--color-border-light);
 }
 
@@ -497,7 +754,7 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-xs);
+  gap: var(--spacing-sm); /* 8px → 12px */
 }
 
 .legendItem {
@@ -533,7 +790,7 @@
 .countryList {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-sm);
+  gap: var(--spacing-md); /* 12px → 16px */
 }
 
 .countryItem {
@@ -575,14 +832,14 @@
 .holdingsList {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-xs);
+  gap: var(--spacing-sm); /* 8px → 12px */
 }
 
 .holdingItem {
   display: flex;
   align-items: center;
   gap: var(--spacing-sm);
-  padding: var(--spacing-xs) 0;
+  padding: var(--spacing-sm) 0; /* 더 넉넉한 패딩 */
 }
 
 .holdingRank {
@@ -696,14 +953,14 @@
 .dividendHistory {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-xs);
+  gap: var(--spacing-sm); /* 8px → 12px */
 }
 
 .dividendHistoryItem {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: var(--spacing-xs) 0;
+  padding: var(--spacing-sm) 0; /* 더 넉넉한 패딩 */
   border-bottom: 1px solid var(--color-border-light);
 }
 
@@ -733,13 +990,20 @@
 .riskGrid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: var(--spacing-sm);
+  gap: var(--spacing-md); /* 12px → 16px */
 }
 
 .riskItem {
-  padding: var(--spacing-sm);
+  padding: var(--spacing-md); /* 더 넉넉한 패딩 */
   background: var(--color-bg);
   border-radius: var(--radius-md);
+  transition: all 0.2s ease;
+}
+
+.riskItem:hover {
+  background: rgba(250, 251, 252, 0.8);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
 }
 
 .riskLabel {
@@ -830,12 +1094,12 @@
 .advancedGrid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: var(--spacing-sm);
+  gap: var(--spacing-md); /* 12px → 16px */
 }
 
 .advancedItem {
   text-align: center;
-  padding: var(--spacing-sm);
+  padding: var(--spacing-md); /* 더 넉넉한 패딩 */
   background: var(--color-bg);
   border-radius: var(--radius-md);
 }
@@ -1007,12 +1271,12 @@
 .maGrid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: var(--spacing-xs);
+  gap: var(--spacing-sm); /* 8px → 12px */
 }
 
 .maItem {
   text-align: center;
-  padding: var(--spacing-sm);
+  padding: var(--spacing-md); /* 더 넉넉한 패딩 */
   background: var(--color-bg);
   border-radius: var(--radius-md);
 }
@@ -1062,7 +1326,7 @@
 .costList {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-xs);
+  gap: var(--spacing-sm); /* 8px → 12px */
   margin-bottom: var(--spacing-md);
 }
 
@@ -1118,7 +1382,7 @@
 .similarList {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-xs);
+  gap: var(--spacing-sm); /* 8px → 12px */
 }
 
 .similarItem {
@@ -1177,7 +1441,7 @@
 .newsList {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-sm);
+  gap: var(--spacing-md); /* 12px → 16px */
 }
 
 .newsItem {
@@ -1211,6 +1475,258 @@
 }
 
 /* ==================== 반응형 ==================== */
+@media (max-width: 767px) {
+  .headerCard {
+    padding: var(--spacing-md) !important;
+  }
+  
+  .headerMain {
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-md);
+    padding-bottom: var(--spacing-md);
+  }
+  
+  .etfInfo {
+    flex: 1;
+    min-width: 0;
+  }
+  
+  .etfTitleRow {
+    gap: 6px;
+    flex-wrap: wrap;
+    align-items: baseline;
+    margin-bottom: 6px;
+  }
+  
+  .etfName {
+    font-size: 17px;
+    line-height: 1.3;
+  }
+  
+  .badges {
+    gap: 4px;
+  }
+  
+  .badges > * {
+    font-size: 10px;
+    padding: 2px 6px;
+  }
+  
+  .etfMeta {
+    font-size: 12px;
+    gap: 6px;
+  }
+  
+  .priceSection {
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
+    flex-shrink: 0;
+  }
+  
+  .priceMain {
+    gap: 3px;
+  }
+  
+  .price {
+    font-size: 20px;
+  }
+  
+  .currency {
+    font-size: 11px;
+  }
+  
+  .priceChange {
+    padding: 4px 8px;
+  }
+  
+  .changeValue {
+    font-size: 12px;
+  }
+  
+  .metricsGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-md);
+  }
+  
+  .metricBox {
+    padding: var(--spacing-sm);
+  }
+  
+  .metricLabel {
+    font-size: 10px;
+  }
+  
+  .metricValue {
+    font-size: 16px;
+  }
+  
+  .headerActions {
+    flex-wrap: nowrap;
+    gap: 8px;
+  }
+  
+  .headerActions > button {
+    flex: 1;
+    min-width: 0;
+    padding: 0 12px;
+  }
+  
+  .headerActions > button:first-child {
+    min-width: 90px;
+  }
+  
+  .investmentPointsCard {
+    padding: var(--spacing-md) !important;
+  }
+  
+  .investmentPointsHeader {
+    gap: 6px;
+    margin-bottom: var(--spacing-sm);
+  }
+  
+  .investmentPointsHeader svg {
+    width: 16px;
+    height: 16px;
+  }
+  
+  .investmentPointsTitle {
+    font-size: 14px;
+  }
+  
+  .pointsRow {
+    gap: 6px;
+  }
+  
+  .pointItem {
+    padding: 7px 14px;
+    font-size: 12px;
+    gap: 5px;
+  }
+  
+  .pointItem svg {
+    width: 13px;
+    height: 13px;
+  }
+  
+  .sectionTitleWrapper {
+    gap: 6px;
+    margin-bottom: var(--spacing-md); /* 16px - ComparePage와 일관성 */
+  }
+  
+  .sectionTitleWrapper svg {
+    width: 16px;
+    height: 16px;
+  }
+  
+  .sectionTitle {
+    font-size: 14px;
+  }
+  
+  .sectionHeaderLeft svg {
+    width: 16px;
+    height: 16px;
+  }
+  
+  .tabContent {
+    gap: var(--spacing-lg); /* 24px - ComparePage와 동일 */
+    padding: var(--spacing-md);
+  }
+  
+  .section {
+    padding: var(--spacing-md) !important; /* 16px 전체 - headerCard 모바일과 동일 */
+  }
+  
+  .chartCard {
+    padding: var(--spacing-md) !important;
+  }
+  
+  .rangeCard {
+    padding: var(--spacing-md) !important;
+  }
+  
+  .rangeHeader {
+    margin-bottom: var(--spacing-md);
+    gap: var(--spacing-sm);
+  }
+  
+  .rangeHeaderLeft {
+    gap: 4px;
+  }
+  
+  .rangeDescription {
+    font-size: 11px;
+  }
+  
+  .rangePosition {
+    gap: 2px;
+  }
+  
+  .rangePosition::before {
+    font-size: 10px;
+  }
+  
+  .rangePosition span {
+    font-size: 18px;
+  }
+  
+  .rangeBar {
+    margin-bottom: var(--spacing-sm);
+    padding: 10px 0;
+  }
+  
+  .rangeTrack {
+    height: 10px;
+  }
+  
+  .rangeIndicator {
+    width: 18px;
+    height: 18px;
+    border-width: 2.5px;
+    box-shadow: 0 2px 8px rgba(30, 58, 95, 0.25), 0 0 0 3px rgba(30, 58, 95, 0.08);
+  }
+  
+  .rangeIndicator::before {
+    width: 7px;
+    height: 7px;
+  }
+  
+  .rangeLabels {
+    gap: var(--spacing-xs);
+  }
+  
+  .rangeLabels > span:first-child,
+  .rangeLabels > span:last-child {
+    padding: 3px 8px;
+    font-size: 10px;
+  }
+  
+  .rangeLabels > span:first-child::before,
+  .rangeLabels > span:last-child::before {
+    font-size: 8px;
+  }
+  
+  .currentPrice {
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+  
+  .periodSelector {
+    gap: 4px;
+    padding: 3px;
+  }
+  
+  .periodBtn {
+    padding: 5px 10px;
+    font-size: 11px;
+    min-width: 34px;
+  }
+}
+
 @media (min-width: 768px) {
   .page {
     max-width: 800px;
@@ -1219,20 +1735,8 @@
     gap: var(--spacing-lg);
   }
   
-  .headerTop {
-    gap: var(--spacing-lg);
-  }
-  
-  .etfName {
-    font-size: var(--font-size-xl);
-  }
-  
-  .price {
-    font-size: var(--font-size-2xl);
-  }
-  
-  .keyMetrics {
-    gap: var(--spacing-md);
+  .headerMain {
+    gap: var(--spacing-2xl);
   }
   
   .riskGrid {

@@ -1,10 +1,10 @@
 import { useState, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Plus, Check, Share2, TrendingUp, TrendingDown, Activity, Calculator, ChevronRight, Clock, Target, Zap, Shield, Users, ArrowUpRight, ArrowDownRight } from 'lucide-react';
+import { Plus, Check, Share2, TrendingUp, TrendingDown, Activity, Calculator, ChevronRight, Clock, Target, Zap, Shield, Users, Info, PieChart as PieChartIcon, Globe, List, DollarSign, BarChart3, Calendar, Layers, Newspaper } from 'lucide-react';
 import { XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, AreaChart, Area, BarChart, Bar } from 'recharts';
 import { Card, Button, Badge } from '../components/common';
 import { Tabs, TabList, Tab, TabPanel } from '../components/common';
-import { getETFById, generatePriceHistory, getReturns, getHoldings, getDividends, getRiskMetrics, getExtendedETFInfo, getSimilarETFs, getSectorAllocation, getCountryAllocation, getDividendChartData, getDividendForecast, getExtendedRiskMetrics, getMonthlyReturns, getETFGrades, getFundamentals, getTechnicalIndicators, getGrowthSimulation, getFundFlows, getTaxInfo, getCompetingETFs, getRelatedNews, getCostAnalysis } from '../data/etfs';
+import { getETFById, generatePriceHistory, getReturns, getHoldings, getDividends, getRiskMetrics, getExtendedETFInfo, getSimilarETFs, getSectorAllocation, getCountryAllocation, getDividendChartData, getDividendForecast, getExtendedRiskMetrics, getMonthlyReturns, getTechnicalIndicators, getGrowthSimulation, getFundFlows, getTaxInfo, getCompetingETFs, getRelatedNews, getCostAnalysis } from '../data/etfs';
 import { useETFStore } from '../store/etfStore';
 import { formatPrice, formatPercent, formatLargeNumber, formatDate, getChangeClass } from '../utils/format';
 import styles from './DetailPage.module.css';
@@ -16,6 +16,7 @@ const CHART_PERIODS = [
   { value: '3m', label: '3M', days: 90 },
   { value: '6m', label: '6M', days: 180 },
   { value: '1y', label: '1Y', days: 365 },
+  { value: 'all', label: '전체', days: -1 },
 ];
 
 export default function DetailPage() {
@@ -51,8 +52,6 @@ export default function DetailPage() {
   const extendedRiskMetrics = getExtendedRiskMetrics(etf.id);
   const monthlyReturns = getMonthlyReturns(etf.id);
   
-  const etfGrades = getETFGrades(etf.id);
-  const fundamentals = getFundamentals(etf.id);
   const technicals = getTechnicalIndicators(etf.id);
   const growthData = getGrowthSimulation(etf.id, 5);
   const fundFlows = getFundFlows(etf.id);
@@ -63,7 +62,10 @@ export default function DetailPage() {
   
   const selectedPeriod = CHART_PERIODS.find(p => p.value === chartPeriod) || CHART_PERIODS[1];
   const chartData = useMemo(() => {
-    return priceHistory.slice(-selectedPeriod.days).map(p => ({
+    const dataToShow = selectedPeriod.days === -1 
+      ? priceHistory 
+      : priceHistory.slice(-selectedPeriod.days);
+    return dataToShow.map(p => ({
       date: p.date,
       price: p.close,
     }));
@@ -113,61 +115,70 @@ export default function DetailPage() {
     if (etf.expenseRatio < 0.2) points.push({ icon: Zap, title: '저비용' });
     if (riskMetrics.volatility < 15) points.push({ icon: Shield, title: '저위험' });
     if (etf.volume > 1000000) points.push({ icon: Users, title: '고유동성' });
-    return points.slice(0, 4);
+    return points.slice(0, 5);
   }, [returns, etf, riskMetrics]);
-
-  const overallScore = etfGrades ? Math.round((etfGrades.efficiency.score + etfGrades.tradability.score + etfGrades.fit.score) / 3) : 0;
 
   return (
     <div className={styles.page}>
       {/* 헤더 - ETF 기본 정보 */}
       <Card className={styles.headerCard}>
-        <div className={styles.headerTop}>
+        <div className={styles.headerMain}>
+          {/* 왼쪽: ETF 정보 */}
           <div className={styles.etfInfo}>
-            <div className={styles.badges}>
-              <Badge variant="default">{etf.ticker}</Badge>
-              {etf.leverage && etf.leverage !== 1 && (
-                <Badge variant={etf.leverage > 0 ? 'success' : 'danger'}>
-                  {etf.leverage > 0 ? `${etf.leverage}X` : `인버스`}
-                </Badge>
-              )}
+            <div className={styles.etfTitleRow}>
+              <h1 className={styles.etfName}>{etf.name}</h1>
+              <div className={styles.badges}>
+                <Badge variant="default">{etf.ticker}</Badge>
+                {etf.leverage && etf.leverage !== 1 && (
+                  <Badge variant={etf.leverage > 0 ? 'success' : 'danger'}>
+                    {etf.leverage > 0 ? `${etf.leverage}X` : `인버스`}
+                  </Badge>
+                )}
+              </div>
             </div>
-            <h1 className={styles.etfName}>{etf.name}</h1>
-            <p className={styles.etfMeta}>{etf.issuer} · {etf.category}</p>
+            <p className={styles.etfMeta}>
+              <span className={styles.issuer}>{etf.issuer}</span>
+              <span className={styles.separator}>·</span>
+              <span className={styles.category}>{etf.category}</span>
+            </p>
           </div>
-          <div className={styles.priceInfo}>
-            <span className={styles.price}>{formatPrice(etf.price)}원</span>
-            <span className={`${styles.change} ${getChangeClass(etf.changePercent)}`}>
-              {etf.changePercent >= 0 ? <TrendingUp size={14} /> : <TrendingDown size={14} />}
-              {formatPercent(etf.changePercent)}
-            </span>
+          
+          {/* 오른쪽: 가격 정보 */}
+          <div className={styles.priceSection}>
+            <div className={styles.priceMain}>
+              <span className={styles.price}>{formatPrice(etf.price)}</span>
+              <span className={styles.currency}>원</span>
+            </div>
+            <div className={`${styles.priceChange} ${getChangeClass(etf.changePercent)}`}>
+              <span className={styles.changeValue}>{formatPercent(etf.changePercent)}</span>
+            </div>
           </div>
         </div>
         
         {/* 핵심 지표 */}
-        <div className={styles.keyMetrics}>
-          <div className={styles.metricItem}>
-            <span className={styles.metricLabel}>1년 수익률</span>
-            <span className={`${styles.metricValue} ${getChangeClass(returns.year1)}`}>
+        <div className={styles.metricsGrid}>
+          <div className={styles.metricBox}>
+            <div className={styles.metricLabel}>1년 수익률</div>
+            <div className={`${styles.metricValue} ${getChangeClass(returns.year1)}`}>
               {returns.year1 >= 0 ? '+' : ''}{returns.year1.toFixed(1)}%
-            </span>
+            </div>
           </div>
-          <div className={styles.metricItem}>
-            <span className={styles.metricLabel}>배당수익률</span>
-            <span className={styles.metricValue}>{etf.dividendYield}%</span>
+          <div className={styles.metricBox}>
+            <div className={styles.metricLabel}>배당수익률</div>
+            <div className={styles.metricValue}>{etf.dividendYield}%</div>
           </div>
-          <div className={styles.metricItem}>
-            <span className={styles.metricLabel}>총보수</span>
-            <span className={styles.metricValue}>{etf.expenseRatio}%</span>
+          <div className={styles.metricBox}>
+            <div className={styles.metricLabel}>총보수</div>
+            <div className={styles.metricValue}>{etf.expenseRatio}%</div>
           </div>
-          <div className={styles.metricItem}>
-            <span className={styles.metricLabel}>순자산</span>
-            <span className={styles.metricValue}>{formatLargeNumber(etf.aum)}</span>
+          <div className={styles.metricBox}>
+            <div className={styles.metricLabel}>순자산</div>
+            <div className={styles.metricValue}>{formatLargeNumber(etf.aum)}</div>
           </div>
         </div>
         
         {/* 액션 버튼 */}
-        <div className={styles.actions}>
+        <div className={styles.headerActions}>
           <Button 
             variant={inCompare ? 'primary' : 'outline'}
             leftIcon={inCompare ? <Check size={16} /> : <Plus size={16} />}
@@ -177,115 +188,9 @@ export default function DetailPage() {
           >
             {inCompare ? '비교중' : '비교하기'}
           </Button>
-          <Button variant="ghost" leftIcon={<Share2 size={16} />} size="sm">
-            공유
+          <Button variant="outline" leftIcon={<Share2 size={16} />} size="sm">
+            공유하기
           </Button>
-        </div>
-      </Card>
-      
-      {/* 투자 포인트 */}
-      {investmentPoints.length > 0 && (
-        <div className={styles.pointsRow}>
-          {investmentPoints.map((point, i) => (
-            <div key={i} className={styles.pointItem}>
-              <point.icon size={14} />
-              <span>{point.title}</span>
-            </div>
-          ))}
-        </div>
-      )}
-      
-      {/* 가격 차트 */}
-      <Card className={styles.chartCard}>
-        <div className={styles.chartHeader}>
-          <span className={styles.sectionTitle}>가격 차트</span>
-          <div className={styles.periodSelector}>
-            {CHART_PERIODS.map((period) => (
-              <button
-                key={period.value}
-                className={`${styles.periodBtn} ${chartPeriod === period.value ? styles.active : ''}`}
-                onClick={() => setChartPeriod(period.value)}
-              >
-                {period.label}
-              </button>
-            ))}
-          </div>
-        </div>
-        <div className={styles.chartBody}>
-          <ResponsiveContainer width="100%" height={180}>
-            <AreaChart data={chartData} margin={{ top: 10, right: 10, bottom: 0, left: 0 }}>
-              <defs>
-                <linearGradient id="priceGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="var(--color-primary)" stopOpacity={0.15}/>
-                  <stop offset="100%" stopColor="var(--color-primary)" stopOpacity={0}/>
-                </linearGradient>
-              </defs>
-              <XAxis 
-                dataKey="date" 
-                tickFormatter={(v) => v.slice(5)}
-                tick={{ fontSize: 10, fill: 'var(--color-text-tertiary)' }}
-                axisLine={false}
-                tickLine={false}
-                interval="preserveStartEnd"
-              />
-              <YAxis 
-                domain={yDomain}
-                tick={{ fontSize: 10, fill: 'var(--color-text-tertiary)' }}
-                axisLine={false}
-                tickLine={false}
-                tickFormatter={(v) => `${(v / 1000).toFixed(0)}K`}
-                width={35}
-                orientation="right"
-              />
-              <Tooltip 
-                formatter={(value: number) => [`${formatPrice(value)}원`, '가격']}
-                contentStyle={{
-                  background: 'var(--color-white)',
-                  border: '1px solid var(--color-border)',
-                  borderRadius: 'var(--radius-md)',
-                  fontSize: '12px',
-                  boxShadow: 'var(--shadow-md)',
-                }}
-              />
-              <Area 
-                type="monotone" 
-                dataKey="price" 
-                stroke="var(--color-primary)" 
-                strokeWidth={2}
-                fill="url(#priceGradient)"
-              />
-            </AreaChart>
-          </ResponsiveContainer>
-        </div>
-        <div className={styles.chartActions}>
-          <button className={styles.chartActionBtn} onClick={() => navigate(`/simulator?etf=${etf.id}`)}>
-            <Calculator size={14} />
-            <span>투자 시뮬레이션</span>
-            <ChevronRight size={14} />
-          </button>
-          <button className={styles.chartActionBtn} onClick={() => navigate(`/phase?etf=${etf.id}`)}>
-            <Activity size={14} />
-            <span>국면 분석</span>
-            <ChevronRight size={14} />
-          </button>
-        </div>
-      </Card>
-      
-      {/* 52주 가격 범위 */}
-      <Card className={styles.rangeCard}>
-        <div className={styles.rangeHeader}>
-          <span className={styles.sectionTitle}>52주 가격 범위</span>
-          <span className={styles.rangePosition}>{pricePosition.toFixed(0)}%</span>
-        </div>
-        <div className={styles.rangeBar}>
-          <div className={styles.rangeTrack}>
-            <div className={styles.rangeIndicator} style={{ left: `${pricePosition}%` }} />
-          </div>
-        </div>
-        <div className={styles.rangeLabels}>
-          <span>{formatPrice(etf.low52w || 0)}원</span>
-          <span className={styles.currentPrice}>{formatPrice(etf.price)}원</span>
-          <span>{formatPrice(etf.high52w || 0)}원</span>
         </div>
       </Card>
       
@@ -297,13 +202,130 @@ export default function DetailPage() {
           <Tab value="dividend">배당</Tab>
           <Tab value="risk">위험지표</Tab>
           <Tab value="analysis">분석</Tab>
+          <Tab value="news">뉴스</Tab>
         </TabList>
         
         {/* 개요 탭 */}
         <TabPanel value="overview" className={styles.tabContent}>
-          {/* 수익률 */}
+          {/* 투자 포인트 */}
+          {investmentPoints.length > 0 && (
+            <Card className={styles.investmentPointsCard}>
+              <div className={styles.investmentPointsHeader}>
+                <Activity size={18} />
+                <h3 className={styles.investmentPointsTitle}>핵심 키워드</h3>
+              </div>
+              <div className={styles.pointsRow}>
+                {investmentPoints.map((point, i) => (
+                  <div key={i} className={styles.pointItem}>
+                    <point.icon size={14} />
+                    <span>{point.title}</span>
+                  </div>
+                ))}
+              </div>
+            </Card>
+          )}
+          
+          {/* 가격 차트 */}
+          <Card className={styles.chartCard}>
+            <div className={styles.chartHeader}>
+              <div className={styles.sectionTitleWrapper}>
+                <TrendingUp size={18} />
+                <h3 className={styles.sectionTitle}>가격 차트</h3>
+              </div>
+              <div className={styles.periodSelector}>
+                {CHART_PERIODS.map((period) => (
+                  <button
+                    key={period.value}
+                    className={`${styles.periodBtn} ${chartPeriod === period.value ? styles.active : ''}`}
+                    onClick={() => setChartPeriod(period.value)}
+                  >
+                    {period.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className={styles.chartBody}>
+              <ResponsiveContainer width="100%" height={180}>
+                <AreaChart data={chartData} margin={{ top: 10, right: 10, bottom: 0, left: 0 }}>
+                  <defs>
+                    <linearGradient id="priceGradient" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="var(--color-primary)" stopOpacity={0.15}/>
+                      <stop offset="100%" stopColor="var(--color-primary)" stopOpacity={0}/>
+                    </linearGradient>
+                  </defs>
+                  <XAxis 
+                    dataKey="date" 
+                    tickFormatter={(v) => v.slice(5)}
+                    tick={{ fontSize: 10, fill: 'var(--color-text-tertiary)' }}
+                    axisLine={false}
+                    tickLine={false}
+                    interval="preserveStartEnd"
+                  />
+                  <YAxis 
+                    domain={yDomain}
+                    tick={{ fontSize: 10, fill: 'var(--color-text-tertiary)' }}
+                    axisLine={false}
+                    tickLine={false}
+                    tickFormatter={(v) => `${(v / 1000).toFixed(0)}K`}
+                    width={35}
+                    orientation="right"
+                  />
+                  <Tooltip 
+                    formatter={(value: number) => [`${formatPrice(value)}원`, '가격']}
+                    contentStyle={{
+                      background: 'var(--color-white)',
+                      border: '1px solid var(--color-border)',
+                      borderRadius: 'var(--radius-md)',
+                      fontSize: '12px',
+                      boxShadow: 'var(--shadow-md)',
+                    }}
+                  />
+                  <Area 
+                    type="monotone" 
+                    dataKey="price" 
+                    stroke="var(--color-primary)" 
+                    strokeWidth={2}
+                    fill="url(#priceGradient)"
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          </Card>
+          
+          {/* 52주 가격 범위 */}
+          <Card className={styles.rangeCard}>
+            <div className={styles.rangeHeader}>
+              <div className={styles.rangeHeaderLeft}>
+                <div className={styles.sectionTitleWrapper}>
+                  <Activity size={18} />
+                  <h3 className={styles.sectionTitle}>52주 가격 범위</h3>
+                </div>
+                <p className={styles.rangeDescription}>
+                  현재 가격이 52주 최저가와 최고가 사이 어디에 위치하는지 보여줍니다
+                </p>
+              </div>
+              <div className={styles.rangePosition}>
+                <span>{pricePosition.toFixed(0)}%</span>
+              </div>
+            </div>
+            <div className={styles.rangeBar}>
+              <div className={styles.rangeTrack} style={{ '--fill-width': `${pricePosition}%` } as any}>
+                <div className={styles.rangeIndicator} style={{ left: `${pricePosition}%` }} />
+              </div>
+            </div>
+            <div className={styles.rangeLabels}>
+              <span>{formatPrice(etf.low52w || 0)}원</span>
+              <span className={styles.currentPrice}>{formatPrice(etf.price)}원</span>
+              <span>{formatPrice(etf.high52w || 0)}원</span>
+            </div>
+          </Card>
+          
+          {/* 기간별 수익률 */}
           <Card className={styles.section}>
-            <h3 className={styles.sectionTitle}>수익률</h3>
+            <div className={styles.sectionTitleWrapper}>
+              <TrendingUp size={18} />
+              <h3 className={styles.sectionTitle}>기간별 수익률</h3>
+            </div>
             <div className={styles.returnsGrid}>
               {[
                 { label: '1개월', value: returns.month1 },
@@ -324,7 +346,10 @@ export default function DetailPage() {
           
           {/* 기본 정보 */}
           <Card className={styles.section}>
-            <h3 className={styles.sectionTitle}>기본 정보</h3>
+            <div className={styles.sectionTitleWrapper}>
+              <Info size={18} />
+              <h3 className={styles.sectionTitle}>기본 정보</h3>
+            </div>
             <div className={styles.infoGrid}>
               <div className={styles.infoItem}>
                 <span className={styles.infoLabel}>추적지수</span>
@@ -363,52 +388,51 @@ export default function DetailPage() {
             </div>
           </Card>
           
-          {/* ETF 등급 */}
-          {etfGrades && (
-            <Card className={styles.section}>
-              <h3 className={styles.sectionTitle}>ETF 등급</h3>
-              <div className={styles.gradeOverview}>
-                <div className={styles.gradeMain}>
-                  <span className={styles.gradeValue}>{etfGrades.overall.grade}</span>
-                  <span className={styles.gradeLabel}>종합등급</span>
+          {/* 비용 & 세금 */}
+          <Card className={styles.section}>
+            <div className={styles.sectionTitleWrapper}>
+              <Calculator size={18} />
+              <h3 className={styles.sectionTitle}>비용 구조</h3>
+            </div>
+            {costAnalysis && (
+              <div className={styles.costList}>
+                <div className={styles.costItem}>
+                  <span>총보수 (TER)</span>
+                  <span>{costAnalysis.ter}%</span>
                 </div>
-                <div className={styles.gradeScore}>
-                  <span>{overallScore}</span>
-                  <span>/ 100</span>
+                <div className={styles.costItem}>
+                  <span>매매수수료</span>
+                  <span>{costAnalysis.tradingCost}%</span>
                 </div>
-              </div>
-              <div className={styles.gradeItems}>
-                <div className={styles.gradeItem}>
-                  <span className={styles.gradeItemLabel}>비용효율</span>
-                  <div className={styles.gradeBar}>
-                    <div className={styles.gradeBarFill} style={{ width: `${etfGrades.efficiency.score}%` }} />
-                  </div>
-                  <span className={styles.gradeItemScore}>{etfGrades.efficiency.score}</span>
-                </div>
-                <div className={styles.gradeItem}>
-                  <span className={styles.gradeItemLabel}>거래편의</span>
-                  <div className={styles.gradeBar}>
-                    <div className={styles.gradeBarFill} style={{ width: `${etfGrades.tradability.score}%` }} />
-                  </div>
-                  <span className={styles.gradeItemScore}>{etfGrades.tradability.score}</span>
-                </div>
-                <div className={styles.gradeItem}>
-                  <span className={styles.gradeItemLabel}>투자적합</span>
-                  <div className={styles.gradeBar}>
-                    <div className={styles.gradeBarFill} style={{ width: `${etfGrades.fit.score}%` }} />
-                  </div>
-                  <span className={styles.gradeItemScore}>{etfGrades.fit.score}</span>
+                <div className={`${styles.costItem} ${styles.costTotal}`}>
+                  <span>실부담비용</span>
+                  <span>{costAnalysis.totalCost}%</span>
                 </div>
               </div>
-            </Card>
-          )}
+            )}
+            {taxInfo && (
+              <div className={styles.taxInfo}>
+                <div className={styles.taxItem}>
+                  <span>배당소득세</span>
+                  <span>{taxInfo.dividendTaxRate}</span>
+                </div>
+                <div className={styles.taxItem}>
+                  <span>양도세</span>
+                  <span>{taxInfo.capitalGainsDistribution}</span>
+                </div>
+              </div>
+            )}
+          </Card>
         </TabPanel>
         
         {/* 구성종목 탭 */}
         <TabPanel value="holdings" className={styles.tabContent}>
           {/* 섹터 비중 */}
           <Card className={styles.section}>
-            <h3 className={styles.sectionTitle}>섹터 비중</h3>
+            <div className={styles.sectionTitleWrapper}>
+              <PieChartIcon size={18} />
+              <h3 className={styles.sectionTitle}>섹터 비중</h3>
+            </div>
             <div className={styles.allocationContent}>
               <div className={styles.pieChart}>
                 <ResponsiveContainer width="100%" height={140}>
@@ -444,7 +468,10 @@ export default function DetailPage() {
           {/* 국가 비중 */}
           {countryAllocation.length > 1 && (
             <Card className={styles.section}>
-              <h3 className={styles.sectionTitle}>국가 비중</h3>
+              <div className={styles.sectionTitleWrapper}>
+                <Globe size={18} />
+                <h3 className={styles.sectionTitle}>국가 비중</h3>
+              </div>
               <div className={styles.countryList}>
                 {countryAllocation.slice(0, 5).map((country, i) => (
                   <div key={country.code} className={styles.countryItem}>
@@ -465,7 +492,10 @@ export default function DetailPage() {
           {/* 상위 종목 */}
           <Card className={styles.section}>
             <div className={styles.sectionHeader}>
-              <h3 className={styles.sectionTitle}>상위 종목</h3>
+              <div className={styles.sectionHeaderLeft}>
+                <List size={18} />
+                <h3 className={styles.sectionTitle}>상위 종목</h3>
+              </div>
               <span className={styles.sectionMeta}>{holdings.length}개 보유</span>
             </div>
             <div className={styles.holdingsList}>
@@ -489,7 +519,10 @@ export default function DetailPage() {
             <>
               {/* 배당 요약 */}
               <Card className={styles.section}>
-                <h3 className={styles.sectionTitle}>배당 정보</h3>
+                <div className={styles.sectionTitleWrapper}>
+                  <DollarSign size={18} />
+                  <h3 className={styles.sectionTitle}>배당 정보</h3>
+                </div>
                 <div className={styles.dividendSummary}>
                   <div className={styles.dividendMain}>
                     <span className={styles.dividendYield}>{etf.dividendYield}%</span>
@@ -525,7 +558,10 @@ export default function DetailPage() {
               {/* 배당 추이 */}
               {dividendChartData.length > 0 && (
                 <Card className={styles.section}>
-                  <h3 className={styles.sectionTitle}>배당금 추이</h3>
+                  <div className={styles.sectionTitleWrapper}>
+                    <BarChart3 size={18} />
+                    <h3 className={styles.sectionTitle}>배당금 추이</h3>
+                  </div>
                   <div className={styles.dividendChart}>
                     <ResponsiveContainer width="100%" height={140}>
                       <BarChart data={dividendChartData} margin={{ top: 10, right: 5, bottom: 0, left: 5 }}>
@@ -544,7 +580,10 @@ export default function DetailPage() {
               
               {/* 배당 이력 */}
               <Card className={styles.section}>
-                <h3 className={styles.sectionTitle}>배당 이력</h3>
+                <div className={styles.sectionTitleWrapper}>
+                  <Clock size={18} />
+                  <h3 className={styles.sectionTitle}>배당 이력</h3>
+                </div>
                 <div className={styles.dividendHistory}>
                   {dividends.slice(0, 6).map((d, i) => (
                     <div key={i} className={styles.dividendHistoryItem}>
@@ -566,7 +605,10 @@ export default function DetailPage() {
         <TabPanel value="risk" className={styles.tabContent}>
           {/* 핵심 위험 지표 */}
           <Card className={styles.section}>
-            <h3 className={styles.sectionTitle}>핵심 지표</h3>
+            <div className={styles.sectionTitleWrapper}>
+              <Target size={18} />
+              <h3 className={styles.sectionTitle}>핵심 지표</h3>
+            </div>
             <div className={styles.riskGrid}>
               <div className={styles.riskItem}>
                 <span className={styles.riskLabel}>변동성</span>
@@ -601,7 +643,10 @@ export default function DetailPage() {
           
           {/* 시장 캡처 */}
           <Card className={styles.section}>
-            <h3 className={styles.sectionTitle}>시장 캡처</h3>
+            <div className={styles.sectionTitleWrapper}>
+              <TrendingUp size={18} />
+              <h3 className={styles.sectionTitle}>시장 캡처</h3>
+            </div>
             <div className={styles.captureGrid}>
               <div className={styles.captureItem}>
                 <div className={styles.captureHeader}>
@@ -628,7 +673,10 @@ export default function DetailPage() {
           
           {/* 고급 지표 */}
           <Card className={styles.section}>
-            <h3 className={styles.sectionTitle}>고급 지표</h3>
+            <div className={styles.sectionTitleWrapper}>
+              <Zap size={18} />
+              <h3 className={styles.sectionTitle}>고급 지표</h3>
+            </div>
             <div className={styles.advancedGrid}>
               <div className={styles.advancedItem}>
                 <span className={styles.advancedLabel}>알파</span>
@@ -661,7 +709,10 @@ export default function DetailPage() {
           
           {/* 월별 수익률 히트맵 */}
           <Card className={styles.section}>
-            <h3 className={styles.sectionTitle}>월별 수익률</h3>
+            <div className={styles.sectionTitleWrapper}>
+              <Calendar size={18} />
+              <h3 className={styles.sectionTitle}>월별 수익률</h3>
+            </div>
             <div className={styles.heatmap}>
               <div className={styles.heatmapHeader}>
                 {['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'].map(m => (
@@ -696,7 +747,10 @@ export default function DetailPage() {
           {/* 기술적 분석 */}
           {technicals && (
             <Card className={styles.section}>
-              <h3 className={styles.sectionTitle}>기술적 분석</h3>
+              <div className={styles.sectionTitleWrapper}>
+                <Activity size={18} />
+                <h3 className={styles.sectionTitle}>기술적 분석</h3>
+              </div>
               <div className={styles.technicalSummary}>
                 <div className={styles.rsiSection}>
                   <div className={styles.rsiHeader}>
@@ -715,11 +769,11 @@ export default function DetailPage() {
                 <div className={styles.trendSection}>
                   <div className={`${styles.trendItem} ${technicals.trend.shortTerm === 'bullish' ? styles.bullish : styles.bearish}`}>
                     <span>단기</span>
-                    {technicals.trend.shortTerm === 'bullish' ? <ArrowUpRight size={14} /> : <ArrowDownRight size={14} />}
+                    {technicals.trend.shortTerm === 'bullish' ? <TrendingUp size={14} /> : <TrendingDown size={14} />}
                   </div>
                   <div className={`${styles.trendItem} ${technicals.trend.longTerm === 'bullish' ? styles.bullish : styles.bearish}`}>
                     <span>장기</span>
-                    {technicals.trend.longTerm === 'bullish' ? <ArrowUpRight size={14} /> : <ArrowDownRight size={14} />}
+                    {technicals.trend.longTerm === 'bullish' ? <TrendingUp size={14} /> : <TrendingDown size={14} />}
                   </div>
                 </div>
               </div>
@@ -742,108 +796,58 @@ export default function DetailPage() {
             </Card>
           )}
           
-          {/* 펀더멘털 */}
-          {fundamentals && (
+          {/* 유사 ETF */}
+          {(similarETFs.length > 0 || competingETFs.length > 0) && (
             <Card className={styles.section}>
-              <h3 className={styles.sectionTitle}>펀더멘털</h3>
-              <div className={styles.fundamentalGrid}>
-                <div className={styles.fundamentalItem}>
-                  <span className={styles.fundamentalLabel}>P/E</span>
-                  <span className={styles.fundamentalValue}>{fundamentals.pe}x</span>
+              <div className={styles.sectionHeader}>
+                <div className={styles.sectionHeaderLeft}>
+                  <Layers size={18} />
+                  <h3 className={styles.sectionTitle}>유사 ETF</h3>
                 </div>
-                <div className={styles.fundamentalItem}>
-                  <span className={styles.fundamentalLabel}>P/B</span>
-                  <span className={styles.fundamentalValue}>{fundamentals.pb}x</span>
-                </div>
-                <div className={styles.fundamentalItem}>
-                  <span className={styles.fundamentalLabel}>ROE</span>
-                  <span className={styles.fundamentalValue}>{fundamentals.roe}%</span>
-                </div>
-                <div className={styles.fundamentalItem}>
-                  <span className={styles.fundamentalLabel}>성장률</span>
-                  <span className={`${styles.fundamentalValue} ${Number(fundamentals.earningsGrowth) >= 0 ? 'number-up' : 'number-down'}`}>
-                    {Number(fundamentals.earningsGrowth) >= 0 ? '+' : ''}{fundamentals.earningsGrowth}%
-                  </span>
-                </div>
+                <ChevronRight size={16} className={styles.sectionMore} />
+              </div>
+              <div className={styles.similarList}>
+                {(competingETFs.length > 0 ? competingETFs : similarETFs).slice(0, 4).map((r) => (
+                  <button key={r.id} className={styles.similarItem} onClick={() => navigate(`/etf/${r.id}`)}>
+                    <div className={styles.similarInfo}>
+                      <span className={styles.similarName}>{r.name}</span>
+                      <span className={styles.similarTicker}>{r.ticker}</span>
+                    </div>
+                    <div className={styles.similarPrice}>
+                      <span>{formatPrice(r.price)}원</span>
+                      <span className={getChangeClass(r.changePercent)}>{formatPercent(r.changePercent)}</span>
+                    </div>
+                  </button>
+                ))}
               </div>
             </Card>
           )}
-          
-          {/* 비용 & 세금 */}
-          <Card className={styles.section}>
-            <h3 className={styles.sectionTitle}>비용 구조</h3>
-            {costAnalysis && (
-              <div className={styles.costList}>
-                <div className={styles.costItem}>
-                  <span>총보수 (TER)</span>
-                  <span>{costAnalysis.ter}%</span>
-                </div>
-                <div className={styles.costItem}>
-                  <span>매매수수료</span>
-                  <span>{costAnalysis.tradingCost}%</span>
-                </div>
-                <div className={`${styles.costItem} ${styles.costTotal}`}>
-                  <span>실부담비용</span>
-                  <span>{costAnalysis.totalCost}%</span>
-                </div>
+        </TabPanel>
+        
+        {/* 뉴스 탭 */}
+        <TabPanel value="news" className={styles.tabContent}>
+          {relatedNews.length > 0 ? (
+            <Card className={styles.section}>
+              <div className={styles.sectionTitleWrapper}>
+                <Newspaper size={18} />
+                <h3 className={styles.sectionTitle}>관련 뉴스</h3>
               </div>
-            )}
-            {taxInfo && (
-              <div className={styles.taxInfo}>
-                <div className={styles.taxItem}>
-                  <span>배당소득세</span>
-                  <span>{taxInfo.dividendTaxRate}</span>
-                </div>
-                <div className={styles.taxItem}>
-                  <span>양도세</span>
-                  <span>{taxInfo.capitalGainsDistribution}</span>
-                </div>
+              <div className={styles.newsList}>
+                {relatedNews.map((news) => (
+                  <a key={news.id} href={news.url} className={styles.newsItem} target="_blank" rel="noopener noreferrer">
+                    <span className={styles.newsTitle}>{news.title}</span>
+                    <span className={styles.newsMeta}>{news.source} · {news.date}</span>
+                  </a>
+                ))}
               </div>
-            )}
-          </Card>
+            </Card>
+          ) : (
+            <Card className={styles.emptyState}>
+              <p>최근 뉴스가 없습니다.</p>
+            </Card>
+          )}
         </TabPanel>
       </Tabs>
-      
-      {/* 유사 ETF */}
-      {(similarETFs.length > 0 || competingETFs.length > 0) && (
-        <Card className={styles.section}>
-          <div className={styles.sectionHeader}>
-            <h3 className={styles.sectionTitle}>유사 ETF</h3>
-            <ChevronRight size={16} className={styles.sectionMore} />
-          </div>
-          <div className={styles.similarList}>
-            {(competingETFs.length > 0 ? competingETFs : similarETFs).slice(0, 4).map((r) => (
-              <button key={r.id} className={styles.similarItem} onClick={() => navigate(`/etf/${r.id}`)}>
-                <div className={styles.similarInfo}>
-                  <span className={styles.similarName}>{r.name}</span>
-                  <span className={styles.similarTicker}>{r.ticker}</span>
-                </div>
-                <div className={styles.similarPrice}>
-                  <span>{formatPrice(r.price)}원</span>
-                  <span className={getChangeClass(r.changePercent)}>{formatPercent(r.changePercent)}</span>
-                </div>
-              </button>
-            ))}
-          </div>
-        </Card>
-      )}
-      
-      {/* 관련 뉴스 */}
-      {relatedNews.length > 0 && (
-        <Card className={styles.section}>
-          <div className={styles.sectionHeader}>
-            <h3 className={styles.sectionTitle}>관련 뉴스</h3>
-          </div>
-          <div className={styles.newsList}>
-            {relatedNews.slice(0, 3).map((news) => (
-              <a key={news.id} href={news.url} className={styles.newsItem} target="_blank" rel="noopener noreferrer">
-                <span className={styles.newsTitle}>{news.title}</span>
-                <span className={styles.newsMeta}>{news.source} · {news.date}</span>
-              </a>
-            ))}
-          </div>
-        </Card>
-      )}
     </div>
   );
 }

@@ -70,43 +70,73 @@
 
 /* Underline Variant */
 .underline {
-  border-bottom: 1px solid var(--color-border-light);
-  gap: 0;
+  border-bottom: none;
+  gap: 6px;
+  padding: 12px 24px;
+  background: linear-gradient(to bottom, #fafbfc 0%, #f5f7fa 100%);
+  border-bottom: 3px solid var(--color-border-light);
+  position: relative;
 }
 
 .underline .tab {
-  padding: var(--spacing-sm) var(--spacing-md);
-  font-size: var(--font-size-sm);
-  font-weight: 500;
-  color: var(--color-text-secondary);
-  background: transparent;
+  padding: 10px 28px;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--color-text-tertiary);
+  background: rgba(255, 255, 255, 0.5);
+  border: 2px solid transparent;
+  border-radius: 10px 10px 0 0;
   position: relative;
-  transition: all var(--transition-fast);
+  transition: all 0.2s ease;
   white-space: nowrap;
+  letter-spacing: -0.01em;
+  box-shadow: inset 0 -1px 2px rgba(0, 0, 0, 0.02);
 }
 
-.underline .tab::after {
+.underline .tab + .tab {
+  margin-left: 2px;
+}
+
+.underline .tab::before {
   content: '';
   position: absolute;
-  bottom: -1px;
+  top: 0;
   left: 0;
   right: 0;
-  height: 2px;
-  background: var(--color-primary);
-  transform: scaleX(0);
-  transition: transform var(--transition-fast);
+  bottom: 0;
+  background: transparent;
+  border-radius: 10px 10px 0 0;
+  transition: all 0.2s ease;
+  z-index: -1;
 }
 
-.underline .tab:hover:not(:disabled) {
+.underline .tab:hover:not(:disabled):not(.active) {
   color: var(--color-text-primary);
+  background: rgba(255, 255, 255, 0.8);
+  border-color: rgba(30, 58, 95, 0.15);
+  transform: translateY(-1px);
 }
 
 .underline .tab.active {
   color: var(--color-primary);
+  font-weight: 800;
+  background: var(--color-white);
+  border: 2px solid var(--color-border);
+  border-bottom: 2px solid var(--color-white);
+  box-shadow: 
+    0 -3px 12px rgba(30, 58, 95, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  position: relative;
+  margin-bottom: -3px;
+  padding-bottom: 13px;
+  z-index: 10;
 }
 
-.underline .tab.active::after {
-  transform: scaleX(1);
+.underline .tab.active::before {
+  background: linear-gradient(to bottom, 
+    rgba(30, 58, 95, 0.03) 0%, 
+    rgba(30, 58, 95, 0.01) 50%,
+    var(--color-white) 100%);
 }
 
 /* Tab Common */
@@ -115,7 +145,7 @@
   cursor: pointer;
   display: flex;
   align-items: center;
-  gap: var(--spacing-xs);
+  justify-content: center;
 }
 
 .tab:disabled {
@@ -125,13 +155,68 @@
 
 /* Tab Panel */
 .tabPanel {
-  padding-top: var(--spacing-md);
-  animation: fadeIn var(--transition-fast);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg); /* 24px - ComparePage와 동일 */
+  padding: var(--spacing-xl) 0; /* 상하 32px, 좌우 0 - 내부 Card가 headerCard와 정렬되도록 */
+  padding-bottom: 48px;
+  animation: fadeIn 0.3s ease-out;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+.tabPanel > * {
+  margin-bottom: 0 !important;
+}
+
+.tabPanel > *:first-child {
+  margin-top: 0;
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from { 
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to { 
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 모바일 반응형 */
+@media (max-width: 767px) {
+  .underline {
+    padding: 10px 12px;
+    gap: 3px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  
+  .underline::-webkit-scrollbar {
+    display: none;
+  }
+  
+  .underline .tab {
+    padding: 9px 18px;
+    font-size: 13px;
+    flex-shrink: 0;
+  }
+  
+  .underline .tab + .tab {
+    margin-left: 1px;
+  }
+  
+  .underline .tab.active {
+    padding-bottom: 12px;
+  }
+  
+  .tabPanel {
+    gap: var(--spacing-lg); /* 24px - ComparePage와 동일 */
+    padding: var(--spacing-lg) 0; /* 상하 24px, 좌우 0 - 내부 Card가 headerCard와 정렬되도록 */
+    padding-bottom: 40px;
+  }
 }
 
 

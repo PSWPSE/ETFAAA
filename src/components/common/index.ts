@@ -6,4 +6,5 @@ export { Tabs, TabList, Tab, TabPanel } from './Tab';
 export { default as Select } from './Select';
 export { default as Badge } from './Badge';
 export { default as MarketSelector } from './MarketSelector';
+export { default as ScrollToTop } from './ScrollToTop';
 

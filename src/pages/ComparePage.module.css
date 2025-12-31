@@ -655,47 +655,54 @@
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: var(--spacing-sm);
-  padding: 4px;
-  background: rgba(250, 251, 252, 0.8);
-  border-radius: var(--radius-lg);
-  border: 1px solid rgba(229, 231, 235, 0.6);
 }
 
-@media (min-width: 640px) {
+@media (min-width: 768px) {
   .tabNavigation {
     grid-template-columns: repeat(4, 1fr);
+    gap: var(--spacing-md);
   }
 }
 
 .tabButton {
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 6px;
+  gap: var(--spacing-xs);
   padding: 12px 16px;
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--color-text-secondary);
-  background: transparent;
-  border: none;
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all var(--transition-fast);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  min-height: 52px;
 }
 
 .tabButton:hover {
-  color: var(--color-text-primary);
-  background: rgba(255, 255, 255, 0.6);
+  border-color: var(--color-primary);
+  box-shadow: 0 2px 8px rgba(30, 58, 95, 0.08);
+  transform: translateY(-2px);
 }
 
 .tabButton.active {
-  color: var(--color-primary);
-  background: var(--color-white);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: var(--color-white);
+  box-shadow: 0 4px 12px rgba(30, 58, 95, 0.15);
 }
 
 .tabButton svg {
   flex-shrink: 0;
+  transition: all var(--transition-fast);
+}
+
+.tabButton:hover svg,
+.tabButton.active svg {
+  transform: scale(1.1);
 }
 
 /* ==================== 탭 컨텐츠 ==================== */
@@ -971,6 +978,19 @@
 
   .resultsTitle {
     font-size: var(--font-size-xl);
+  }
+}
+
+/* ==================== 모바일 반응형 (탭) ==================== */
+@media (max-width: 767px) {
+  .tabNavigation {
+    gap: 8px;
+  }
+
+  .tabButton {
+    padding: 10px 12px;
+    font-size: 12px;
+    min-height: 48px;
   }
 }
 
