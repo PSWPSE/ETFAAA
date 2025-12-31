@@ -1995,7 +1995,7 @@ export const getTaxInfo = (etfId: string) => {
   
   return {
     taxEfficiency: Math.round(85 + Math.random() * 15), // 85-100%
-    capitalGainsDistribution: isKorean ? '국내 ETF는 매도 차익에 대해 비과세' : '15.4% (배당소득세)',
+    capitalGainsDistribution: isKorean ? '비과세' : '15.4% (배당소득세)',
     dividendTaxRate: '15.4%',
     foreignTaxWithheld: isKorean ? 'N/A' : '15%',
     taxLossHarvesting: isKorean ? '가능' : '가능 (환율 주의)',

@@ -388,40 +388,42 @@ export default function DetailPage() {
             </div>
           </Card>
           
-          {/* 비용 & 세금 */}
+          {/* 비용 구조 */}
           <Card className={styles.section}>
             <div className={styles.sectionTitleWrapper}>
               <Calculator size={18} />
               <h3 className={styles.sectionTitle}>비용 구조</h3>
             </div>
-            {costAnalysis && (
-              <div className={styles.costList}>
-                <div className={styles.costItem}>
-                  <span>총보수 (TER)</span>
-                  <span>{costAnalysis.ter}%</span>
-                </div>
-                <div className={styles.costItem}>
-                  <span>매매수수료</span>
-                  <span>{costAnalysis.tradingCost}%</span>
-                </div>
-                <div className={`${styles.costItem} ${styles.costTotal}`}>
-                  <span>실부담비용</span>
-                  <span>{costAnalysis.totalCost}%</span>
-                </div>
-              </div>
-            )}
-            {taxInfo && (
-              <div className={styles.taxInfo}>
-                <div className={styles.taxItem}>
-                  <span>배당소득세</span>
-                  <span>{taxInfo.dividendTaxRate}</span>
-                </div>
-                <div className={styles.taxItem}>
-                  <span>양도세</span>
-                  <span>{taxInfo.capitalGainsDistribution}</span>
-                </div>
-              </div>
-            )}
+            <div className={styles.infoGrid}>
+              {costAnalysis && (
+                <>
+                  <div className={styles.infoItem}>
+                    <span className={styles.infoLabel}>총보수 (TER)</span>
+                    <span className={styles.infoValue}>{costAnalysis.ter}%</span>
+                  </div>
+                  <div className={styles.infoItem}>
+                    <span className={styles.infoLabel}>매매수수료</span>
+                    <span className={styles.infoValue}>{costAnalysis.tradingCost}%</span>
+                  </div>
+                  <div className={styles.infoItem}>
+                    <span className={styles.infoLabel}>실부담비용</span>
+                    <span className={`${styles.infoValue} ${styles.highlight}`}>{costAnalysis.totalCost}%</span>
+                  </div>
+                </>
+              )}
+              {taxInfo && (
+                <>
+                  <div className={styles.infoItem}>
+                    <span className={styles.infoLabel}>배당소득세</span>
+                    <span className={styles.infoValue}>{taxInfo.dividendTaxRate}</span>
+                  </div>
+                  <div className={styles.infoItem}>
+                    <span className={styles.infoLabel}>양도세</span>
+                    <span className={styles.infoValue}>{taxInfo.capitalGainsDistribution}</span>
+                  </div>
+                </>
+              )}
+            </div>
           </Card>
         </TabPanel>
         
