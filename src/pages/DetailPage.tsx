@@ -4,7 +4,7 @@ import { Plus, Check, Share2, TrendingUp, TrendingDown, Activity, Calculator, Ch
 import { XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, AreaChart, Area, BarChart, Bar } from 'recharts';
 import { Card, Button, Badge } from '../components/common';
 import { Tabs, TabList, Tab, TabPanel } from '../components/common';
-import { getETFById, generatePriceHistory, getReturns, getHoldings, getDividends, getRiskMetrics, getExtendedETFInfo, getSimilarETFs, getSectorAllocation, getCountryAllocation, getDividendChartData, getDividendForecast, getExtendedRiskMetrics, getMonthlyReturns, getTechnicalIndicators, getGrowthSimulation, getFundFlows, getTaxInfo, getCompetingETFs, getRelatedNews, getCostAnalysis } from '../data/etfs';
+import { getETFById, generatePriceHistory, getReturns, getHoldings, getDividends, getRiskMetrics, getExtendedETFInfo, getSimilarETFs, getSectorAllocation, getAssetAllocation, getCountryAllocation, getDividendChartData, getDividendForecast, getExtendedRiskMetrics, getMonthlyReturns, getTechnicalIndicators, getGrowthSimulation, getFundFlows, getTaxInfo, getCompetingETFs, getRelatedNews, getCostAnalysis, getCorrelatedETFs } from '../data/etfs';
 import { useETFStore } from '../store/etfStore';
 import { formatPrice, formatPercent, formatLargeNumber, formatDate, getChangeClass } from '../utils/format';
 import styles from './DetailPage.module.css';
@@ -44,8 +44,10 @@ export default function DetailPage() {
   const dividends = getDividends(etf.id);
   const riskMetrics = getRiskMetrics(etf.id);
   const similarETFs = getSimilarETFs(etf.id, 5);
+  const correlatedETFs = getCorrelatedETFs(etf.id, 5);
   
   const sectorAllocation = getSectorAllocation(etf.id);
+  const assetAllocation = getAssetAllocation(etf.id);
   const countryAllocation = getCountryAllocation(etf.id);
   const dividendChartData = getDividendChartData(etf.id);
   const dividendForecast = getDividendForecast(etf.id);
@@ -118,6 +120,38 @@ export default function DetailPage() {
     return points.slice(0, 5);
   }, [returns, etf, riskMetrics]);
 
+  const periodReturn = useMemo(() => {
+    switch (chartPeriod) {
+      case '1m':
+        return { label: '1개월 수익률', value: returns.month1 };
+      case '3m':
+        return { label: '3개월 수익률', value: returns.month3 };
+      case '6m':
+        return { label: '6개월 수익률', value: returns.month6 };
+      case '1y':
+        return { label: '1년 수익률', value: returns.year1 };
+      case 'all':
+        // Calculate total return from all price history
+        const firstPrice = priceHistory[0]?.close || etf.price;
+        const lastPrice = priceHistory[priceHistory.length - 1]?.close || etf.price;
+        const totalReturn = ((lastPrice - firstPrice) / firstPrice) * 100;
+        return { label: '전체 수익률', value: totalReturn };
+      default:
+        return { label: '1년 수익률', value: returns.year1 };
+    }
+  }, [chartPeriod, returns, priceHistory, etf.price]);
+
+  const monthlyStats = useMemo(() => {
+    const allReturns = monthlyReturns.flatMap(year => year.returns.map(m => m.value));
+    const max = Math.max(...allReturns);
+    const min = Math.min(...allReturns);
+    const avg = allReturns.reduce((sum, val) => sum + val, 0) / allReturns.length;
+    const variance = allReturns.reduce((sum, val) => sum + Math.pow(val - avg, 2), 0) / allReturns.length;
+    const stdDev = Math.sqrt(variance);
+    
+    return { max, min, avg, stdDev };
+  }, [monthlyReturns]);
+
   return (
     <div className={styles.page}>
       {/* 헤더 - ETF 기본 정보 */}
@@ -136,11 +170,22 @@ export default function DetailPage() {
                 )}
               </div>
             </div>
-            <p className={styles.etfMeta}>
+            <div className={styles.etfMeta}>
               <span className={styles.issuer}>{etf.issuer}</span>
-              <span className={styles.separator}>·</span>
-              <span className={styles.category}>{etf.category}</span>
-            </p>
+              {(etf.personalPension || etf.retirementPension) && (
+                <>
+                  <span className={styles.separator}>·</span>
+                  <div className={styles.pensionBadges}>
+                    {etf.personalPension && (
+                      <span className={styles.pensionBadge}>개인연금</span>
+                    )}
+                    {etf.retirementPension && (
+                      <span className={styles.pensionBadge}>퇴직연금</span>
+                    )}
+                  </div>
+                </>
+              )}
+            </div>
           </div>
           
           {/* 오른쪽: 가격 정보 */}
@@ -155,12 +200,79 @@ export default function DetailPage() {
           </div>
         </div>
         
+        {/* 가격 차트 */}
+        <div className={styles.chartContainer}>
+          <div className={styles.chartHeader}>
+            <div className={styles.sectionTitleWrapper}>
+              <TrendingUp size={18} />
+              <h3 className={styles.sectionTitle}>가격 차트</h3>
+            </div>
+            <div className={styles.periodSelector}>
+              {CHART_PERIODS.map((period) => (
+                <button
+                  key={period.value}
+                  className={`${styles.periodBtn} ${chartPeriod === period.value ? styles.active : ''}`}
+                  onClick={() => setChartPeriod(period.value)}
+                >
+                  {period.label}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className={styles.chartBody}>
+            <ResponsiveContainer width="100%" height={180}>
+              <AreaChart data={chartData} margin={{ top: 10, right: 10, bottom: 0, left: 0 }}>
+                <defs>
+                  <linearGradient id="priceGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="var(--color-primary)" stopOpacity={0.15}/>
+                    <stop offset="100%" stopColor="var(--color-primary)" stopOpacity={0}/>
+                  </linearGradient>
+                </defs>
+                <XAxis 
+                  dataKey="date" 
+                  tickFormatter={(v) => v.slice(5)}
+                  tick={{ fontSize: 10, fill: 'var(--color-text-tertiary)' }}
+                  axisLine={false}
+                  tickLine={false}
+                  interval="preserveStartEnd"
+                />
+                <YAxis 
+                  domain={yDomain}
+                  tick={{ fontSize: 10, fill: 'var(--color-text-tertiary)' }}
+                  axisLine={false}
+                  tickLine={false}
+                  tickFormatter={(v) => `${(v / 1000).toFixed(0)}K`}
+                  width={35}
+                  orientation="right"
+                />
+                <Tooltip 
+                  formatter={(value: number) => [`${formatPrice(value)}원`, '가격']}
+                  contentStyle={{
+                    background: 'var(--color-white)',
+                    border: '1px solid var(--color-border)',
+                    borderRadius: 'var(--radius-md)',
+                    fontSize: '12px',
+                    boxShadow: 'var(--shadow-md)',
+                  }}
+                />
+                <Area 
+                  type="monotone" 
+                  dataKey="price" 
+                  stroke="var(--color-primary)" 
+                  strokeWidth={2}
+                  fill="url(#priceGradient)"
+                />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+        
         {/* 핵심 지표 */}
         <div className={styles.metricsGrid}>
           <div className={styles.metricBox}>
-            <div className={styles.metricLabel}>1년 수익률</div>
-            <div className={`${styles.metricValue} ${getChangeClass(returns.year1)}`}>
-              {returns.year1 >= 0 ? '+' : ''}{returns.year1.toFixed(1)}%
+            <div className={styles.metricLabel}>{periodReturn.label}</div>
+            <div className={`${styles.metricValue} ${getChangeClass(periodReturn.value)}`}>
+              {periodReturn.value >= 0 ? '+' : ''}{periodReturn.value.toFixed(1)}%
             </div>
           </div>
           <div className={styles.metricBox}>
@@ -200,8 +312,7 @@ export default function DetailPage() {
           <Tab value="overview">개요</Tab>
           <Tab value="holdings">구성종목</Tab>
           <Tab value="dividend">배당</Tab>
-          <Tab value="risk">위험지표</Tab>
-          <Tab value="analysis">분석</Tab>
+          <Tab value="deep-analysis">심층 분석</Tab>
           <Tab value="news">뉴스</Tab>
         </TabList>
         
@@ -225,123 +336,18 @@ export default function DetailPage() {
             </Card>
           )}
           
-          {/* 가격 차트 */}
-          <Card className={styles.chartCard}>
-            <div className={styles.chartHeader}>
-              <div className={styles.sectionTitleWrapper}>
-                <TrendingUp size={18} />
-                <h3 className={styles.sectionTitle}>가격 차트</h3>
-              </div>
-              <div className={styles.periodSelector}>
-                {CHART_PERIODS.map((period) => (
-                  <button
-                    key={period.value}
-                    className={`${styles.periodBtn} ${chartPeriod === period.value ? styles.active : ''}`}
-                    onClick={() => setChartPeriod(period.value)}
-                  >
-                    {period.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-            <div className={styles.chartBody}>
-              <ResponsiveContainer width="100%" height={180}>
-                <AreaChart data={chartData} margin={{ top: 10, right: 10, bottom: 0, left: 0 }}>
-                  <defs>
-                    <linearGradient id="priceGradient" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="var(--color-primary)" stopOpacity={0.15}/>
-                      <stop offset="100%" stopColor="var(--color-primary)" stopOpacity={0}/>
-                    </linearGradient>
-                  </defs>
-                  <XAxis 
-                    dataKey="date" 
-                    tickFormatter={(v) => v.slice(5)}
-                    tick={{ fontSize: 10, fill: 'var(--color-text-tertiary)' }}
-                    axisLine={false}
-                    tickLine={false}
-                    interval="preserveStartEnd"
-                  />
-                  <YAxis 
-                    domain={yDomain}
-                    tick={{ fontSize: 10, fill: 'var(--color-text-tertiary)' }}
-                    axisLine={false}
-                    tickLine={false}
-                    tickFormatter={(v) => `${(v / 1000).toFixed(0)}K`}
-                    width={35}
-                    orientation="right"
-                  />
-                  <Tooltip 
-                    formatter={(value: number) => [`${formatPrice(value)}원`, '가격']}
-                    contentStyle={{
-                      background: 'var(--color-white)',
-                      border: '1px solid var(--color-border)',
-                      borderRadius: 'var(--radius-md)',
-                      fontSize: '12px',
-                      boxShadow: 'var(--shadow-md)',
-                    }}
-                  />
-                  <Area 
-                    type="monotone" 
-                    dataKey="price" 
-                    stroke="var(--color-primary)" 
-                    strokeWidth={2}
-                    fill="url(#priceGradient)"
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
-            </div>
-          </Card>
-          
-          {/* 52주 가격 범위 */}
-          <Card className={styles.rangeCard}>
-            <div className={styles.rangeHeader}>
-              <div className={styles.rangeHeaderLeft}>
-                <div className={styles.sectionTitleWrapper}>
-                  <Activity size={18} />
-                  <h3 className={styles.sectionTitle}>52주 가격 범위</h3>
-                </div>
-                <p className={styles.rangeDescription}>
-                  현재 가격이 52주 최저가와 최고가 사이 어디에 위치하는지 보여줍니다
-                </p>
-              </div>
-              <div className={styles.rangePosition}>
-                <span>{pricePosition.toFixed(0)}%</span>
-              </div>
-            </div>
-            <div className={styles.rangeBar}>
-              <div className={styles.rangeTrack} style={{ '--fill-width': `${pricePosition}%` } as any}>
-                <div className={styles.rangeIndicator} style={{ left: `${pricePosition}%` }} />
-              </div>
-            </div>
-            <div className={styles.rangeLabels}>
-              <span>{formatPrice(etf.low52w || 0)}원</span>
-              <span className={styles.currentPrice}>{formatPrice(etf.price)}원</span>
-              <span>{formatPrice(etf.high52w || 0)}원</span>
-            </div>
-          </Card>
-          
-          {/* 기간별 수익률 */}
+          {/* 투자전략 */}
           <Card className={styles.section}>
             <div className={styles.sectionTitleWrapper}>
-              <TrendingUp size={18} />
-              <h3 className={styles.sectionTitle}>기간별 수익률</h3>
+              <Target size={18} />
+              <h3 className={styles.sectionTitle}>투자전략</h3>
             </div>
-            <div className={styles.returnsGrid}>
-              {[
-                { label: '1개월', value: returns.month1 },
-                { label: '3개월', value: returns.month3 },
-                { label: '6개월', value: returns.month6 },
-                { label: '1년', value: returns.year1 },
-                { label: 'YTD', value: returns.ytd },
-              ].map(item => (
-                <div key={item.label} className={styles.returnItem}>
-                  <span className={styles.returnLabel}>{item.label}</span>
-                  <span className={`${styles.returnValue} ${getChangeClass(item.value)}`}>
-                    {item.value >= 0 ? '+' : ''}{item.value.toFixed(1)}%
-                  </span>
-                </div>
-              ))}
-            </div>
+            <p className={styles.strategyText}>
+              이 투자신탁은 {etf.trackingIndex}를 기초지수로 하여 1좌당 순자산가치의 변동률을 기초지수의 변동률과 유사하도록 
+              투자신탁재산을 운용하는 것을 목적으로 합니다. {etf.category === '국내주식' ? '국내' : '해외'} {etf.category.includes('채권') ? '채권' : '주식'} 
+              시장에 투자하며, {etf.leverage && etf.leverage !== 1 ? (etf.leverage > 0 ? `${etf.leverage}배 레버리지` : '인버스') : '현물'} 
+              상품으로 운용됩니다.
+            </p>
           </Card>
           
           {/* 기본 정보 */}
@@ -352,8 +358,46 @@ export default function DetailPage() {
             </div>
             <div className={styles.infoGrid}>
               <div className={styles.infoItem}>
+                <span className={styles.infoLabel}>운용사</span>
+                <span className={styles.infoValue}>{etf.issuer}</span>
+              </div>
+              <div className={styles.infoItem}>
+                <span className={styles.infoLabel}>상장일</span>
+                <span className={styles.infoValue}>{formatDate(etf.inceptionDate)}</span>
+              </div>
+              <div className={styles.infoItem}>
+                <span className={styles.infoLabel}>기초자산</span>
+                <span className={styles.infoValue}>{etf.category}</span>
+              </div>
+              <div className={styles.infoItem}>
                 <span className={styles.infoLabel}>추적지수</span>
                 <span className={styles.infoValue}>{etf.trackingIndex}</span>
+              </div>
+              <div className={styles.infoItem}>
+                <span className={styles.infoLabel}>시가총액</span>
+                <span className={styles.infoValue}>{formatLargeNumber(etf.marketCap)}</span>
+              </div>
+              <div className={styles.infoItem}>
+                <span className={styles.infoLabel}>순자산(AUM)</span>
+                <span className={styles.infoValue}>{formatLargeNumber(etf.marketCap * 1.005)}</span>
+              </div>
+              <div className={styles.infoItem}>
+                <span className={styles.infoLabel}>상장주식수</span>
+                <span className={styles.infoValue}>{formatLargeNumber(sharesOutstanding)}주</span>
+              </div>
+              <div className={styles.infoItem}>
+                <span className={styles.infoLabel}>구성종목수</span>
+                <span className={styles.infoValue}>{holdings.length}종목</span>
+              </div>
+              <div className={styles.infoItem}>
+                <span className={styles.infoLabel}>레버리지</span>
+                <span className={styles.infoValue}>
+                  {etf.leverage && etf.leverage !== 1 ? (etf.leverage > 0 ? `${etf.leverage}배` : '인버스') : '1배'}
+                </span>
+              </div>
+              <div className={styles.infoItem}>
+                <span className={styles.infoLabel}>거래소</span>
+                <span className={styles.infoValue}>{etf.listingExchange}</span>
               </div>
               <div className={styles.infoItem}>
                 <span className={styles.infoLabel}>NAV</span>
@@ -366,47 +410,31 @@ export default function DetailPage() {
                 </span>
               </div>
               <div className={styles.infoItem}>
-                <span className={styles.infoLabel}>상장주식수</span>
-                <span className={styles.infoValue}>{formatLargeNumber(sharesOutstanding)}주</span>
-              </div>
-              <div className={styles.infoItem}>
-                <span className={styles.infoLabel}>시가총액</span>
-                <span className={styles.infoValue}>{formatLargeNumber(etf.marketCap)}</span>
-              </div>
-              <div className={styles.infoItem}>
                 <span className={styles.infoLabel}>거래량</span>
                 <span className={styles.infoValue}>{formatLargeNumber(etf.volume)}</span>
-              </div>
-              <div className={styles.infoItem}>
-                <span className={styles.infoLabel}>설정일</span>
-                <span className={styles.infoValue}>{formatDate(etf.inceptionDate)}</span>
-              </div>
-              <div className={styles.infoItem}>
-                <span className={styles.infoLabel}>거래소</span>
-                <span className={styles.infoValue}>{etf.listingExchange}</span>
               </div>
             </div>
           </Card>
           
-          {/* 비용 구조 */}
+          {/* 비용 & 세금 */}
           <Card className={styles.section}>
             <div className={styles.sectionTitleWrapper}>
               <Calculator size={18} />
-              <h3 className={styles.sectionTitle}>비용 구조</h3>
+              <h3 className={styles.sectionTitle}>비용 & 세금</h3>
             </div>
             <div className={styles.infoGrid}>
               {costAnalysis && (
                 <>
                   <div className={styles.infoItem}>
-                    <span className={styles.infoLabel}>총보수 (TER)</span>
+                    <span className={styles.infoLabel}>총보수율</span>
+                    <span className={styles.infoValue}>{(costAnalysis.ter * 0.9).toFixed(4)}%</span>
+                  </div>
+                  <div className={styles.infoItem}>
+                    <span className={styles.infoLabel}>TER</span>
                     <span className={styles.infoValue}>{costAnalysis.ter}%</span>
                   </div>
                   <div className={styles.infoItem}>
-                    <span className={styles.infoLabel}>매매수수료</span>
-                    <span className={styles.infoValue}>{costAnalysis.tradingCost}%</span>
-                  </div>
-                  <div className={styles.infoItem}>
-                    <span className={styles.infoLabel}>실부담비용</span>
+                    <span className={styles.infoLabel}>실부담비용률</span>
                     <span className={`${styles.infoValue} ${styles.highlight}`}>{costAnalysis.totalCost}%</span>
                   </div>
                 </>
@@ -414,12 +442,16 @@ export default function DetailPage() {
               {taxInfo && (
                 <>
                   <div className={styles.infoItem}>
-                    <span className={styles.infoLabel}>배당소득세</span>
-                    <span className={styles.infoValue}>{taxInfo.dividendTaxRate}</span>
+                    <span className={styles.infoLabel}>증권거래세</span>
+                    <span className={styles.infoValue}>비과세</span>
                   </div>
                   <div className={styles.infoItem}>
-                    <span className={styles.infoLabel}>양도세</span>
+                    <span className={styles.infoLabel}>매매차익</span>
                     <span className={styles.infoValue}>{taxInfo.capitalGainsDistribution}</span>
+                  </div>
+                  <div className={styles.infoItem}>
+                    <span className={styles.infoLabel}>현금배당</span>
+                    <span className={styles.infoValue}>배당소득세 {taxInfo.dividendTaxRate}</span>
                   </div>
                 </>
               )}
@@ -429,43 +461,84 @@ export default function DetailPage() {
         
         {/* 구성종목 탭 */}
         <TabPanel value="holdings" className={styles.tabContent}>
-          {/* 섹터 비중 */}
-          <Card className={styles.section}>
-            <div className={styles.sectionTitleWrapper}>
-              <PieChartIcon size={18} />
-              <h3 className={styles.sectionTitle}>섹터 비중</h3>
-            </div>
-            <div className={styles.allocationContent}>
-              <div className={styles.pieChart}>
-                <ResponsiveContainer width="100%" height={140}>
-                  <PieChart>
-                    <Pie
-                      data={sectorAllocation.slice(0, 5)}
-                      dataKey="weight"
-                      nameKey="name"
-                      cx="50%"
-                      cy="50%"
-                      outerRadius={60}
-                      innerRadius={40}
-                    >
-                      {sectorAllocation.slice(0, 5).map((_, i) => (
-                        <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />
-                      ))}
-                    </Pie>
-                  </PieChart>
-                </ResponsiveContainer>
+          {/* 자산/섹터 비중 */}
+          <div className={styles.allocationGrid}>
+            {/* 자산 비중 */}
+            <Card className={styles.section}>
+              <div className={styles.sectionTitleWrapper}>
+                <Layers size={18} />
+                <h3 className={styles.sectionTitle}>자산 비중</h3>
               </div>
-              <div className={styles.legendList}>
-                {sectorAllocation.slice(0, 5).map((sector, i) => (
-                  <div key={sector.name} className={styles.legendItem}>
-                    <span className={styles.legendDot} style={{ background: CHART_COLORS[i % CHART_COLORS.length] }} />
-                    <span className={styles.legendName}>{sector.name}</span>
-                    <span className={styles.legendValue}>{sector.weight.toFixed(1)}%</span>
-                  </div>
-                ))}
+              <div className={styles.allocationContent}>
+                <div className={styles.pieChart}>
+                  <ResponsiveContainer width="100%" height={140}>
+                    <PieChart>
+                      <Pie
+                        data={assetAllocation}
+                        dataKey="weight"
+                        nameKey="name"
+                        cx="50%"
+                        cy="50%"
+                        outerRadius={60}
+                        innerRadius={40}
+                      >
+                        {assetAllocation.map((_, i) => (
+                          <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />
+                        ))}
+                      </Pie>
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+                <div className={styles.legendList}>
+                  {assetAllocation.map((asset, i) => (
+                    <div key={asset.name} className={styles.legendItem}>
+                      <span className={styles.legendDot} style={{ background: CHART_COLORS[i % CHART_COLORS.length] }} />
+                      <span className={styles.legendName}>{asset.name}</span>
+                      <span className={styles.legendValue}>{asset.weight.toFixed(1)}%</span>
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
-          </Card>
+            </Card>
+            
+            {/* 섹터 비중 */}
+            <Card className={styles.section}>
+              <div className={styles.sectionTitleWrapper}>
+                <PieChartIcon size={18} />
+                <h3 className={styles.sectionTitle}>섹터 비중</h3>
+              </div>
+              <div className={styles.allocationContent}>
+                <div className={styles.pieChart}>
+                  <ResponsiveContainer width="100%" height={140}>
+                    <PieChart>
+                      <Pie
+                        data={sectorAllocation.slice(0, 5)}
+                        dataKey="weight"
+                        nameKey="name"
+                        cx="50%"
+                        cy="50%"
+                        outerRadius={60}
+                        innerRadius={40}
+                      >
+                        {sectorAllocation.slice(0, 5).map((_, i) => (
+                          <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />
+                        ))}
+                      </Pie>
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+                <div className={styles.legendList}>
+                  {sectorAllocation.slice(0, 5).map((sector, i) => (
+                    <div key={sector.name} className={styles.legendItem}>
+                      <span className={styles.legendDot} style={{ background: CHART_COLORS[i % CHART_COLORS.length] }} />
+                      <span className={styles.legendName}>{sector.name}</span>
+                      <span className={styles.legendValue}>{sector.weight.toFixed(1)}%</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </Card>
+          </div>
           
           {/* 국가 비중 */}
           {countryAllocation.length > 1 && (
@@ -603,13 +676,250 @@ export default function DetailPage() {
           )}
         </TabPanel>
         
-        {/* 위험지표 탭 */}
-        <TabPanel value="risk" className={styles.tabContent}>
+        {/* 심층 분석 탭 */}
+        <TabPanel value="deep-analysis" className={styles.tabContent}>
+          {/* 기간별 수익률 */}
+          <Card className={styles.section}>
+            <div className={styles.sectionHeaderWrapper}>
+              <div className={styles.sectionTitleWrapper}>
+                <TrendingUp size={18} />
+                <h3 className={styles.sectionTitle}>기간별 수익률</h3>
+              </div>
+              <p className={styles.sectionDescription}>다양한 기간의 수익률을 비교하여 단기 및 장기 성과를 평가합니다</p>
+            </div>
+            <div className={styles.returnsGrid}>
+              {[
+                { label: '1개월', value: returns.month1 },
+                { label: '3개월', value: returns.month3 },
+                { label: '6개월', value: returns.month6 },
+                { label: '1년', value: returns.year1 },
+                { label: 'YTD', value: returns.ytd },
+              ].map(item => (
+                <div key={item.label} className={styles.returnItem}>
+                  <span className={styles.returnLabel}>{item.label}</span>
+                  <span className={`${styles.returnValue} ${getChangeClass(item.value)}`}>
+                    {item.value >= 0 ? '+' : ''}{item.value.toFixed(1)}%
+                  </span>
+                </div>
+              ))}
+            </div>
+          </Card>
+          
+          {/* 월별 수익률 히트맵 */}
+          <Card className={styles.section}>
+            <div className={styles.sectionHeaderWrapper}>
+              <div className={styles.sectionTitleWrapper}>
+                <Calendar size={18} />
+                <h3 className={styles.sectionTitle}>월별 수익률</h3>
+              </div>
+              <p className={styles.sectionDescription}>월별 수익률을 한눈에 파악할 수 있습니다. 양수는 녹색, 음수는 빨간색으로 표시됩니다</p>
+            </div>
+            <div className={styles.returnsTable}>
+              <div className={styles.returnsTableHeader}>
+                <div className={styles.returnsTableCell}></div>
+                {['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'].map(m => (
+                  <div key={m} className={styles.returnsTableCell}>{m}</div>
+                ))}
+              </div>
+              {monthlyReturns.slice(0, 3).map((yearData) => (
+                <div key={yearData.year} className={styles.returnsTableRow}>
+                  <div className={`${styles.returnsTableCell} ${styles.yearCell}`}>{yearData.year}</div>
+                  {yearData.returns.map((m, i) => (
+                    <div 
+                      key={i}
+                      className={`${styles.returnsTableCell} ${styles.valueCell}`}
+                      style={{
+                        background: m.value >= 0 
+                          ? `rgba(34, 197, 94, ${Math.min(Math.abs(m.value) / 15, 0.15) + 0.08})` 
+                          : `rgba(239, 68, 68, ${Math.min(Math.abs(m.value) / 15, 0.15) + 0.08})`,
+                        color: m.value >= 0 ? 'var(--color-success)' : 'var(--color-danger)',
+                        fontWeight: Math.abs(m.value) > 5 ? 700 : 600
+                      }}
+                    >
+                      {m.value >= 0 ? '+' : ''}{m.value.toFixed(1)}%
+                    </div>
+                  ))}
+                </div>
+              ))}
+            </div>
+            
+            <div className={styles.monthlyStatsGrid}>
+              <div className={styles.monthlyStatItem}>
+                <span className={styles.monthlyStatLabel}>월간 최고</span>
+                <span className={`${styles.monthlyStatValue} number-up`}>
+                  +{monthlyStats.max.toFixed(1)}%
+                </span>
+              </div>
+              <div className={styles.monthlyStatItem}>
+                <span className={styles.monthlyStatLabel}>월간 최저</span>
+                <span className={`${styles.monthlyStatValue} number-down`}>
+                  {monthlyStats.min.toFixed(1)}%
+                </span>
+              </div>
+              <div className={styles.monthlyStatItem}>
+                <span className={styles.monthlyStatLabel}>월간 평균</span>
+                <span className={`${styles.monthlyStatValue} ${monthlyStats.avg >= 0 ? 'number-up' : 'number-down'}`}>
+                  {monthlyStats.avg >= 0 ? '+' : ''}{monthlyStats.avg.toFixed(1)}%
+                </span>
+              </div>
+              <div className={styles.monthlyStatItem}>
+                <span className={styles.monthlyStatLabel}>변동성</span>
+                <span className={styles.monthlyStatValue}>
+                  {monthlyStats.stdDev.toFixed(1)}%
+                </span>
+              </div>
+            </div>
+          </Card>
+          
+          {/* 52주 가격 범위 */}
+          <Card className={styles.rangeCard}>
+            <div className={styles.rangeHeader}>
+              <div className={styles.rangeHeaderLeft}>
+                <div className={styles.sectionTitleWrapper}>
+                  <Activity size={18} />
+                  <h3 className={styles.sectionTitle}>52주 가격 범위</h3>
+                </div>
+                <p className={styles.rangeDescription}>
+                  현재 가격이 52주 최저가와 최고가 사이 어디에 위치하는지 보여줍니다
+                </p>
+              </div>
+              <div className={styles.rangePosition}>
+                <span>{pricePosition.toFixed(0)}%</span>
+              </div>
+            </div>
+            <div className={styles.rangeBar}>
+              <div className={styles.rangeTrack} style={{ '--fill-width': `${pricePosition}%` } as any}>
+                <div className={styles.rangeIndicator} style={{ left: `${pricePosition}%` }} />
+              </div>
+            </div>
+            <div className={styles.rangeLabels}>
+              <span>{formatPrice(etf.low52w || 0)}원</span>
+              <span className={styles.currentPrice}>{formatPrice(etf.price)}원</span>
+              <span>{formatPrice(etf.high52w || 0)}원</span>
+            </div>
+          </Card>
+          
+          {/* 국면 분석 */}
+          {technicals && (
+            <Card className={styles.section}>
+              <div className={styles.sectionHeaderWrapper}>
+                <div className={styles.sectionTitleWrapper}>
+                  <Activity size={18} />
+                  <h3 className={styles.sectionTitle}>국면 분석</h3>
+                </div>
+                <p className={styles.sectionDescription}>단기, 중기, 장기 시장 국면을 종합적으로 분석합니다</p>
+              </div>
+              
+              <div className={styles.phaseGrid}>
+                {/* 단기 국면 */}
+                <div className={styles.phaseItem}>
+                  <div className={styles.phaseItemHeader}>
+                    <span className={styles.phaseLabel}>단기</span>
+                    <span className={styles.phasePeriod}>5-20일</span>
+                  </div>
+                  <div className={styles.phaseItemContent}>
+                    <div className={styles.phaseStatus}>
+                      <span className={styles.phaseStatusLabel}>국면</span>
+                      <span className={`${styles.phaseStatusValue} ${
+                        technicals.rsi >= 70 ? 'number-up' : 
+                        technicals.rsi <= 30 ? 'number-down' : ''
+                      }`}>
+                        {technicals.rsi >= 70 ? '과열' : technicals.rsi <= 30 ? '공포' : '중립'}
+                      </span>
+                    </div>
+                    <div className={styles.phaseStatus}>
+                      <span className={styles.phaseStatusLabel}>추세</span>
+                      <span className={`${styles.phaseStatusValue} ${
+                        etf.price > technicals.movingAverages.ma20 ? 'number-up' : 'number-down'
+                      }`}>
+                        {etf.price > technicals.movingAverages.ma20 ? '상승' : '하락'}
+                      </span>
+                    </div>
+                    <div className={styles.phaseMetric}>
+                      <span className={styles.phaseMetricLabel}>RSI</span>
+                      <span className={styles.phaseMetricValue}>{technicals.rsi}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 중기 국면 */}
+                <div className={styles.phaseItem}>
+                  <div className={styles.phaseItemHeader}>
+                    <span className={styles.phaseLabel}>중기</span>
+                    <span className={styles.phasePeriod}>20-50일</span>
+                  </div>
+                  <div className={styles.phaseItemContent}>
+                    <div className={styles.phaseStatus}>
+                      <span className={styles.phaseStatusLabel}>국면</span>
+                      <span className={`${styles.phaseStatusValue} ${
+                        parseFloat(technicals.macd.value) > 0 ? 'number-up' : 
+                        parseFloat(technicals.macd.value) < -50 ? 'number-down' : ''
+                      }`}>
+                        {parseFloat(technicals.macd.value) > 0 ? '과열' : parseFloat(technicals.macd.value) < -50 ? '공포' : '중립'}
+                      </span>
+                    </div>
+                    <div className={styles.phaseStatus}>
+                      <span className={styles.phaseStatusLabel}>추세</span>
+                      <span className={`${styles.phaseStatusValue} ${
+                        etf.price > technicals.movingAverages.ma50 ? 'number-up' : 'number-down'
+                      }`}>
+                        {etf.price > technicals.movingAverages.ma50 ? '상승' : '하락'}
+                      </span>
+                    </div>
+                    <div className={styles.phaseMetric}>
+                      <span className={styles.phaseMetricLabel}>MACD</span>
+                      <span className={styles.phaseMetricValue}>{parseFloat(technicals.macd.value).toFixed(0)}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 장기 국면 */}
+                <div className={styles.phaseItem}>
+                  <div className={styles.phaseItemHeader}>
+                    <span className={styles.phaseLabel}>장기</span>
+                    <span className={styles.phasePeriod}>50-200일</span>
+                  </div>
+                  <div className={styles.phaseItemContent}>
+                    <div className={styles.phaseStatus}>
+                      <span className={styles.phaseStatusLabel}>국면</span>
+                      <span className={`${styles.phaseStatusValue} ${
+                        etf.price > technicals.movingAverages.ma200 * 1.2 ? 'number-up' : 
+                        etf.price < technicals.movingAverages.ma200 * 0.8 ? 'number-down' : ''
+                      }`}>
+                        {etf.price > technicals.movingAverages.ma200 * 1.2 ? '과열' : 
+                         etf.price < technicals.movingAverages.ma200 * 0.8 ? '공포' : '중립'}
+                      </span>
+                    </div>
+                    <div className={styles.phaseStatus}>
+                      <span className={styles.phaseStatusLabel}>추세</span>
+                      <span className={`${styles.phaseStatusValue} ${
+                        etf.price > technicals.movingAverages.ma200 ? 'number-up' : 'number-down'
+                      }`}>
+                        {etf.price > technicals.movingAverages.ma200 ? '상승' : '하락'}
+                      </span>
+                    </div>
+                    <div className={styles.phaseMetric}>
+                      <span className={styles.phaseMetricLabel}>괴리율</span>
+                      <span className={`${styles.phaseMetricValue} ${
+                        etf.price > technicals.movingAverages.ma200 ? 'number-up' : 'number-down'
+                      }`}>
+                        {((etf.price - technicals.movingAverages.ma200) / technicals.movingAverages.ma200 * 100).toFixed(1)}%
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </Card>
+          )}
+          
           {/* 핵심 위험 지표 */}
           <Card className={styles.section}>
-            <div className={styles.sectionTitleWrapper}>
-              <Target size={18} />
-              <h3 className={styles.sectionTitle}>핵심 지표</h3>
+            <div className={styles.sectionHeaderWrapper}>
+              <div className={styles.sectionTitleWrapper}>
+                <Shield size={18} />
+                <h3 className={styles.sectionTitle}>위험 분석</h3>
+              </div>
+              <p className={styles.sectionDescription}>변동성, 샤프비율, 베타, MDD 등 핵심 위험 지표를 평가합니다</p>
             </div>
             <div className={styles.riskGrid}>
               <div className={styles.riskItem}>
@@ -645,9 +955,12 @@ export default function DetailPage() {
           
           {/* 시장 캡처 */}
           <Card className={styles.section}>
-            <div className={styles.sectionTitleWrapper}>
-              <TrendingUp size={18} />
-              <h3 className={styles.sectionTitle}>시장 캡처</h3>
+            <div className={styles.sectionHeaderWrapper}>
+              <div className={styles.sectionTitleWrapper}>
+                <TrendingUp size={18} />
+                <h3 className={styles.sectionTitle}>시장 캡처</h3>
+              </div>
+              <p className={styles.sectionDescription}>상승장과 하락장에서 시장 대비 수익률 민감도를 보여줍니다</p>
             </div>
             <div className={styles.captureGrid}>
               <div className={styles.captureItem}>
@@ -675,9 +988,12 @@ export default function DetailPage() {
           
           {/* 고급 지표 */}
           <Card className={styles.section}>
-            <div className={styles.sectionTitleWrapper}>
-              <Zap size={18} />
-              <h3 className={styles.sectionTitle}>고급 지표</h3>
+            <div className={styles.sectionHeaderWrapper}>
+              <div className={styles.sectionTitleWrapper}>
+                <Zap size={18} />
+                <h3 className={styles.sectionTitle}>고급 지표</h3>
+              </div>
+              <p className={styles.sectionDescription}>알파, R², 소르티노, VaR 등 전문적인 투자 지표를 제공합니다</p>
             </div>
             <div className={styles.advancedGrid}>
               <div className={styles.advancedItem}>
@@ -709,119 +1025,62 @@ export default function DetailPage() {
             </div>
           </Card>
           
-          {/* 월별 수익률 히트맵 */}
-          <Card className={styles.section}>
-            <div className={styles.sectionTitleWrapper}>
-              <Calendar size={18} />
-              <h3 className={styles.sectionTitle}>월별 수익률</h3>
-            </div>
-            <div className={styles.heatmap}>
-              <div className={styles.heatmapHeader}>
-                {['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'].map(m => (
-                  <span key={m} className={styles.heatmapMonth}>{m}</span>
-                ))}
+          {/* 상관 관계 */}
+          {(correlatedETFs.positive.length > 0 || correlatedETFs.negative.length > 0) && (
+            <Card className={styles.section}>
+              <div className={styles.sectionHeaderWrapper}>
+                <div className={styles.sectionTitleWrapper}>
+                  <Activity size={18} />
+                  <h3 className={styles.sectionTitle}>상관 관계</h3>
+                </div>
+                <p className={styles.sectionDescription}>이 ETF와 같거나 반대 방향으로 움직이는 ETF를 분석합니다</p>
               </div>
-              {monthlyReturns.slice(0, 3).map((yearData) => (
-                <div key={yearData.year} className={styles.heatmapRow}>
-                  <span className={styles.heatmapYear}>{yearData.year}</span>
-                  <div className={styles.heatmapCells}>
-                    {yearData.returns.map((m, i) => (
-                      <div 
-                        key={i}
-                        className={styles.heatmapCell}
-                        style={{
-                          background: m.value >= 0 
-                            ? `rgba(34, 197, 94, ${Math.min(Math.abs(m.value) / 10, 0.8)})` 
-                            : `rgba(239, 68, 68, ${Math.min(Math.abs(m.value) / 10, 0.8)})`
-                        }}
-                        title={`${m.month}: ${m.value >= 0 ? '+' : ''}${m.value.toFixed(1)}%`}
-                      />
+              
+              {correlatedETFs.positive.length > 0 && (
+                <div className={styles.correlationGroup}>
+                  <h4 className={styles.correlationGroupTitle}>같은 방향 (양의 상관관계)</h4>
+                  <div className={styles.correlationList}>
+                    {correlatedETFs.positive.slice(0, 5).map((r: any) => (
+                      <button key={r.id} className={styles.correlationItem} onClick={() => navigate(`/etf/${r.id}`)}>
+                        <div className={styles.correlationLeft}>
+                          <span className={styles.correlationName}>{r.name}</span>
+                          <span className={styles.correlationTicker}>{r.ticker}</span>
+                        </div>
+                        <div className={styles.correlationRight}>
+                          <span className={styles.correlationValue}>
+                            {(r.correlation * 100).toFixed(0)}%
+                          </span>
+                          <span className={styles.correlationPrice}>{formatPrice(r.price)}원</span>
+                          <span className={getChangeClass(r.changePercent)}>{formatPercent(r.changePercent)}</span>
+                        </div>
+                      </button>
                     ))}
                   </div>
                 </div>
-              ))}
-            </div>
-          </Card>
-        </TabPanel>
-        
-        {/* 분석 탭 */}
-        <TabPanel value="analysis" className={styles.tabContent}>
-          {/* 기술적 분석 */}
-          {technicals && (
-            <Card className={styles.section}>
-              <div className={styles.sectionTitleWrapper}>
-                <Activity size={18} />
-                <h3 className={styles.sectionTitle}>기술적 분석</h3>
-              </div>
-              <div className={styles.technicalSummary}>
-                <div className={styles.rsiSection}>
-                  <div className={styles.rsiHeader}>
-                    <span>RSI (14)</span>
-                    <span className={`${styles.rsiStatus} ${styles[technicals.rsiStatus]}`}>
-                      {technicals.rsiStatus === 'overbought' ? '과매수' : technicals.rsiStatus === 'oversold' ? '과매도' : '중립'}
-                    </span>
-                  </div>
-                  <div className={styles.rsiBar}>
-                    <div className={styles.rsiTrack}>
-                      <div className={styles.rsiIndicator} style={{ left: `${technicals.rsi}%` }} />
-                    </div>
-                    <span className={styles.rsiValue}>{technicals.rsi}</span>
-                  </div>
-                </div>
-                <div className={styles.trendSection}>
-                  <div className={`${styles.trendItem} ${technicals.trend.shortTerm === 'bullish' ? styles.bullish : styles.bearish}`}>
-                    <span>단기</span>
-                    {technicals.trend.shortTerm === 'bullish' ? <TrendingUp size={14} /> : <TrendingDown size={14} />}
-                  </div>
-                  <div className={`${styles.trendItem} ${technicals.trend.longTerm === 'bullish' ? styles.bullish : styles.bearish}`}>
-                    <span>장기</span>
-                    {technicals.trend.longTerm === 'bullish' ? <TrendingUp size={14} /> : <TrendingDown size={14} />}
-                  </div>
-                </div>
-              </div>
+              )}
               
-              <div className={styles.maGrid}>
-                {[
-                  { label: 'MA5', value: technicals.movingAverages.ma5 },
-                  { label: 'MA20', value: technicals.movingAverages.ma20 },
-                  { label: 'MA50', value: technicals.movingAverages.ma50 },
-                  { label: 'MA200', value: technicals.movingAverages.ma200 },
-                ].map(ma => (
-                  <div key={ma.label} className={styles.maItem}>
-                    <span className={styles.maLabel}>{ma.label}</span>
-                    <span className={`${styles.maValue} ${etf.price >= ma.value ? 'number-up' : 'number-down'}`}>
-                      {formatPrice(ma.value)}
-                    </span>
+              {correlatedETFs.negative.length > 0 && (
+                <div className={styles.correlationGroup}>
+                  <h4 className={styles.correlationGroupTitle}>반대 방향 (음의 상관관계)</h4>
+                  <div className={styles.correlationList}>
+                    {correlatedETFs.negative.slice(0, 5).map((r: any) => (
+                      <button key={r.id} className={styles.correlationItem} onClick={() => navigate(`/etf/${r.id}`)}>
+                        <div className={styles.correlationLeft}>
+                          <span className={styles.correlationName}>{r.name}</span>
+                          <span className={styles.correlationTicker}>{r.ticker}</span>
+                        </div>
+                        <div className={styles.correlationRight}>
+                          <span className={styles.correlationValue}>
+                            {(r.correlation * 100).toFixed(0)}%
+                          </span>
+                          <span className={styles.correlationPrice}>{formatPrice(r.price)}원</span>
+                          <span className={getChangeClass(r.changePercent)}>{formatPercent(r.changePercent)}</span>
+                        </div>
+                      </button>
+                    ))}
                   </div>
-                ))}
-              </div>
-            </Card>
-          )}
-          
-          {/* 유사 ETF */}
-          {(similarETFs.length > 0 || competingETFs.length > 0) && (
-            <Card className={styles.section}>
-              <div className={styles.sectionHeader}>
-                <div className={styles.sectionHeaderLeft}>
-                  <Layers size={18} />
-                  <h3 className={styles.sectionTitle}>유사 ETF</h3>
                 </div>
-                <ChevronRight size={16} className={styles.sectionMore} />
-              </div>
-              <div className={styles.similarList}>
-                {(competingETFs.length > 0 ? competingETFs : similarETFs).slice(0, 4).map((r) => (
-                  <button key={r.id} className={styles.similarItem} onClick={() => navigate(`/etf/${r.id}`)}>
-                    <div className={styles.similarInfo}>
-                      <span className={styles.similarName}>{r.name}</span>
-                      <span className={styles.similarTicker}>{r.ticker}</span>
-                    </div>
-                    <div className={styles.similarPrice}>
-                      <span>{formatPrice(r.price)}원</span>
-                      <span className={getChangeClass(r.changePercent)}>{formatPercent(r.changePercent)}</span>
-                    </div>
-                  </button>
-                ))}
-              </div>
+              )}
             </Card>
           )}
         </TabPanel>

@@ -20,6 +20,8 @@ export const koreanETFs: ETF[] = [
     inceptionDate: '2002-10-14',
     nav: 35850,
     aum: 8500000000000,
+    personalPension: true,
+    retirementPension: true,
     holdings: [
       { ticker: '005930', name: '삼성전자', weight: 28.5 },
       { ticker: '000660', name: 'SK하이닉스', weight: 5.2 },
@@ -45,6 +47,8 @@ export const koreanETFs: ETF[] = [
     inceptionDate: '2008-04-03',
     nav: 35780,
     aum: 4200000000000,
+    personalPension: true,
+    retirementPension: false,
     holdings: [
       { ticker: '005930', name: '삼성전자', weight: 29.1 },
       { ticker: '000660', name: 'SK하이닉스', weight: 5.4 },
@@ -392,6 +396,8 @@ export const koreanETFs: ETF[] = [
     inceptionDate: '2023-10-17',
     nav: 12880,
     aum: 920000000000,
+    personalPension: true,
+    retirementPension: true,
   },
   // ESG
   {
@@ -1597,6 +1603,65 @@ export const getSimilarETFs = (etfId: string, limit: number = 5): ETF[] => {
   return similar;
 };
 
+// 상관관계 ETF 가져오기 (양의 상관관계, 음의 상관관계)
+export const getCorrelatedETFs = (etfId: string, limit: number = 5) => {
+  const etf = getETFById(etfId);
+  if (!etf) return { positive: [], negative: [] };
+  
+  // 모의 상관관계 계산
+  // 실제로는 가격 데이터를 기반으로 상관계수를 계산해야 함
+  const allOtherETFs = etfs.filter(e => e.id !== etfId);
+  
+  const correlations = allOtherETFs.map(other => {
+    // 같은 카테고리/테마면 양의 상관관계 (0.7~0.95)
+    const sameCategory = other.category === etf.category;
+    const commonThemes = other.themes.filter(t => etf.themes.includes(t)).length;
+    
+    let correlation: number;
+    
+    if (sameCategory && commonThemes > 0) {
+      // 매우 유사: 높은 양의 상관관계
+      correlation = 0.85 + Math.random() * 0.1;
+    } else if (sameCategory || commonThemes > 0) {
+      // 약간 유사: 중간 양의 상관관계
+      correlation = 0.6 + Math.random() * 0.2;
+    } else if (
+      // 반대 성격 (인버스, 레버리지 등)
+      (etf.name.includes('인버스') && !other.name.includes('인버스')) ||
+      (!etf.name.includes('인버스') && other.name.includes('인버스')) ||
+      (etf.category === '국내주식' && other.category === '채권') ||
+      (etf.category === '채권' && other.category === '국내주식')
+    ) {
+      // 음의 상관관계
+      correlation = -0.5 - Math.random() * 0.4;
+    } else {
+      // 무관: 약한 상관관계
+      correlation = -0.2 + Math.random() * 0.4;
+    }
+    
+    return {
+      etf: other,
+      correlation: Math.max(-1, Math.min(1, correlation)), // -1 ~ 1 범위로 제한
+    };
+  });
+  
+  // 양의 상관관계 (높은 순)
+  const positive = correlations
+    .filter(c => c.correlation > 0.5)
+    .sort((a, b) => b.correlation - a.correlation)
+    .slice(0, limit)
+    .map(c => ({ ...c.etf, correlation: c.correlation }));
+  
+  // 음의 상관관계 (낮은 순)
+  const negative = correlations
+    .filter(c => c.correlation < -0.3)
+    .sort((a, b) => a.correlation - b.correlation)
+    .slice(0, limit)
+    .map(c => ({ ...c.etf, correlation: c.correlation }));
+  
+  return { positive, negative };
+};
+
 // 섹터별 비중 (구성종목 탭용)
 export const getSectorAllocation = (etfId: string) => {
   const etf = getETFById(etfId);
@@ -1633,6 +1698,43 @@ export const getSectorAllocation = (etfId: string) => {
   return template.map(s => ({
     ...s,
     weight: s.weight + (Math.random() * 4 - 2), // 약간의 변동
+  }));
+};
+
+// 자산 비중 (구성종목 탭용)
+export const getAssetAllocation = (etfId: string) => {
+  const etf = getETFById(etfId);
+  if (!etf) return [];
+  
+  // 카테고리에 따른 자산 비중 생성
+  const assetTemplates: Record<string, { name: string; weight: number }[]> = {
+    '반도체': [
+      { name: '주식', weight: 98 },
+      { name: '현금', weight: 2 },
+    ],
+    '국내주식': [
+      { name: '주식', weight: 97 },
+      { name: '현금', weight: 3 },
+    ],
+    '해외주식': [
+      { name: '주식', weight: 96 },
+      { name: '현금', weight: 4 },
+    ],
+    '채권': [
+      { name: '채권', weight: 95 },
+      { name: '현금', weight: 5 },
+    ],
+    '원자재': [
+      { name: '원자재', weight: 85 },
+      { name: '선물', weight: 10 },
+      { name: '현금', weight: 5 },
+    ],
+  };
+  
+  const template = assetTemplates[etf.category] || assetTemplates['국내주식'];
+  return template.map(a => ({
+    ...a,
+    weight: a.weight + (Math.random() * 2 - 1), // 약간의 변동
   }));
 };
 

@@ -37,6 +37,9 @@ export interface ETF {
   listingExchange?: string; // 상장거래소
   leverage?: number; // 레버리지 배수 (해당시)
   holdings?: SimpleHolding[]; // 보유 종목
+  // 연금 투자 가능 여부
+  personalPension?: boolean; // 개인연금 가능
+  retirementPension?: boolean; // 퇴직연금 가능
 }
 
 // 가격 히스토리

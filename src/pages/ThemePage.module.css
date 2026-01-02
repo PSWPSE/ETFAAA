@@ -402,6 +402,12 @@
   font-weight: 600;
 }
 
+.sortControls {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
 .sortDropdown {
   display: flex;
   align-items: center;
@@ -439,6 +445,47 @@
 
 .sortOrderButton:hover {
   opacity: 0.8;
+}
+
+.periodDropdown {
+  display: flex;
+  align-items: center;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  background: var(--color-bg-secondary);
+  border: 1px solid transparent;
+  border-radius: var(--radius-full);
+  transition: all var(--transition-fast);
+  animation: slideIn 0.2s ease-out;
+}
+
+.periodDropdown:hover {
+  border-color: var(--color-border);
+  background: var(--color-bg);
+}
+
+.periodSelect {
+  background: transparent;
+  border: none;
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  color: var(--color-primary);
+  cursor: pointer;
+  padding: 0 4px;
+}
+
+.periodSelect:focus {
+  outline: none;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
 /* ==================== */
@@ -885,6 +932,27 @@
     flex-direction: column;
     align-items: stretch;
     gap: var(--spacing-sm);
+  }
+  
+  .filterBarBottom {
+    flex-wrap: wrap;
+    gap: var(--spacing-xs);
+  }
+  
+  .sortControls {
+    flex-wrap: wrap;
+    gap: var(--spacing-xs);
+  }
+  
+  .sortDropdown,
+  .periodDropdown {
+    font-size: 12px;
+    padding: 6px 10px;
+  }
+  
+  .sortSelect,
+  .periodSelect {
+    font-size: 12px;
   }
   
   .viewToggle {

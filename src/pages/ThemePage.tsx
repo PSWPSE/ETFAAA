@@ -358,20 +358,37 @@ export default function ThemePage() {
               <strong>{processedThemes.length}개</strong> 테마
             </span>
             {viewMode === 'list' && (
-              <div className={styles.sortDropdown}>
-                <SortDesc size={14} />
-                <select 
-                  value={sortField}
-                  onChange={(e) => setSortField(e.target.value as SortField)}
-                  className={styles.sortSelect}
-                >
-                  {SORT_OPTIONS.map(option => (
-                    <option key={option.value} value={option.value}>{option.label}</option>
-                  ))}
-                </select>
-                <button className={styles.sortOrderButton} onClick={toggleSort}>
-                  {sortOrder === 'desc' ? '↓' : '↑'}
-                </button>
+              <div className={styles.sortControls}>
+                {/* 수익률 선택 시 기간 선택 드롭다운 표시 */}
+                {sortField === 'return' && (
+                  <div className={styles.periodDropdown}>
+                    <select 
+                      value={selectedPeriod}
+                      onChange={(e) => setSelectedPeriod(e.target.value)}
+                      className={styles.periodSelect}
+                    >
+                      {PERIOD_OPTIONS.map(option => (
+                        <option key={option.value} value={option.value}>{option.label}</option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+                
+                <div className={styles.sortDropdown}>
+                  <SortDesc size={14} />
+                  <select 
+                    value={sortField}
+                    onChange={(e) => setSortField(e.target.value as SortField)}
+                    className={styles.sortSelect}
+                  >
+                    {SORT_OPTIONS.map(option => (
+                      <option key={option.value} value={option.value}>{option.label}</option>
+                    ))}
+                  </select>
+                  <button className={styles.sortOrderButton} onClick={toggleSort}>
+                    {sortOrder === 'desc' ? '↓' : '↑'}
+                  </button>
+                </div>
               </div>
             )}
           </div>

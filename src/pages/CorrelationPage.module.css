@@ -1,280 +1,781 @@
 .page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: var(--spacing-lg);
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-2xl);
-  margin: calc(var(--spacing-sm) * -1);
-  margin-top: 0;
-  padding: var(--spacing-md);
-  padding-top: var(--spacing-sm);
-  padding-bottom: 180px;
-}
-
-@media (min-width: 768px) {
-  .page {
-    gap: 48px;
-    padding: var(--spacing-xl) var(--spacing-2xl);
-    padding-bottom: 200px;
-  }
-}
-
-@media (min-width: 1024px) {
-  .page {
-    margin: calc(var(--spacing-lg) * -1);
-    margin-top: calc(var(--spacing-md) * -1);
-    padding: var(--spacing-2xl);
-    padding-bottom: 200px;
-  }
-}
-
-
-/* Header Card */
-.headerCard {
-  text-align: center;
-  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-light) 100%);
-  color: var(--color-white);
-}
-
-.headerIcon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 56px;
-  height: 56px;
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: var(--radius-lg);
-  margin-bottom: var(--spacing-md);
-}
-
-.headerTitle {
-  font-size: var(--font-size-2xl);
-  font-weight: 700;
-  margin: 0 0 var(--spacing-xs);
-}
-
-.headerDesc {
-  font-size: var(--font-size-sm);
-  opacity: 0.9;
-  margin: 0;
-}
-
-/* ETF Chips */
-.etfChips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--spacing-xs);
-  margin-top: var(--spacing-md);
-}
-
-.etfChip {
-  padding: var(--spacing-xs) var(--spacing-md);
-  background: var(--color-bg-secondary);
-  border: 1px solid transparent;
-  border-radius: var(--radius-full);
-  font-size: var(--font-size-sm);
-  font-weight: 500;
-  color: var(--color-text-secondary);
-  transition: all var(--transition-fast);
-  min-height: 36px;
-}
-
-.etfChip:hover {
-  background: var(--color-border);
-}
-
-.etfChip.selected {
-  background: rgba(30, 58, 95, 0.1);
-  border-color: var(--color-primary);
-  color: var(--color-primary);
-}
-
-/* Matrix */
-.matrixContainer {
-  overflow-x: auto;
-  margin-top: var(--spacing-md);
-}
-
-.matrix {
-  display: inline-flex;
-  flex-direction: column;
-  gap: 2px;
-  min-width: 100%;
-}
-
-.matrixRow {
-  display: flex;
-  gap: 2px;
-}
-
-.matrixCorner {
-  width: 60px;
-  height: 32px;
-  flex-shrink: 0;
-}
-
-.matrixHeader {
-  width: 56px;
-  height: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: var(--font-size-xs);
-  font-weight: 600;
-  color: var(--color-text-secondary);
-  background: var(--color-bg-secondary);
-  border-radius: var(--radius-sm);
-  flex-shrink: 0;
-}
-
-.matrixLabel {
-  width: 60px;
-  height: 40px;
-  display: flex;
-  align-items: center;
-  font-size: var(--font-size-xs);
-  font-weight: 600;
-  color: var(--color-text-secondary);
-  flex-shrink: 0;
-}
-
-.matrixCell {
-  width: 56px;
-  height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: var(--font-size-xs);
-  font-weight: 500;
-  border-radius: var(--radius-sm);
-  flex-shrink: 0;
-  cursor: default;
-  transition: transform var(--transition-fast);
-}
-
-.matrixCell:hover {
-  transform: scale(1.1);
+  gap: var(--spacing-lg);
+  position: relative;
   z-index: 1;
 }
 
-/* Color Legend */
-.colorLegend {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--spacing-sm);
-  margin-top: var(--spacing-lg);
-  padding-top: var(--spacing-md);
-  border-top: 1px solid var(--color-border-light);
+/* ETF 검색 카드 */
+.etfCard {
+  position: relative;
+  border: 1px solid var(--color-border);
+  overflow: visible !important;
 }
 
-.legendLabel {
+.etfCard.required {
+  border: 2px solid #EF4444 !important;
+  box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.1), 0 4px 12px rgba(239, 68, 68, 0.15) !important;
+  animation: pulseRequired 2s ease-in-out infinite;
+}
+
+@keyframes pulseRequired {
+  0%, 100% {
+    box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.1), 0 4px 12px rgba(239, 68, 68, 0.15);
+  }
+  50% {
+    box-shadow: 0 0 0 6px rgba(239, 68, 68, 0.15), 0 6px 16px rgba(239, 68, 68, 0.2);
+  }
+}
+
+.etfCardHeader {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-xs);
+}
+
+.etfCardHeader svg {
+  color: var(--color-primary);
+}
+
+.etfCardTitle {
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+.etfCardDescription {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-tertiary);
+  margin: 0 0 var(--spacing-md) 0;
+}
+
+/* 검색 섹션 wrapper */
+.searchSection {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  background: rgba(250, 251, 252, 0.6);
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(229, 231, 235, 0.6);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: visible;
+}
+
+.searchSection:hover {
+  background: var(--color-white);
+  border-color: var(--color-border);
+  box-shadow: 0 2px 8px rgba(30, 58, 95, 0.04);
+}
+
+/* 빈 상태 */
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 48px 24px;
+  text-align: center;
+  background: transparent;
+  border-radius: var(--radius-md);
+  border: 1px dashed var(--color-border);
+}
+
+.emptyIcon {
+  color: var(--color-text-tertiary);
+  opacity: 0.4;
+}
+
+.emptyState h3 {
+  font-size: var(--font-size-base);
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+.emptyState p {
+  font-size: 13px;
+  color: var(--color-text-tertiary);
+  margin: 0;
+  line-height: 1.6;
+}
+
+/* 선택된 ETF */
+.selectedETF {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  background: var(--color-bg);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+}
+
+.selectedETFInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.selectedETFName {
+  font-size: var(--font-size-md);
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.selectedETFTicker {
   font-size: var(--font-size-xs);
+  font-weight: 500;
   color: var(--color-text-tertiary);
 }
 
-.legendGradient {
+.selectedETFRight {
   display: flex;
-  gap: 2px;
+  align-items: center;
+  gap: var(--spacing-sm);
 }
 
-.legendGradient span {
-  width: 24px;
-  height: 16px;
-  border-radius: 2px;
+.selectedETFPrice {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-text-primary);
+  font-feature-settings: 'tnum' on, 'lnum' on;
 }
 
-/* Insights Grid */
-.insightsGrid {
-  display: grid;
-  grid-template-columns: 1fr;
+.clearButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--color-bg-secondary);
+  border: none;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  color: var(--color-text-tertiary);
+}
+
+.clearButton:hover {
+  background: var(--color-danger);
+  color: white;
+}
+
+/* 검색 입력 */
+.searchInputWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  overflow: visible;
+}
+
+.searchIcon {
+  position: absolute;
+  left: 14px;
+  color: var(--color-text-tertiary);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.searchInput {
+  width: 100%;
+  padding: 12px 16px 12px 44px;
+  font-size: var(--font-size-base);
+  color: var(--color-text-primary);
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  transition: all 0.3s ease;
+}
+
+.searchInput:hover {
+  border-color: var(--color-text-secondary);
+}
+
+.searchInput:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(30, 58, 95, 0.1);
+}
+
+.searchInput::placeholder {
+  color: var(--color-text-tertiary);
+}
+
+.searchResults {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(30, 58, 95, 0.04);
+  max-height: 350px;
+  overflow-y: auto;
+  z-index: 1000;
+}
+
+.searchResultItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  text-align: left;
+  border: none;
+  border-bottom: 1px solid var(--color-border-light);
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  animation: slideInResult 0.3s ease-out backwards;
+}
+
+@keyframes slideInResult {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.searchResultItem:last-child {
+  border-bottom: none;
+}
+
+.searchResultItem:hover {
+  background: var(--color-bg-secondary);
+}
+
+.searchResultInfo {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.searchResultName {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.searchResultTicker {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--color-text-tertiary);
+}
+
+.searchResultPrice {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.searchResultPrice > span:first-child {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  font-feature-settings: 'tnum' on, 'lnum' on;
+  white-space: nowrap;
+}
+
+.searchResultPrice > span:last-child {
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* 섹션 헤더 */
+.sectionHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: var(--spacing-lg);
+}
+
+.sectionTitleWrapper {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.sectionTitleWrapper svg {
+  color: var(--color-primary);
+}
+
+.sectionTitle {
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+.sectionDescription {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--color-text-tertiary);
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* 매트릭스 */
+.matrixWrapper {
+  display: flex;
+  flex-direction: column;
   gap: var(--spacing-md);
 }
 
-.pairsList {
-  display: flex;
-  flex-direction: column;
-  margin-top: var(--spacing-sm);
+.matrixContainer {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
-.pairItem {
+.matrix {
+  display: grid;
+  grid-template-columns: 80px repeat(7, minmax(80px, 1fr));
+  gap: 0;
+  width: 100%;
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.matrixRow {
+  display: contents;
+}
+
+@media (max-width: 767px) {
+  .matrix {
+    grid-template-columns: 60px repeat(7, minmax(60px, 1fr));
+  }
+}
+
+.matrixCorner {
+  background: var(--color-bg-secondary);
+  border-bottom: 1px solid var(--color-border);
+  border-right: 1px solid var(--color-border);
+}
+
+.matrixHeader {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14px 8px;
+  min-height: 48px;
+  background: var(--color-bg-secondary);
+  border: none;
+  border-bottom: 1px solid var(--color-border);
+  border-right: 1px solid var(--color-border-light);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.matrixHeader:hover {
+  background: var(--color-bg);
+  transform: translateY(-2px);
+}
+
+.matrixHeader:last-child {
+  border-right: none;
+}
+
+.matrixHeaderTicker {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  text-align: center;
+  letter-spacing: -0.01em;
+}
+
+.matrixHeader.baseETF {
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.08), rgba(99, 102, 241, 0.04));
+}
+
+.matrixHeader.baseETF:hover {
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.12), rgba(99, 102, 241, 0.06));
+}
+
+.matrixHeader.baseETF .matrixHeaderTicker {
+  color: var(--color-primary);
+  font-weight: 800;
+}
+
+.matrixLabel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14px 8px;
+  min-height: 48px;
+  background: var(--color-bg-secondary);
+  border: none;
+  border-bottom: 1px solid var(--color-border-light);
+  border-right: 1px solid var(--color-border);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.matrixLabel:hover {
+  background: var(--color-bg);
+  transform: translateX(-2px);
+}
+
+.matrixLabelTicker {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  letter-spacing: -0.01em;
+}
+
+.matrixLabel.baseETF {
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.08), rgba(99, 102, 241, 0.04));
+  font-weight: 800;
+}
+
+.matrixLabel.baseETF:hover {
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.12), rgba(99, 102, 241, 0.06));
+}
+
+.matrixLabel.baseETF .matrixLabelTicker {
+  color: var(--color-primary);
+}
+
+.matrixCell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14px 8px;
+  min-height: 48px;
+  font-size: 13px;
+  font-weight: 700;
+  font-feature-settings: 'tnum' on, 'lnum' on;
+  border-right: 1px solid var(--color-border-light);
+  border-bottom: 1px solid var(--color-border-light);
+  transition: all var(--transition-fast);
+  position: relative;
+}
+
+.matrixRow:last-child .matrixCell,
+.matrixRow:last-child .matrixLabel {
+  border-bottom: none;
+}
+
+.matrixCell:hover {
+  transform: scale(1.08);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  z-index: 10;
+  border-radius: 4px;
+}
+
+/* Legend */
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md);
+  background: var(--color-bg);
+  border-radius: var(--radius-md);
+}
+
+.legendItem {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.legendColor {
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  border: 1px solid var(--color-border-light);
+  flex-shrink: 0;
+}
+
+.legendLabel {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+}
+
+.legendValue {
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--color-text-tertiary);
+  white-space: nowrap;
+  font-feature-settings: 'tnum' on, 'lnum' on;
+}
+
+/* 분석 그리드 */
+.analysisGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--spacing-md);
+}
+
+.analysisTitle {
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin: 0 0 var(--spacing-sm) 0;
+  padding-bottom: var(--spacing-xs);
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+/* 상관관계 리스트 */
+.correlationList {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+}
+
+.correlationItem {
+  width: 100%;
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: var(--spacing-sm) 0;
+  background: transparent;
+  border: none;
   border-bottom: 1px solid var(--color-border-light);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  text-align: left;
 }
 
-.pairItem:last-child {
+.correlationItem:hover {
+  background: var(--color-bg-secondary);
+  padding-left: var(--spacing-xs);
+  padding-right: var(--spacing-xs);
+}
+
+.correlationItem:last-child {
   border-bottom: none;
 }
 
-.pairNames {
+.correlationLeft {
   display: flex;
-  align-items: center;
-  gap: var(--spacing-sm);
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+.correlationName {
   font-size: var(--font-size-sm);
   font-weight: 500;
   color: var(--color-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.pairDivider {
+.correlationTicker {
+  font-size: var(--font-size-xs);
+  font-weight: 500;
   color: var(--color-text-tertiary);
 }
 
-.noPairs {
-  text-align: center;
-  color: var(--color-text-tertiary);
-  font-size: var(--font-size-sm);
-  padding: var(--spacing-md);
-  margin: 0;
-}
-
-/* Info Card */
-.infoCard {
+.correlationRight {
   display: flex;
-  gap: var(--spacing-md);
-  background: var(--color-bg);
-  color: var(--color-text-secondary);
-}
-
-.infoCard svg {
+  align-items: center;
+  gap: var(--spacing-sm);
   flex-shrink: 0;
-  margin-top: 2px;
 }
 
-.infoContent h4 {
+.correlationValue {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-text-tertiary);
+  font-feature-settings: 'tnum' on, 'lnum' on;
+  min-width: 36px;
+  text-align: right;
+}
+
+.correlationPrice {
   font-size: var(--font-size-sm);
   font-weight: 600;
   color: var(--color-text-primary);
-  margin: 0 0 var(--spacing-xs);
+  font-feature-settings: 'tnum' on, 'lnum' on;
+  min-width: 70px;
+  text-align: right;
 }
 
-.infoContent p {
-  font-size: var(--font-size-sm);
-  line-height: 1.6;
-  margin: 0;
+.correlationRight > span:last-child {
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  min-width: 50px;
+  text-align: right;
 }
 
-/* Desktop */
-@media (min-width: 768px) {
-  .insightsGrid {
-    grid-template-columns: repeat(2, 1fr);
+/* 모바일 */
+@media (max-width: 767px) {
+  .page {
+    padding: var(--spacing-md);
+    gap: var(--spacing-md);
+  }
+  
+  .etfCardTitle {
+    font-size: var(--font-size-md);
+  }
+  
+  .etfCardDescription {
+    font-size: 12px;
+  }
+  
+  .searchSection {
+    padding: 14px;
+  }
+  
+  .searchInput {
+    font-size: var(--font-size-base);
+    padding: 14px 18px 14px 46px;
+  }
+  
+  .selectedETF {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-sm);
+    padding: 12px 14px;
+  }
+  
+  .selectedETFRight {
+    width: 100%;
+    justify-content: space-between;
+  }
+  
+  .searchResultName {
+    font-size: 13px;
+  }
+  
+  .searchResultTicker {
+    font-size: 11px;
+  }
+  
+  .searchResultPrice > span:first-child {
+    font-size: 12px;
+  }
+  
+  .searchResultPrice > span:last-child {
+    font-size: 11px;
+  }
+  
+  .analysisGrid {
+    grid-template-columns: 1fr;
   }
   
   .matrixHeader,
-  .matrixCell {
-    width: 64px;
-    height: 44px;
-    font-size: var(--font-size-sm);
-  }
-  
   .matrixLabel {
-    width: 70px;
-    height: 44px;
+    padding: 12px 6px;
+    min-height: 40px;
   }
   
-  .matrixCorner {
-    width: 70px;
-    height: 36px;
+  .matrixCell {
+    padding: 12px 6px;
+    min-height: 40px;
+    font-size: 11px;
+  }
+  
+  .matrixHeaderTicker,
+  .matrixLabelTicker {
+    font-size: 10px;
+  }
+  
+  .legend {
+    gap: 10px;
+    padding: 12px;
+  }
+  
+  .legendItem {
+    gap: 4px;
+  }
+  
+  .legendColor {
+    width: 16px;
+    height: 16px;
+  }
+  
+  .legendLabel {
+    font-size: 10px;
+  }
+  
+  .legendValue {
+    font-size: 9px;
+  }
+  
+  .correlationName {
+    font-size: 13px;
+  }
+  
+  .correlationTicker {
+    font-size: 11px;
+  }
+  
+  .correlationRight {
+    gap: var(--spacing-xs);
+  }
+  
+  .correlationValue {
+    font-size: 10px;
+    min-width: 32px;
+  }
+  
+  .correlationPrice {
+    font-size: 13px;
+    min-width: 60px;
+  }
+  
+  .correlationRight > span:last-child {
+    font-size: 11px;
+    min-width: 45px;
+  }
+  
+  .matrixHeader:hover,
+  .matrixLabel:hover {
+    transform: none;
+  }
+  
+  .correlationItem:hover {
+    padding-left: 0;
+    padding-right: 0;
+  }
+  
+  .emptyState {
+    padding: 32px 16px;
+  }
+  
+  .emptyIcon {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .emptyState h3 {
+    font-size: 14px;
+  }
+  
+  .emptyState p {
+    font-size: 12px;
   }
 }
-
