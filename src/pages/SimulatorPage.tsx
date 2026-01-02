@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef } from 'react';
-import { Calendar, Search, Play, RotateCcw, ArrowLeft, TrendingUp, Zap } from 'lucide-react';
+import { Calendar, Search, Play, RotateCcw, ArrowLeft, TrendingUp, Zap, Activity } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, LineChart, Line, Legend, BarChart, Bar, Cell } from 'recharts';
 import { Card, CardHeader, Button, Input, Select } from '../components/common';
 import { useETFStore } from '../store/etfStore';
@@ -181,6 +181,9 @@ export default function SimulatorPage() {
     const daysDiff = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
     
     if (daysDiff <= 0) return;
+    
+    // 비교 분석 결과 초기화
+    setComparisonResult(null);
     
     // 가격 히스토리 생성 (실제로는 API에서 가져와야 함)
     const priceHistory = generatePriceHistory(selectedETF.price, daysDiff);
@@ -816,7 +819,7 @@ export default function SimulatorPage() {
                       i % Math.max(1, Math.floor(comparisonResult.combinedData.length / 30)) === 0 || 
                       i === comparisonResult.combinedData.length - 1
                     )}
-                    margin={{ top: 20, right: 30, left: 10, bottom: 20 }}
+                    margin={{ top: 20, right: 30, left: 10, bottom: 5 }}
                   >
                     <XAxis 
                       dataKey="date" 
@@ -848,7 +851,7 @@ export default function SimulatorPage() {
                       }}
                     />
                     <Legend 
-                      wrapperStyle={{ paddingTop: '10px' }} 
+                      wrapperStyle={{ paddingTop: '5px' }} 
                       verticalAlign="bottom"
                     />
                     <Line 
@@ -956,74 +959,82 @@ export default function SimulatorPage() {
       
       {/* Result Section */}
       {isSimulated && result ? (
-        <div ref={resultRef} className={styles.resultContainer}>
-          <div className={styles.resultHeaderRow}>
-            <div className={styles.resultTitleGroup}>
-              <span className={styles.resultLabel}>BACKTEST REPORT</span>
-              <h2 className={styles.resultETFName}>{result.etfName}</h2>
-              <div className={styles.resultBadges}>
-                <span className={styles.badge}>{result.investmentType === 'lump' ? '거치식' : '적립식'}</span>
-                <span className={styles.badge}>{result.dividendOption === 'reinvest' ? '배당 재투자' : '배당 인출'}</span>
-                <span className={styles.badge}>{result.startDate} ~ {result.endDate}</span>
+        <Card ref={resultRef} className={styles.resultContainer}>
+          {/* 헤더 섹션 */}
+          <div className={styles.resultHeader}>
+            <div className={styles.resultHeaderContent}>
+              <div className={styles.sectionTitleWrapper}>
+                <TrendingUp size={20} />
+                <h2 className={styles.resultTitle}>투자 실험 결과</h2>
               </div>
+              <div className={styles.resultSubtitle}>
+                <span className={styles.etfName}>{result.etfName}</span>
+                <div className={styles.resultBadges}>
+                  <span className={styles.badge}>{result.investmentType === 'lump' ? '거치식' : '적립식'}</span>
+                  <span className={styles.badge}>{result.dividendOption === 'reinvest' ? '배당 재투자' : '배당 인출'}</span>
+                </div>
+              </div>
+              <span className={styles.periodText}>{result.startDate} ~ {result.endDate}</span>
             </div>
             <Button
-              variant="ghost"
+              variant="outline"
               size="sm"
               onClick={resetSimulation}
-              className={styles.resetButton}
               leftIcon={<RotateCcw size={16} />}
             >
               다시 설정
             </Button>
           </div>
 
-          <div className={styles.metricsWrapper}>
-            <div className={styles.primaryMetric}>
-              <span className={styles.metricLabel}>최종 평가금액</span>
-              <span className={styles.metricValueLarge}>
-                {formatPrice(result.finalValue)}<small>원</small>
-              </span>
-              <div className={styles.profitChip}>
-                <span className={result.totalReturn >= 0 ? styles.textUp : styles.textDown}>
+          {/* 주요 메트릭 */}
+          <div className={styles.primaryMetricCard}>
+            <div className={styles.primaryMetricContent}>
+              <span className={styles.primaryLabel}>최종 평가금액</span>
+              <div className={styles.primaryValueWrapper}>
+                <span className={styles.primaryValue}>
+                  {formatPrice(result.finalValue)}<span className={styles.unit}>원</span>
+                </span>
+                <span className={result.totalReturn >= 0 ? 'number-up' : 'number-down'}>
                   {result.totalReturn >= 0 ? '+' : ''}{formatPrice(result.totalReturn)} ({formatPercent(result.totalReturnPercent)})
-                </span>
-              </div>
-            </div>
-
-            <div className={styles.secondaryMetrics}>
-              <div className={styles.metricItem}>
-                <span className={styles.metricLabel}>총 투자금</span>
-                <span className={styles.metricValue}>{formatPrice(result.totalInvestment)}원</span>
-              </div>
-              <div className={styles.metricItem}>
-                <span className={styles.metricLabel}>누적 배당금</span>
-                <span className={`${styles.metricValue} ${styles.textDividend}`}>
-                  {formatPrice(result.totalDividend)}원
-                </span>
-              </div>
-              <div className={styles.metricItem}>
-                <span className={styles.metricLabel}>연평균 수익률 (CAGR)</span>
-                <span className={`${styles.metricValue} ${result.cagr >= 0 ? styles.textUp : styles.textDown}`}>
-                  {formatPercent(result.cagr)}
-                </span>
-              </div>
-              <div className={styles.metricItem}>
-                <span className={styles.metricLabel}>투자 기간</span>
-                <span className={styles.metricValue}>
-                  {Math.floor(result.periodDays / 365)}년 {Math.floor((result.periodDays % 365) / 30)}개월
                 </span>
               </div>
             </div>
           </div>
 
+          {/* 세부 메트릭 그리드 */}
+          <div className={styles.metricsGrid}>
+            <div className={styles.metricCard}>
+              <span className={styles.metricLabel}>총 투자금</span>
+              <span className={styles.metricValue}>{formatPrice(result.totalInvestment)}원</span>
+            </div>
+            <div className={styles.metricCard}>
+              <span className={styles.metricLabel}>누적 배당금</span>
+              <span className={`${styles.metricValue} ${styles.dividendValue}`}>
+                {formatPrice(result.totalDividend)}원
+              </span>
+            </div>
+            <div className={styles.metricCard}>
+              <span className={styles.metricLabel}>연평균 수익률</span>
+              <span className={`${styles.metricValue} ${result.cagr >= 0 ? 'number-up' : 'number-down'}`}>
+                {formatPercent(result.cagr)}
+              </span>
+            </div>
+            <div className={styles.metricCard}>
+              <span className={styles.metricLabel}>투자 기간</span>
+              <span className={styles.metricValue}>
+                {Math.floor(result.periodDays / 365)}년 {Math.floor((result.periodDays % 365) / 30)}개월
+              </span>
+            </div>
+          </div>
+
+          {/* 차트 섹션 */}
           <div className={styles.chartSection}>
-            <div className={styles.chartHeader}>
-              <h3>자산 추이</h3>
-              <div className={styles.legend}>
-                <span className={styles.legendItem}><span className={styles.dotValue}></span>평가금액</span>
-                <span className={styles.legendItem}><span className={styles.dotInvest}></span>투자금</span>
+            <div className={styles.sectionHeaderWrapper}>
+              <div className={styles.sectionTitleWrapper}>
+                <Activity size={18} />
+                <h3 className={styles.sectionTitle}>자산 추이</h3>
               </div>
+              <p className={styles.sectionDescription}>투자기간 동안의 평가금액과 투자금 변화를 확인할 수 있습니다</p>
             </div>
             <div className={styles.chartContainer}>
               <ResponsiveContainer width="100%" height={280}>
@@ -1040,8 +1051,8 @@ export default function SimulatorPage() {
                     tick={{ fontSize: 11, fill: '#6B7280' }}
                     axisLine={false}
                     tickLine={false}
-                    dy={8}
-                    height={40}
+                    dy={5}
+                    height={30}
                   />
                   <YAxis 
                     tick={{ fontSize: 11, fill: '#6B7280' }}
@@ -1073,7 +1084,7 @@ export default function SimulatorPage() {
               </ResponsiveContainer>
             </div>
           </div>
-        </div>
+        </Card>
       ) : null}
       
       {/* Disclaimer */}
