@@ -1,7 +1,7 @@
 .page {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-2xl);
+  gap: var(--spacing-lg);
   margin: calc(var(--spacing-sm) * -1);
   margin-top: 0;
   padding: var(--spacing-md);
@@ -11,7 +11,7 @@
 
 @media (min-width: 768px) {
   .page {
-    gap: 48px;
+    gap: var(--spacing-lg);
     padding: var(--spacing-xl) var(--spacing-2xl);
     padding-bottom: 200px;
   }
@@ -19,6 +19,7 @@
 
 @media (min-width: 1024px) {
   .page {
+    gap: var(--spacing-lg);
     margin: calc(var(--spacing-lg) * -1);
     margin-top: calc(var(--spacing-md) * -1);
     padding: var(--spacing-2xl);
@@ -30,6 +31,7 @@
 /* 검색 바 */
 /* ==================== */
 .searchBar {
+  position: relative;
   /* 검색창 단독 배치 */
 }
 
@@ -83,6 +85,114 @@
 .clearButton:hover {
   background: var(--color-bg-secondary);
   color: var(--color-text-primary);
+}
+
+/* 자동완성 드롭다운 */
+.autocompleteDropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  right: 0;
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  max-height: 400px;
+  overflow-y: auto;
+  z-index: 1000;
+  animation: fadeInDown 0.2s ease-out;
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.autocompleteItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--color-border-light);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  text-align: left;
+}
+
+.autocompleteItem:last-child {
+  border-bottom: none;
+}
+
+.autocompleteItem:hover,
+.autocompleteItem.selected {
+  background: var(--color-bg-secondary);
+}
+
+.autocompleteLeft {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.autocompleteName {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.autocompleteMeta {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-tertiary);
+}
+
+.autocompleteCategory {
+  padding: 2px 6px;
+  background: var(--color-bg-secondary);
+  border-radius: var(--radius-sm);
+  font-size: 10px;
+  font-weight: 500;
+}
+
+.autocompleteEtfCount {
+  font-size: var(--font-size-xs);
+}
+
+.autocompleteRight {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  flex-shrink: 0;
+}
+
+.autocompleteReturn {
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.autocompleteReturn.up {
+  color: #10B981;
+}
+
+.autocompleteReturn.down {
+  color: #EF4444;
 }
 
 .notFound {
@@ -632,14 +742,16 @@
 
 .detailHeaderContent {
   display: flex;
-  flex-direction: column;
-  gap: var(--spacing-md);
+  flex-direction: row;
+  align-items: flex-start;
+  gap: var(--spacing-sm);
+  justify-content: space-between;
 }
 
 @media (min-width: 768px) {
   .detailHeaderContent {
-    flex-direction: row;
     align-items: center;
+    gap: var(--spacing-md);
   }
 }
 
@@ -655,17 +767,26 @@
 }
 
 .detailCategoryBadge {
-  font-size: 11px;
-  font-weight: 500;
-  padding: 4px 10px;
+  padding: 4px 8px;
+  background: var(--color-primary);
+  color: var(--color-white);
   border-radius: var(--radius-sm);
-  background: var(--color-bg-secondary);
-  color: var(--color-text-tertiary);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  line-height: 1.4;
 }
 
 .detailEtfCount {
-  font-size: var(--font-size-sm);
-  color: var(--color-text-tertiary);
+  padding: 4px 8px;
+  background: var(--color-bg-secondary);
+  white-space: nowrap;
+  line-height: 1.4;
+  color: var(--color-text-secondary);
+  border-radius: var(--radius-sm);
+  font-size: 10px;
+  font-weight: 600;
 }
 
 .detailTitle {
@@ -691,12 +812,14 @@
 .detailReturnLabel {
   font-size: var(--font-size-xs);
   color: var(--color-text-tertiary);
+  animation: fadeInUp 0.5s ease-out;
 }
 
 .detailReturnValue {
   font-size: var(--font-size-2xl);
   font-weight: 700;
   font-variant-numeric: tabular-nums;
+  animation: fadeInUp 0.5s ease-out;
 }
 
 .detailReturnValue.up {
@@ -707,87 +830,236 @@
   color: #EF4444;
 }
 
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 /* ETF 리스트 */
+.etfListHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: var(--spacing-md);
+  border-bottom: 1px solid var(--color-border-light);
+  flex-wrap: wrap;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-md);
+}
+
+.etfListTitle {
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  letter-spacing: -0.01em;
+}
+
+.etfListCount {
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  color: var(--color-text-tertiary);
+}
+
+.sortWrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sortSelect {
+  padding: 8px 12px;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-text-primary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  outline: none;
+}
+
+.sortSelect:hover {
+  border-color: var(--color-primary);
+  background: var(--color-white);
+}
+
+.sortSelect:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
 .etfList {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-xs);
+  gap: var(--spacing-sm);
 }
 
-.etfItem {
+.etfCard {
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-md);
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.etfCard:hover {
+  background: var(--color-white);
+  border-color: var(--color-primary);
+  box-shadow: 0 4px 12px rgba(30, 58, 95, 0.1);
+  transform: translateX(4px);
+}
+
+/* PRIMARY INFO */
+.primaryInfo {
   display: flex;
+  justify-content: space-between;
   align-items: center;
   gap: var(--spacing-md);
-  padding: var(--spacing-sm) var(--spacing-md);
-  background: var(--color-bg-secondary);
-  border-radius: var(--radius-md);
-  cursor: pointer;
-  transition: all var(--transition-fast);
+  margin-bottom: var(--spacing-sm);
 }
 
-.etfItem:hover {
-  background: var(--color-bg);
-}
-
-.etfInfo {
+.nameBlock {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
   flex: 1;
   min-width: 0;
 }
 
-.etfName {
-  display: block;
-  font-size: var(--font-size-sm);
-  font-weight: 600;
+.name {
+  font-size: var(--font-size-base);
+  font-weight: 700;
   color: var(--color-text-primary);
-  white-space: nowrap;
+  margin: 0;
+  line-height: 1.3;
   overflow: hidden;
   text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.etfMeta {
+.code {
   font-size: var(--font-size-xs);
-  color: var(--color-text-tertiary);
-}
-
-.etfStats {
-  display: flex;
-  gap: var(--spacing-lg);
-}
-
-.etfStat {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 2px;
-}
-
-.statLabel {
-  font-size: 10px;
-  color: var(--color-text-tertiary);
-}
-
-.statValue {
-  font-size: var(--font-size-sm);
   font-weight: 600;
-  color: var(--color-text-primary);
-  font-variant-numeric: tabular-nums;
-}
-
-.statValue.up {
-  color: #10B981;
-}
-
-.statValue.down {
-  color: #EF4444;
-}
-
-.etfArrow {
-  color: var(--color-text-tertiary);
+  color: var(--color-text-secondary);
+  font-family: var(--font-family-numeric);
   flex-shrink: 0;
 }
 
-.etfItem:hover .etfArrow {
+.priceBlock {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.priceMain {
+  font-size: var(--font-size-base);
+  font-weight: 700;
+  color: var(--color-text-primary);
+  letter-spacing: -0.01em;
+  font-family: var(--font-family-numeric);
+}
+
+.changeMain {
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+  font-family: var(--font-family-numeric);
+}
+
+/* SECONDARY INFO */
+.secondaryInfo {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding-top: var(--spacing-sm);
+  border-top: 1px solid var(--color-border-light);
+}
+
+.tagGroup {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  align-items: center;
+}
+
+.primaryTag {
+  padding: 4px 8px;
+  background: var(--color-primary);
+  color: var(--color-white);
+  border-radius: var(--radius-sm);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  line-height: 1.4;
+}
+
+.secondaryTag {
+  padding: 4px 8px;
+  background: var(--color-bg-secondary);
+  white-space: nowrap;
+  line-height: 1.4;
+  color: var(--color-text-secondary);
+  border-radius: var(--radius-sm);
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.metaGroup {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  min-width: 0;
+}
+
+.metaItem {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.metaLabel {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--color-text-tertiary);
+  min-width: 52px;
+  display: inline-block;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.metaValue {
+  font-size: var(--font-size-xs);
+  font-weight: 700;
   color: var(--color-primary);
+  font-family: var(--font-family-numeric);
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.08) 0%, rgba(59, 130, 246, 0.04) 100%);
+  padding: 2px 6px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.metaValue:hover {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.12) 0%, rgba(59, 130, 246, 0.06) 100%);
+  transform: translateY(-1px);
 }
 
 /* ==================== */
@@ -916,22 +1188,16 @@
 }
 
 /* 모바일 최적화 */
-@media (max-width: 640px) {
-  .etfStats {
-    flex-direction: column;
-    gap: var(--spacing-xs);
-  }
-  
-  .etfStat {
-    flex-direction: row;
-    justify-content: space-between;
-    width: 100%;
-  }
-  
+@media (max-width: 767px) {
   .filterBarTop {
     flex-direction: column;
     align-items: stretch;
     gap: var(--spacing-sm);
+  }
+  
+  .categoryTabs {
+    flex-wrap: wrap;
+    overflow-x: visible;
   }
   
   .filterBarBottom {
@@ -955,6 +1221,12 @@
     font-size: 12px;
   }
   
+  .categoryTab {
+    font-size: 12px;
+    padding: 6px 10px;
+    min-height: 32px;
+  }
+  
   .viewToggle {
     align-self: flex-end;
   }
@@ -971,5 +1243,332 @@
   
   .heatmapReturn {
     font-size: var(--font-size-xs);
+  }
+}
+
+/* 추가 모바일 최적화 (641px-767px) */
+@media (min-width: 641px) and (max-width: 767px) {
+  .themeDetailHeader {
+    padding: var(--spacing-lg) !important;
+  }
+  
+  .detailHeaderContent {
+    align-items: center;
+  }
+  
+  .detailBadges {
+    margin-bottom: 8px;
+  }
+  
+  .detailTitle {
+    font-size: var(--font-size-lg);
+    line-height: 1.5;
+    margin-bottom: 6px;
+  }
+  
+  .detailDesc {
+    font-size: var(--font-size-sm);
+    line-height: 1.5;
+  }
+  
+  .detailReturn {
+    align-self: center;
+  }
+  
+  .detailReturnLabel {
+    font-size: 10px;
+  }
+  
+  .detailReturnValue {
+    font-size: var(--font-size-xl);
+  }
+  
+  .etfListTitle {
+    font-size: var(--font-size-lg);
+  }
+  
+  .sortSelect {
+    font-size: var(--font-size-sm);
+  }
+}
+
+/* 자동완성 및 ETF 카드 모바일 최적화 */
+@media (max-width: 640px) {
+  /* 자동완성 모바일 최적화 */
+  .autocompleteDropdown {
+    max-height: 300px;
+  }
+  
+  .autocompleteItem {
+    padding: var(--spacing-xs) var(--spacing-sm);
+  }
+  
+  .autocompleteName {
+    font-size: 13px;
+  }
+  
+  .autocompleteMeta {
+    gap: 6px;
+  }
+  
+  .autocompleteCategory {
+    font-size: 9px;
+    padding: 2px 5px;
+  }
+  
+  .autocompleteEtfCount {
+    font-size: 10px;
+  }
+  
+  .autocompleteReturn {
+    font-size: 13px;
+  }
+  
+  /* ETF 카드 모바일 최적화 */
+  .etfCard {
+    padding: var(--spacing-md);
+  }
+  
+  .primaryInfo {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-md);
+  }
+  
+  .nameBlock {
+    width: 100%;
+    margin-bottom: 2px;
+  }
+  
+  .name {
+    font-size: var(--font-size-base);
+    line-height: 1.5;
+    margin-bottom: 2px;
+  }
+  
+  .code {
+    font-size: 11px;
+  }
+  
+  .priceBlock {
+    width: auto;
+    justify-content: flex-start;
+    align-items: baseline;
+    gap: 8px;
+  }
+  
+  .priceMain {
+    font-size: var(--font-size-base);
+  }
+  
+  .changeMain {
+    font-size: var(--font-size-sm);
+  }
+  
+  .secondaryInfo {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-md);
+    padding-top: var(--spacing-sm);
+  }
+  
+  .tagGroup {
+    justify-content: flex-start;
+    gap: 4px;
+  }
+  
+  .primaryTag,
+  .secondaryTag {
+    font-size: 9px;
+    padding: 3px 6px;
+  }
+  
+  .metaGroup {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-sm);
+    justify-content: flex-start;
+  }
+  
+  .metaItem {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    align-items: flex-start;
+  }
+  
+  .metaLabel {
+    font-size: 10px;
+    min-width: auto;
+    text-transform: none;
+  }
+  
+  .metaValue {
+    font-size: var(--font-size-sm);
+    padding: 2px 4px;
+  }
+  
+  /* 테마 상세 헤더 모바일 최적화 */
+  .themeDetailHeader {
+    padding: var(--spacing-md) !important;
+  }
+  
+  .detailHeaderContent {
+    gap: var(--spacing-xs);
+    align-items: center;
+  }
+  
+  .detailInfo {
+    min-width: 0;
+    flex: 1;
+  }
+  
+  .detailBadges {
+    gap: 4px;
+    margin-bottom: 6px;
+    flex-wrap: wrap;
+  }
+  
+  .detailCategoryBadge,
+  .detailEtfCount {
+    font-size: 9px;
+    padding: 3px 6px;
+  }
+  
+  .detailTitle {
+    font-size: var(--font-size-base);
+    line-height: 1.5;
+    margin-bottom: 4px;
+  }
+  
+  .detailDesc {
+    font-size: 11px;
+    line-height: 1.5;
+  }
+  
+  .detailReturn {
+    flex-shrink: 0;
+    align-items: flex-end;
+    min-width: 85px;
+    align-self: center;
+  }
+  
+  .detailReturnLabel {
+    font-size: 9px;
+    white-space: nowrap;
+  }
+  
+  .detailReturnValue {
+    font-size: var(--font-size-lg);
+  }
+  
+  /* ETF 리스트 헤더 모바일 최적화 */
+  .etfListHeader {
+    flex-wrap: nowrap;
+    gap: var(--spacing-xs);
+  }
+  
+  .etfListTitle {
+    font-size: var(--font-size-base);
+    flex: 1;
+    min-width: 0;
+  }
+  
+  .etfListCount {
+    font-size: 11px;
+  }
+  
+  .sortWrapper {
+    flex-shrink: 0;
+  }
+  
+  .sortSelect {
+    font-size: 12px;
+    padding: 6px 10px;
+    white-space: nowrap;
+  }
+}
+
+/* 태블릿 최적화 */
+@media (min-width: 641px) and (max-width: 767px) {
+  .etfCard {
+    padding: var(--spacing-md);
+  }
+  
+  .primaryInfo {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-sm);
+  }
+  
+  .nameBlock {
+    flex: 1;
+    min-width: 0;
+    margin-bottom: 0;
+  }
+  
+  .name {
+    font-size: var(--font-size-base);
+  }
+  
+  .code {
+    font-size: 11px;
+  }
+  
+  .priceBlock {
+    flex-shrink: 0;
+    width: auto;
+    justify-content: flex-end;
+    gap: 8px;
+  }
+  
+  .priceMain {
+    font-size: var(--font-size-base);
+  }
+  
+  .changeMain {
+    font-size: var(--font-size-sm);
+  }
+  
+  .secondaryInfo {
+    grid-template-columns: auto 1fr;
+    gap: var(--spacing-md);
+  }
+  
+  .metaGroup {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+    gap: var(--spacing-md);
+  }
+  
+  .metaItem {
+    flex-direction: row;
+    gap: 6px;
+    align-items: center;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1023px) {
+  .etfCard {
+    padding: var(--spacing-md);
+  }
+  
+  .name {
+    font-size: var(--font-size-base);
+  }
+  
+  .code {
+    font-size: 11px;
+  }
+  
+  .priceMain {
+    font-size: var(--font-size-base);
+  }
+  
+  .changeMain {
+    font-size: var(--font-size-sm);
   }
 }

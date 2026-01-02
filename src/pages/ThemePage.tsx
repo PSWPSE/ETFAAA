@@ -1,11 +1,11 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, SortDesc, Search, X, LayoutGrid, List } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
-import { Card, CardHeader, Button } from '../components/common';
+import { Card, Button } from '../components/common';
 import { koreanThemes, usThemes, koreanETFs, usETFs, getReturns } from '../data/etfs';
 import { useETFStore } from '../store/etfStore';
-import { formatPercent, formatLargeNumber } from '../utils/format';
+import { formatPercent, formatLargeNumber, formatPrice } from '../utils/format';
 import type { ThemeCategory } from '../types/etf';
 import styles from './ThemePage.module.css';
 
@@ -38,6 +38,8 @@ const SORT_OPTIONS: { value: SortField; label: string }[] = [
   { value: 'name', label: '이름' },
 ];
 
+type EtfSortOption = 'return' | 'marketCap' | 'dividend';
+
 export default function ThemePage() {
   const { themeId } = useParams<{ themeId: string }>();
   const navigate = useNavigate();
@@ -48,6 +50,13 @@ export default function ThemePage() {
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [searchQuery, setSearchQuery] = useState('');
   const [viewMode, setViewMode] = useState<ViewMode>('list');
+  const [showAutocomplete, setShowAutocomplete] = useState(false);
+  const [selectedIndex, setSelectedIndex] = useState(-1);
+  const [etfSortBy, setEtfSortBy] = useState<EtfSortOption>('return');
+  const [rotatingPeriod, setRotatingPeriod] = useState<'1d' | '1m' | '3m' | '1y'>('1y');
+  
+  const searchRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
   
   // 시장별 데이터 선택
   const themes = selectedMarket === 'korea' ? koreanThemes : usThemes;
@@ -74,6 +83,77 @@ export default function ThemePage() {
   };
   
   const selectedPeriodLabel = PERIOD_OPTIONS.find(p => p.value === selectedPeriod)?.label || '1년';
+  
+  // 자동완성 목록 (최대 10개)
+  const autocompleteResults = useMemo(() => {
+    if (!searchQuery.trim()) return [];
+    
+    const query = searchQuery.toLowerCase().trim();
+    return themes
+      .filter(theme => 
+        theme.name.toLowerCase().includes(query) ||
+        theme.description.toLowerCase().includes(query) ||
+        CATEGORY_OPTIONS.find(c => c.value === theme.category)?.label.toLowerCase().includes(query)
+      )
+      .slice(0, 10)
+      .map(theme => ({
+        ...theme,
+        periodReturn: getReturnByPeriod(theme.avgReturn, selectedPeriod),
+      }));
+  }, [themes, searchQuery, selectedPeriod]);
+  
+  // 외부 클릭 감지
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
+        setShowAutocomplete(false);
+        setSelectedIndex(-1);
+      }
+    };
+    
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+  
+  // 키보드 네비게이션
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (!showAutocomplete || autocompleteResults.length === 0) return;
+    
+    switch (e.key) {
+      case 'ArrowDown':
+        e.preventDefault();
+        setSelectedIndex(prev => 
+          prev < autocompleteResults.length - 1 ? prev + 1 : prev
+        );
+        break;
+      case 'ArrowUp':
+        e.preventDefault();
+        setSelectedIndex(prev => prev > 0 ? prev - 1 : -1);
+        break;
+      case 'Enter':
+        e.preventDefault();
+        if (selectedIndex >= 0 && selectedIndex < autocompleteResults.length) {
+          const selectedTheme = autocompleteResults[selectedIndex];
+          navigate(`/theme/${selectedTheme.id}`);
+          setShowAutocomplete(false);
+          setSearchQuery('');
+          setSelectedIndex(-1);
+        }
+        break;
+      case 'Escape':
+        setShowAutocomplete(false);
+        setSelectedIndex(-1);
+        break;
+    }
+  };
+  
+  // 테마 선택 핸들러
+  const handleSelectTheme = (themeId: string) => {
+    navigate(`/theme/${themeId}`);
+    setShowAutocomplete(false);
+    setSearchQuery('');
+    setSelectedIndex(-1);
+  };
   
   // 정렬 토글
   const toggleSort = () => {
@@ -196,30 +276,152 @@ export default function ThemePage() {
     return Math.abs(returnValue) > 15 ? '#fff' : '#1f2937';
   };
   
+  // 테마 상세용 데이터 (모든 Hook은 조건문 전에 선언)
+  const theme = themes.find(t => t.id === themeId);
+  const themeETFs = themeId ? getETFsByTheme(themeId) : [];
+  
+  // ETF별 수익률 계산
+  const etfReturns = useMemo(() => {
+    if (!themeId || themeETFs.length === 0) return [];
+    
+    const etfsWithReturn = themeETFs.map(etf => {
+      const returns = getReturns(etf.id);
+      return {
+        ...etf,
+        return1d: etf.changePercent,
+        return1m: returns.month1,
+        return3m: returns.month3,
+        return1y: returns.year1,
+      };
+    });
+    
+    // 정렬
+    return [...etfsWithReturn].sort((a, b) => {
+      switch (etfSortBy) {
+        case 'return':
+          return b.return1y - a.return1y;
+        case 'marketCap':
+          return b.marketCap - a.marketCap;
+        case 'dividend':
+          return b.dividendYield - a.dividendYield;
+        default:
+          return 0;
+      }
+    });
+  }, [themeId, themeETFs, etfSortBy]);
+  
+  // 기간별 평균 수익률 계산
+  const avgReturns = useMemo(() => {
+    if (etfReturns.length === 0) return { '1d': 0, '1m': 0, '3m': 0, '1y': 0 };
+    
+    return {
+      '1d': etfReturns.reduce((sum, etf) => sum + etf.return1d, 0) / etfReturns.length,
+      '1m': etfReturns.reduce((sum, etf) => sum + etf.return1m, 0) / etfReturns.length,
+      '3m': etfReturns.reduce((sum, etf) => sum + etf.return3m, 0) / etfReturns.length,
+      '1y': etfReturns.reduce((sum, etf) => sum + etf.return1y, 0) / etfReturns.length,
+    };
+  }, [etfReturns]);
+  
+  // 현재 표시할 수익률 정보
+  const currentReturnInfo = useMemo(() => {
+    const labels = {
+      '1d': '오늘 수익률',
+      '1m': '1개월 수익률',
+      '3m': '3개월 수익률',
+      '1y': '1년 수익률',
+    };
+    
+    return {
+      label: labels[rotatingPeriod],
+      value: avgReturns[rotatingPeriod],
+    };
+  }, [rotatingPeriod, avgReturns]);
+  
+  // 수익률 로테이션 효과 (테마 상세에서만 작동)
+  useEffect(() => {
+    if (!themeId) return; // 테마 목록에서는 실행하지 않음
+    
+    const periods: ('1d' | '1m' | '3m' | '1y')[] = ['1d', '1m', '3m', '1y'];
+    let currentIndex = periods.indexOf(rotatingPeriod);
+    
+    const interval = setInterval(() => {
+      currentIndex = (currentIndex + 1) % periods.length;
+      setRotatingPeriod(periods[currentIndex]);
+    }, 3000); // 3초마다 변경
+    
+    return () => clearInterval(interval);
+  }, [themeId, rotatingPeriod]);
+  
   // 테마 선택 안됨 -> 테마 목록
   if (!themeId) {
     return (
       <div className={styles.page}>
         {/* 검색 바 */}
-        <div className={styles.searchBar}>
+        <div className={styles.searchBar} ref={searchRef}>
           <div className={styles.searchInputWrapper}>
             <Search size={18} className={styles.searchIcon} />
             <input
+              ref={inputRef}
               type="text"
               className={styles.searchInput}
               placeholder="테마 검색 (예: 반도체, AI, 배당...)"
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setShowAutocomplete(true);
+                setSelectedIndex(-1);
+              }}
+              onFocus={() => {
+                if (searchQuery.trim()) {
+                  setShowAutocomplete(true);
+                }
+              }}
+              onKeyDown={handleKeyDown}
             />
             {searchQuery && (
               <button
                 className={styles.clearButton}
-                onClick={() => setSearchQuery('')}
+                onClick={() => {
+                  setSearchQuery('');
+                  setShowAutocomplete(false);
+                  setSelectedIndex(-1);
+                }}
               >
                 <X size={16} />
               </button>
             )}
           </div>
+          
+          {/* 자동완성 드롭다운 */}
+          {showAutocomplete && autocompleteResults.length > 0 && (
+            <div className={styles.autocompleteDropdown}>
+              {autocompleteResults.map((theme, index) => (
+                <button
+                  key={theme.id}
+                  className={`${styles.autocompleteItem} ${index === selectedIndex ? styles.selected : ''}`}
+                  onClick={() => handleSelectTheme(theme.id)}
+                  onMouseEnter={() => setSelectedIndex(index)}
+                >
+                  <div className={styles.autocompleteLeft}>
+                    <span className={styles.autocompleteName}>{theme.name}</span>
+                    <div className={styles.autocompleteMeta}>
+                      <span className={styles.autocompleteCategory}>
+                        {CATEGORY_OPTIONS.find(c => c.value === theme.category)?.label}
+                      </span>
+                      <span className={styles.autocompleteEtfCount}>
+                        {theme.etfCount}개 ETF
+                      </span>
+                    </div>
+                  </div>
+                  <div className={styles.autocompleteRight}>
+                    <span className={`${styles.autocompleteReturn} ${theme.periodReturn >= 0 ? styles.up : styles.down}`}>
+                      {theme.periodReturn >= 0 ? '+' : ''}{theme.periodReturn.toFixed(1)}%
+                    </span>
+                  </div>
+                </button>
+              ))}
+            </div>
+          )}
         </div>
         
         {/* 수익률 차트 - 상위/하위 */}
@@ -540,8 +742,6 @@ export default function ThemePage() {
   }
   
   // 특정 테마 선택됨 -> 테마 상세
-  const theme = themes.find(t => t.id === themeId);
-  
   if (!theme) {
     return (
       <div className={styles.notFound}>
@@ -551,25 +751,8 @@ export default function ThemePage() {
     );
   }
   
-  const themeETFs = getETFsByTheme(themeId);
-  
-  // ETF별 1년 수익률
-  const etfReturns = themeETFs.map(etf => {
-    const returns = getReturns(etf.id);
-    return {
-      ...etf,
-      return1y: returns.year1,
-    };
-  }).sort((a, b) => b.return1y - a.return1y);
-  
   return (
     <div className={styles.page}>
-      {/* Back Button */}
-      <button className={styles.backButton} onClick={() => navigate('/theme')}>
-        <ArrowLeft size={20} />
-        <span>테마 목록</span>
-      </button>
-      
       {/* Theme Header */}
       <Card padding="lg" className={styles.themeDetailHeader}>
         <div className={styles.detailHeaderContent}>
@@ -584,9 +767,14 @@ export default function ThemePage() {
             <p className={styles.detailDesc}>{theme.description}</p>
           </div>
           <div className={styles.detailReturn}>
-            <span className={styles.detailReturnLabel}>평균 수익률 (1Y)</span>
-            <span className={`${styles.detailReturnValue} ${theme.avgReturn >= 0 ? styles.up : styles.down}`}>
-              {theme.avgReturn >= 0 ? '+' : ''}{theme.avgReturn.toFixed(1)}%
+            <span className={styles.detailReturnLabel} key={rotatingPeriod}>
+              {currentReturnInfo.label}
+            </span>
+            <span 
+              className={`${styles.detailReturnValue} ${currentReturnInfo.value >= 0 ? styles.up : styles.down}`}
+              key={`${rotatingPeriod}-value`}
+            >
+              {currentReturnInfo.value >= 0 ? '+' : ''}{currentReturnInfo.value.toFixed(1)}%
             </span>
           </div>
         </div>
@@ -594,31 +782,64 @@ export default function ThemePage() {
       
       {/* ETF List */}
       <Card padding="md">
-        <CardHeader title="테마 ETF 목록" subtitle={`수익률 높은 순`} />
+        <div className={styles.etfListHeader}>
+          <h3 className={styles.etfListTitle}>
+            테마 ETF 목록 <span className={styles.etfListCount}>{etfReturns.length}개</span>
+          </h3>
+          <div className={styles.sortWrapper}>
+            <select 
+              className={styles.sortSelect} 
+              value={etfSortBy} 
+              onChange={(e) => setEtfSortBy(e.target.value as EtfSortOption)}
+            >
+              <option value="return">수익률순</option>
+              <option value="marketCap">시가총액순</option>
+              <option value="dividend">배당수익률순</option>
+            </select>
+          </div>
+        </div>
         <div className={styles.etfList}>
           {etfReturns.map((etf) => (
             <div 
               key={etf.id}
-              className={styles.etfItem}
-              onClick={() => navigate(`/detail/${etf.id}`)}
+              className={styles.etfCard}
+              onClick={() => navigate(`/etf/${etf.id}`)}
             >
-              <div className={styles.etfInfo}>
-                <span className={styles.etfName}>{etf.name}</span>
-                <span className={styles.etfMeta}>{etf.ticker} · {etf.issuer}</span>
-              </div>
-              <div className={styles.etfStats}>
-                <div className={styles.etfStat}>
-                  <span className={styles.statLabel}>현재가</span>
-                  <span className={styles.statValue}>{formatLargeNumber(etf.price)}원</span>
+              {/* Primary Info */}
+              <div className={styles.primaryInfo}>
+                <div className={styles.nameBlock}>
+                  <h3 className={styles.name}>{etf.name}</h3>
+                  <span className={styles.code}>{etf.ticker}</span>
                 </div>
-                <div className={styles.etfStat}>
-                  <span className={styles.statLabel}>1년 수익률</span>
-                  <span className={`${styles.statValue} ${etf.return1y >= 0 ? styles.up : styles.down}`}>
-                    {formatPercent(etf.return1y)}
+                <div className={styles.priceBlock}>
+                  <div className={styles.priceMain}>{formatPrice(etf.price)}원</div>
+                  <div className={`${styles.changeMain} ${etf.changePercent >= 0 ? 'number-up' : 'number-down'}`}>
+                    {etf.changePercent >= 0 ? '▲' : '▼'} {formatPercent(Math.abs(etf.changePercent))}
+                  </div>
+                </div>
+              </div>
+              
+              {/* Secondary Info */}
+              <div className={styles.secondaryInfo}>
+                <div className={styles.tagGroup}>
+                  <span className={styles.primaryTag}>{etf.category}</span>
+                  {etf.themes.slice(0, 2).map(theme => (
+                    <span key={theme} className={styles.secondaryTag}>{theme}</span>
+                  ))}
+                </div>
+                <div className={styles.metaGroup}>
+                  <span className={styles.metaItem}>
+                    <span className={styles.metaLabel}>시가총액</span>
+                    <span className={styles.metaValue}>{formatLargeNumber(etf.marketCap)}</span>
+                  </span>
+                  <span className={styles.metaItem}>
+                    <span className={styles.metaLabel}>1년 수익률</span>
+                    <span className={`${styles.metaValue} ${etf.return1y >= 0 ? 'number-up' : 'number-down'}`}>
+                      {formatPercent(etf.return1y)}
+                    </span>
                   </span>
                 </div>
               </div>
-              <ArrowRight size={16} className={styles.etfArrow} />
             </div>
           ))}
         </div>
