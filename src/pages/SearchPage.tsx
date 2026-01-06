@@ -1,9 +1,10 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Sparkles, SlidersHorizontal, Package, ArrowRight, Send, FileText } from 'lucide-react';
-import { Card, Button } from '../components/common';
+import { Search, Sparkles, SlidersHorizontal, Package, ArrowRight, Send, FileText, ChevronDown, X } from 'lucide-react';
+import { Card, CardHeader, Button } from '../components/common';
+import PageContainer from '../components/layout/PageContainer';
 import { useETFStore } from '../store/etfStore';
-import { koreanETFs, usETFs, filterOptions } from '../data/etfs';
+import { koreanETFs, usETFs, filterOptions, getReturns } from '../data/etfs';
 import { formatPrice, formatPercent, formatLargeNumber, getChangeClass } from '../utils/format';
 import styles from './SearchPage.module.css';
 
@@ -36,12 +37,23 @@ const pensionTypes = ['전체', '개인연금', '퇴직연금'];
 type SortOption = 'marketCap' | 'dividend' | 'change';
 type HoldingSortOption = 'weight' | 'change';
 
+type ResultPeriod = '1d' | '1m' | '3m' | '6m' | '1y';
+
+const RESULT_PERIOD_OPTIONS = [
+  { value: '1d' as ResultPeriod, label: '1일' },
+  { value: '1m' as ResultPeriod, label: '1개월' },
+  { value: '3m' as ResultPeriod, label: '3개월' },
+  { value: '6m' as ResultPeriod, label: '6개월' },
+  { value: '1y' as ResultPeriod, label: '1년' },
+];
+
 export default function SearchPage() {
   const navigate = useNavigate();
   const [searchType, setSearchType] = useState<SearchType>('name');
   const [hasSearched, setHasSearched] = useState(false);
-  const [sortBy, setSortBy] = useState<SortOption>('marketCap');
+  const [sortBy, setSortBy] = useState<SortOption>('change');
   const [holdingSortBy, setHoldingSortBy] = useState<HoldingSortOption>('weight');
+  const [resultPeriod, setResultPeriod] = useState<ResultPeriod>('1d');
   
   const [nameQuery, setNameQuery] = useState('');
   const [aiQuery, setAiQuery] = useState('');
@@ -73,11 +85,63 @@ export default function SearchPage() {
   const [issuerMarket, setIssuerMarket] = useState<'korea' | 'us'>('korea');
   const [selectedPensionTypes, setSelectedPensionTypes] = useState<string[]>([]);
   
+  // 활성 필터 탭
+  const [activeFilterTab, setActiveFilterTab] = useState<string>('listing');
+  
+  // 필터 카테고리 정의
+  const filterCategories = [
+    { id: 'listing', label: '상장국가' },
+    { id: 'region', label: '투자지역' },
+    { id: 'asset', label: '기초자산' },
+    { id: 'aum', label: '자산규모' },
+    { id: 'leverage', label: '레버리지' },
+    { id: 'inverse', label: '인버스' },
+    { id: 'dividend', label: '배당' },
+    { id: 'return', label: '수익률' },
+    { id: 'issuer', label: '운용사' },
+    { id: 'pension', label: '연금' },
+    { id: 'sector', label: '섹터' },
+    { id: 'volume', label: '거래량' },
+    { id: 'expense', label: '총보수' },
+    { id: 'listingPeriod', label: '상장기간' },
+    { id: 'hedge', label: '환헤지' },
+  ];
+  
   const store = useETFStore();
   const { selectedMarket, selectedIssuers, setSelectedIssuers } = store;
   
   const etfs = selectedMarket === 'korea' ? koreanETFs : usETFs;
   const [searchResults, setSearchResults] = useState(etfs);
+  
+  // 선택된 필터 개수 계산
+  const activeFiltersCount = useMemo(() => {
+    let count = 0;
+    if (selectedListingCountries.length > 0) count += selectedListingCountries.length;
+    if (selectedInvestRegions.length > 0) count += selectedInvestRegions.length;
+    if (selectedAssetTypes.length > 0) count += selectedAssetTypes.length;
+    if (selectedDomesticAUM.length > 0) count += selectedDomesticAUM.length;
+    if (selectedForeignAUM.length > 0) count += selectedForeignAUM.length;
+    if (selectedLeverageTypes.length > 0) count += selectedLeverageTypes.length;
+    if (selectedInverseTypes.length > 0) count += selectedInverseTypes.length;
+    if (selectedDividendFreq.length > 0) count += selectedDividendFreq.length;
+    if (dividendMin || dividendMax) count += 1;
+    if (selectedReturnPeriod) count += 1;
+    if (returnMin || returnMax) count += 1;
+    if (selectedIssuers.length > 0) count += selectedIssuers.length;
+    if (selectedPensionTypes.length > 0) count += selectedPensionTypes.length;
+    if (selectedSectors.length > 0) count += selectedSectors.length;
+    if (selectedTradingVolumes.length > 0) count += selectedTradingVolumes.length;
+    if (selectedExpenseRatios.length > 0) count += selectedExpenseRatios.length;
+    if (selectedListingPeriods.length > 0) count += selectedListingPeriods.length;
+    if (selectedHedgeTypes.length > 0) count += selectedHedgeTypes.length;
+    return count;
+  }, [
+    selectedListingCountries, selectedInvestRegions, selectedAssetTypes,
+    selectedDomesticAUM, selectedForeignAUM, selectedLeverageTypes, selectedInverseTypes,
+    selectedDividendFreq, dividendMin, dividendMax, selectedReturnPeriod, returnMin, returnMax,
+    selectedIssuers, selectedPensionTypes, selectedSectors, selectedTradingVolumes,
+    selectedExpenseRatios, selectedListingPeriods, selectedHedgeTypes
+  ]);
   
   const sortedResults = [...searchResults].sort((a, b) => {
     if (searchType === 'holdings' && holdingsQuery) {
@@ -107,7 +171,25 @@ export default function SearchPage() {
         case 'dividend':
           return b.dividendYield - a.dividendYield;
         case 'change':
-          return b.changePercent - a.changePercent;
+          // 기간별 수익률 계산
+          const getReturnByPeriod = (etf: typeof a) => {
+            const returns = getReturns(etf.id);
+            switch (resultPeriod) {
+              case '1d':
+                return etf.changePercent;
+              case '1m':
+                return returns.month1;
+              case '3m':
+                return returns.month3;
+              case '6m':
+                return returns.month6;
+              case '1y':
+                return returns.year1;
+              default:
+                return etf.changePercent;
+            }
+          };
+          return getReturnByPeriod(b) - getReturnByPeriod(a);
         default:
           return 0;
       }
@@ -164,9 +246,21 @@ export default function SearchPage() {
     setAiQuery('');
   };
 
+  const resultsSectionRef = useRef<HTMLDivElement>(null);
+  
   const handleSearch = () => {
     setHasSearched(true);
     let filtered = [...etfs];
+    
+    // 검색 실행 후 결과 섹션으로 스크롤 (섹션 전체가 보이도록)
+    setTimeout(() => {
+      if (resultsSectionRef.current) {
+        const yOffset = -80; // 헤더 높이 고려
+        const element = resultsSectionRef.current;
+        const y = element.getBoundingClientRect().top + window.pageYOffset + yOffset;
+        window.scrollTo({ top: y, behavior: 'smooth' });
+      }
+    }, 150);
     
     if (searchType === 'ai') {
       handleAIChat();
@@ -233,10 +327,13 @@ export default function SearchPage() {
   ];
   
   return (
-    <div className={styles.page}>
+    <PageContainer 
+      title="ETF 검색" 
+      subtitle="원하는 조건으로 ETF를 검색하세요"
+      showMarketSelector={true}
+    >
       {/* Search Method Selector */}
       <div className={styles.searchMethodSection}>
-        <h2 className={styles.searchMethodTitle}>검색 방식을 선택하세요</h2>
         <div className={styles.searchTypeTabs}>
           {searchTabs.map((tab) => {
             const Icon = tab.icon;
@@ -251,7 +348,7 @@ export default function SearchPage() {
         </div>
       </div>
       
-      <Card padding="md" className={styles.searchCard}>
+      <Card padding="md" className={`${styles.searchCard} ${(searchType === 'name' && !nameQuery.trim()) || (searchType === 'holdings' && !holdingsQuery.trim()) ? styles.required : ''}`}>
         {searchType === 'ai' && (
           <div className={styles.chatInterface}>
             <div className={styles.chatHeader}>
@@ -322,7 +419,7 @@ export default function SearchPage() {
             </div>
             
             {/* Chat Input */}
-            <div className={styles.chatInputWrapper}>
+            <div className={`${styles.chatInputWrapper} ${styles.required}`}>
               <input type="text" className={styles.chatInput} placeholder="AI와 대화를 시작해보세요."
                 value={aiQuery} onChange={(e) => setAiQuery(e.target.value)} 
                 onKeyPress={(e) => e.key === 'Enter' && handleAIChat()} />
@@ -336,137 +433,152 @@ export default function SearchPage() {
         {searchType === 'screener' && (
           <div className={styles.searchInterface}>
             <h3 className={styles.sectionTitle}>원하는 조건으로 ETF를 찾아보세요</h3>
-            <div className={styles.screenerFilters}>
+            
+            {/* 필터 카테고리 탭 */}
+            <div className={styles.filterCategoryTabs}>
+              {filterCategories.map((category) => (
+                <button
+                  key={category.id}
+                  className={`${styles.filterCategoryTab} ${activeFilterTab === category.id ? styles.active : ''}`}
+                  onClick={() => setActiveFilterTab(category.id)}
+                >
+                  {category.label}
+                </button>
+              ))}
+            </div>
+            
+            {/* 선택된 카테고리의 필터 옵션 */}
+            <div className={`${styles.filterOptions} ${styles.required}`}>
+              <div className={styles.filterOptionsHeader}>
+                원하는 항목을 선택하세요
+              </div>
               
               {/* 상장국가 */}
-              <div className={styles.filterSection}>
-                <h4 className={styles.filterTitle}>상장국가</h4>
+              {activeFilterTab === 'listing' && (
                 <div className={styles.filterChips}>
                   {listingCountries.map(country => (
                     <button key={country} className={`${styles.filterChip} ${selectedListingCountries.includes(country) ? styles.selected : ''}`}
                       onClick={() => toggleArrayItem(selectedListingCountries, setSelectedListingCountries, country)}>{country}</button>
                   ))}
                 </div>
-              </div>
+              )}
               
               {/* 투자지역 */}
-              <div className={styles.filterSection}>
-                <h4 className={styles.filterTitle}>투자지역</h4>
+              {activeFilterTab === 'region' && (
                 <div className={styles.filterChips}>
                   {investRegions.map(region => (
                     <button key={region} className={`${styles.filterChip} ${selectedInvestRegions.includes(region) ? styles.selected : ''}`}
                       onClick={() => toggleArrayItem(selectedInvestRegions, setSelectedInvestRegions, region)}>{region}</button>
                   ))}
                 </div>
-              </div>
+              )}
               
               {/* 기초자산 */}
-              <div className={styles.filterSection}>
-                <h4 className={styles.filterTitle}>기초자산</h4>
+              {activeFilterTab === 'asset' && (
                 <div className={styles.filterChips}>
                   {assetTypes.map(type => (
                     <button key={type} className={`${styles.filterChip} ${selectedAssetTypes.includes(type) ? styles.selected : ''}`}
                       onClick={() => toggleArrayItem(selectedAssetTypes, setSelectedAssetTypes, type)}>{type}</button>
                   ))}
                 </div>
-              </div>
+              )}
               
               {/* 자산규모 */}
-              <div className={styles.filterSection}>
-                <h4 className={styles.filterTitle}>자산규모</h4>
-                <div className={styles.filterSubSection}>
-                  <span className={styles.filterSubtitle}>국내 ETF</span>
-                  <div className={styles.filterChips}>
-                    {domesticAUM.map(aum => (
-                      <button key={aum} className={`${styles.filterChip} ${selectedDomesticAUM.includes(aum) ? styles.selected : ''}`}
-                        onClick={() => toggleArrayItem(selectedDomesticAUM, setSelectedDomesticAUM, aum)}>{aum}</button>
-                    ))}
-                  </div>
-                </div>
-                <div className={styles.filterSubSection}>
-                  <span className={styles.filterSubtitle}>해외 ETF</span>
-                  <div className={styles.filterChips}>
-                    {foreignAUM.map(aum => (
-                      <button key={aum} className={`${styles.filterChip} ${selectedForeignAUM.includes(aum) ? styles.selected : ''}`}
-                        onClick={() => toggleArrayItem(selectedForeignAUM, setSelectedForeignAUM, aum)}>{aum}</button>
-                    ))}
-                  </div>
-                </div>
-              </div>
+              {activeFilterTab === 'aum' && (
+                  <>
+                    <div className={styles.filterSubSection}>
+                      <span className={styles.filterSubtitle}>국내 ETF</span>
+                      <div className={styles.filterChips}>
+                        {domesticAUM.map(aum => (
+                          <button key={aum} className={`${styles.filterChip} ${selectedDomesticAUM.includes(aum) ? styles.selected : ''}`}
+                            onClick={() => toggleArrayItem(selectedDomesticAUM, setSelectedDomesticAUM, aum)}>{aum}</button>
+                        ))}
+                      </div>
+                    </div>
+                    <div className={styles.filterSubSection}>
+                      <span className={styles.filterSubtitle}>해외 ETF</span>
+                      <div className={styles.filterChips}>
+                        {foreignAUM.map(aum => (
+                          <button key={aum} className={`${styles.filterChip} ${selectedForeignAUM.includes(aum) ? styles.selected : ''}`}
+                            onClick={() => toggleArrayItem(selectedForeignAUM, setSelectedForeignAUM, aum)}>{aum}</button>
+                        ))}
+                      </div>
+                    </div>
+                  </>
+              )}
               
               {/* 레버리지 */}
-              <div className={styles.filterSection}>
-                <h4 className={styles.filterTitle}>레버리지</h4>
+              {activeFilterTab === 'leverage' && (
                 <div className={styles.filterChips}>
                   {leverageTypes.map(type => (
                     <button key={type} className={`${styles.filterChip} ${selectedLeverageTypes.includes(type) ? styles.selected : ''}`}
                       onClick={() => toggleArrayItem(selectedLeverageTypes, setSelectedLeverageTypes, type)}>{type}</button>
                   ))}
                 </div>
-              </div>
+              )}
               
               {/* 인버스 */}
-              <div className={styles.filterSection}>
-                <h4 className={styles.filterTitle}>인버스</h4>
+              {activeFilterTab === 'inverse' && (
                 <div className={styles.filterChips}>
                   {inverseTypes.map(type => (
                     <button key={type} className={`${styles.filterChip} ${selectedInverseTypes.includes(type) ? styles.selected : ''}`}
                       onClick={() => toggleArrayItem(selectedInverseTypes, setSelectedInverseTypes, type)}>{type}</button>
                   ))}
                 </div>
-              </div>
+              )}
               
               {/* 배당 */}
-              <div className={styles.filterSection}>
-                <h4 className={styles.filterTitle}>배당</h4>
-                <div className={styles.filterSubSection}>
-                  <span className={styles.filterSubtitle}>배당 수익률</span>
-                  <div className={styles.rangeInputs}>
-                    <input type="text" className={styles.rangeInput} placeholder="배당률 입력" value={dividendMin} 
-                      onChange={(e) => setDividendMin(e.target.value)} />
-                    <span className={styles.rangeSeparator}>~</span>
-                    <input type="text" className={styles.rangeInput} placeholder="배당률 입력" value={dividendMax}
-                      onChange={(e) => setDividendMax(e.target.value)} />
+              {activeFilterTab === 'dividend' && (
+                <>
+                  <div className={styles.filterSubSection}>
+                    <span className={styles.filterSubtitle}>배당 수익률</span>
+                    <div className={styles.rangeInputs}>
+                      <input type="text" className={styles.rangeInput} placeholder="배당률 입력" value={dividendMin} 
+                        onChange={(e) => setDividendMin(e.target.value)} />
+                      <span className={styles.rangeSeparator}>~</span>
+                      <input type="text" className={styles.rangeInput} placeholder="배당률 입력" value={dividendMax}
+                        onChange={(e) => setDividendMax(e.target.value)} />
+                    </div>
                   </div>
-                </div>
-                <div className={styles.filterSubSection}>
-                  <span className={styles.filterSubtitle}>배당 주기</span>
-                  <div className={styles.filterChips}>
-                    {dividendFrequencies.map(freq => (
-                      <button key={freq} className={`${styles.filterChip} ${selectedDividendFreq.includes(freq) ? styles.selected : ''}`}
-                        onClick={() => toggleArrayItem(selectedDividendFreq, setSelectedDividendFreq, freq)}>{freq}</button>
-                    ))}
+                  <div className={styles.filterSubSection}>
+                    <span className={styles.filterSubtitle}>배당 주기</span>
+                    <div className={styles.filterChips}>
+                      {dividendFrequencies.map(freq => (
+                        <button key={freq} className={`${styles.filterChip} ${selectedDividendFreq.includes(freq) ? styles.selected : ''}`}
+                          onClick={() => toggleArrayItem(selectedDividendFreq, setSelectedDividendFreq, freq)}>{freq}</button>
+                      ))}
+                    </div>
                   </div>
-                </div>
-              </div>
+                </>
+              )}
               
               {/* 수익률 */}
-              <div className={styles.filterSection}>
-                <h4 className={styles.filterTitle}>수익률</h4>
-                <div className={styles.filterSubSection}>
-                  <span className={styles.filterSubtitle}>수익기간</span>
-                  <div className={styles.filterChips}>
-                    {returnPeriods.map(period => (
-                      <button key={period} className={`${styles.filterChip} ${selectedReturnPeriod === period ? styles.selected : ''}`}
-                        onClick={() => setSelectedReturnPeriod(selectedReturnPeriod === period ? null : period)}>{period}</button>
-                    ))}
+              {activeFilterTab === 'return' && (
+                <>
+                  <div className={styles.filterSubSection}>
+                    <span className={styles.filterSubtitle}>수익기간</span>
+                    <div className={styles.filterChips}>
+                      {returnPeriods.map(period => (
+                        <button key={period} className={`${styles.filterChip} ${selectedReturnPeriod === period ? styles.selected : ''}`}
+                          onClick={() => setSelectedReturnPeriod(selectedReturnPeriod === period ? null : period)}>{period}</button>
+                      ))}
+                    </div>
                   </div>
-                </div>
-                <div className={styles.filterSubSection}>
-                  <span className={styles.filterSubtitle}>수익률 범위</span>
-                  <div className={styles.rangeInputs}>
-                    <input type="text" className={styles.rangeInput} placeholder="수익률 입력" value={returnMin} 
-                      onChange={(e) => setReturnMin(e.target.value)} />
-                    <span className={styles.rangeSeparator}>~</span>
-                    <input type="text" className={styles.rangeInput} placeholder="수익률 입력" value={returnMax}
-                      onChange={(e) => setReturnMax(e.target.value)} />
+                  <div className={styles.filterSubSection}>
+                    <span className={styles.filterSubtitle}>수익률 범위</span>
+                    <div className={styles.rangeInputs}>
+                      <input type="text" className={styles.rangeInput} placeholder="수익률 입력" value={returnMin} 
+                        onChange={(e) => setReturnMin(e.target.value)} />
+                      <span className={styles.rangeSeparator}>~</span>
+                      <input type="text" className={styles.rangeInput} placeholder="수익률 입력" value={returnMax}
+                        onChange={(e) => setReturnMax(e.target.value)} />
+                    </div>
                   </div>
-                </div>
-              </div>
+                </>
+              )}
               
               {/* 운용사 */}
-              <div className={styles.filterSection}>
-                <h4 className={styles.filterTitle}>운용사</h4>
+              {activeFilterTab === 'issuer' && (
                 <div className={styles.filterSubSection}>
                   <div className={styles.issuerToggle}>
                     <button 
@@ -487,117 +599,322 @@ export default function SearchPage() {
                     ))}
                   </div>
                 </div>
-              </div>
+              )}
               
               {/* 연금 */}
-              <div className={styles.filterSection}>
-                <h4 className={styles.filterTitle}>연금</h4>
+              {activeFilterTab === 'pension' && (
                 <div className={styles.filterChips}>
                   {pensionTypes.map(type => (
                     <button key={type} className={`${styles.filterChip} ${selectedPensionTypes.includes(type) ? styles.selected : ''}`}
                       onClick={() => toggleArrayItem(selectedPensionTypes, setSelectedPensionTypes, type)}>{type}</button>
                   ))}
                 </div>
-              </div>
+              )}
               
               {/* 섹터 */}
-              <div className={styles.filterSection}>
-                <h4 className={styles.filterTitle}>섹터</h4>
+              {activeFilterTab === 'sector' && (
                 <div className={styles.filterChips}>
                   {sectors.map(sector => (
                     <button key={sector} className={`${styles.filterChip} ${selectedSectors.includes(sector) ? styles.selected : ''}`}
                       onClick={() => toggleArrayItem(selectedSectors, setSelectedSectors, sector)}>{sector}</button>
                   ))}
                 </div>
-              </div>
+              )}
               
               {/* 거래량 */}
-              <div className={styles.filterSection}>
-                <h4 className={styles.filterTitle}>일평균 거래량</h4>
+              {activeFilterTab === 'volume' && (
                 <div className={styles.filterChips}>
                   {tradingVolumes.map(volume => (
                     <button key={volume} className={`${styles.filterChip} ${selectedTradingVolumes.includes(volume) ? styles.selected : ''}`}
                       onClick={() => toggleArrayItem(selectedTradingVolumes, setSelectedTradingVolumes, volume)}>{volume}</button>
                   ))}
                 </div>
-              </div>
+              )}
               
               {/* 총보수 */}
-              <div className={styles.filterSection}>
-                <h4 className={styles.filterTitle}>총보수 (연간)</h4>
+              {activeFilterTab === 'expense' && (
                 <div className={styles.filterChips}>
                   {expenseRatios.map(ratio => (
                     <button key={ratio} className={`${styles.filterChip} ${selectedExpenseRatios.includes(ratio) ? styles.selected : ''}`}
                       onClick={() => toggleArrayItem(selectedExpenseRatios, setSelectedExpenseRatios, ratio)}>{ratio}</button>
                   ))}
                 </div>
-              </div>
+              )}
               
               {/* 상장기간 */}
-              <div className={styles.filterSection}>
-                <h4 className={styles.filterTitle}>상장기간</h4>
+              {activeFilterTab === 'listingPeriod' && (
                 <div className={styles.filterChips}>
                   {listingPeriods.map(period => (
                     <button key={period} className={`${styles.filterChip} ${selectedListingPeriods.includes(period) ? styles.selected : ''}`}
                       onClick={() => toggleArrayItem(selectedListingPeriods, setSelectedListingPeriods, period)}>{period}</button>
                   ))}
                 </div>
-              </div>
+              )}
               
               {/* 환헤지 */}
-              <div className={styles.filterSection}>
-                <h4 className={styles.filterTitle}>환헤지 여부</h4>
+              {activeFilterTab === 'hedge' && (
                 <div className={styles.filterChips}>
                   {hedgeTypes.map(type => (
                     <button key={type} className={`${styles.filterChip} ${selectedHedgeTypes.includes(type) ? styles.selected : ''}`}
                       onClick={() => toggleArrayItem(selectedHedgeTypes, setSelectedHedgeTypes, type)}>{type}</button>
                   ))}
                 </div>
-              </div>
+              )}
               
             </div>
+            
+            {/* 선택된 필터 표시 */}
+            {activeFiltersCount > 0 && (
+              <div className={styles.selectedFiltersSection}>
+                <div className={styles.selectedFiltersHeader}>
+                  <span className={styles.selectedFiltersLabel}>
+                    선택된 필터 <span className={styles.selectedFiltersCount}>({activeFiltersCount})</span>
+                  </span>
+                  <button 
+                    className={styles.clearAllFiltersButton}
+                    onClick={() => {
+                      setSelectedListingCountries([]);
+                      setSelectedInvestRegions([]);
+                      setSelectedAssetTypes([]);
+                      setSelectedDomesticAUM([]);
+                      setSelectedForeignAUM([]);
+                      setSelectedLeverageTypes([]);
+                      setSelectedInverseTypes([]);
+                      setSelectedDividendFreq([]);
+                      setDividendMin('');
+                      setDividendMax('');
+                      setSelectedReturnPeriod(null);
+                      setReturnMin('');
+                      setReturnMax('');
+                      setSelectedIssuers([]);
+                      setSelectedPensionTypes([]);
+                      setSelectedSectors([]);
+                      setSelectedTradingVolumes([]);
+                      setSelectedExpenseRatios([]);
+                      setSelectedListingPeriods([]);
+                      setSelectedHedgeTypes([]);
+                    }}
+                  >
+                    전체 초기화
+                  </button>
+                </div>
+                <div className={styles.selectedFilterChips}>
+                  {selectedListingCountries.map(item => (
+                    <div key={item} className={styles.selectedFilterChip}>
+                      <span>{item}</span>
+                      <button onClick={() => toggleArrayItem(selectedListingCountries, setSelectedListingCountries, item)}>
+                        <X size={14} />
+                      </button>
+                    </div>
+                  ))}
+                  {selectedInvestRegions.map(item => (
+                    <div key={item} className={styles.selectedFilterChip}>
+                      <span>{item}</span>
+                      <button onClick={() => toggleArrayItem(selectedInvestRegions, setSelectedInvestRegions, item)}>
+                        <X size={14} />
+                      </button>
+                    </div>
+                  ))}
+                  {selectedAssetTypes.map(item => (
+                    <div key={item} className={styles.selectedFilterChip}>
+                      <span>{item}</span>
+                      <button onClick={() => toggleArrayItem(selectedAssetTypes, setSelectedAssetTypes, item)}>
+                        <X size={14} />
+                      </button>
+                    </div>
+                  ))}
+                  {selectedDomesticAUM.map(item => (
+                    <div key={item} className={styles.selectedFilterChip}>
+                      <span>국내: {item}</span>
+                      <button onClick={() => toggleArrayItem(selectedDomesticAUM, setSelectedDomesticAUM, item)}>
+                        <X size={14} />
+                      </button>
+                    </div>
+                  ))}
+                  {selectedForeignAUM.map(item => (
+                    <div key={item} className={styles.selectedFilterChip}>
+                      <span>해외: {item}</span>
+                      <button onClick={() => toggleArrayItem(selectedForeignAUM, setSelectedForeignAUM, item)}>
+                        <X size={14} />
+                      </button>
+                    </div>
+                  ))}
+                  {selectedLeverageTypes.map(item => (
+                    <div key={item} className={styles.selectedFilterChip}>
+                      <span>레버리지: {item}</span>
+                      <button onClick={() => toggleArrayItem(selectedLeverageTypes, setSelectedLeverageTypes, item)}>
+                        <X size={14} />
+                      </button>
+                    </div>
+                  ))}
+                  {selectedInverseTypes.map(item => (
+                    <div key={item} className={styles.selectedFilterChip}>
+                      <span>인버스: {item}</span>
+                      <button onClick={() => toggleArrayItem(selectedInverseTypes, setSelectedInverseTypes, item)}>
+                        <X size={14} />
+                      </button>
+                    </div>
+                  ))}
+                  {selectedDividendFreq.map(item => (
+                    <div key={item} className={styles.selectedFilterChip}>
+                      <span>배당: {item}</span>
+                      <button onClick={() => toggleArrayItem(selectedDividendFreq, setSelectedDividendFreq, item)}>
+                        <X size={14} />
+                      </button>
+                    </div>
+                  ))}
+                  {(dividendMin || dividendMax) && (
+                    <div className={styles.selectedFilterChip}>
+                      <span>배당률: {dividendMin || '0'}% ~ {dividendMax || '∞'}%</span>
+                      <button onClick={() => { setDividendMin(''); setDividendMax(''); }}>
+                        <X size={14} />
+                      </button>
+                    </div>
+                  )}
+                  {selectedReturnPeriod && (
+                    <div className={styles.selectedFilterChip}>
+                      <span>수익기간: {selectedReturnPeriod}</span>
+                      <button onClick={() => setSelectedReturnPeriod(null)}>
+                        <X size={14} />
+                      </button>
+                    </div>
+                  )}
+                  {(returnMin || returnMax) && (
+                    <div className={styles.selectedFilterChip}>
+                      <span>수익률: {returnMin || '-∞'}% ~ {returnMax || '∞'}%</span>
+                      <button onClick={() => { setReturnMin(''); setReturnMax(''); }}>
+                        <X size={14} />
+                      </button>
+                    </div>
+                  )}
+                  {selectedIssuers.map(item => (
+                    <div key={item} className={styles.selectedFilterChip}>
+                      <span>운용사: {item}</span>
+                      <button onClick={() => toggleIssuer(item)}>
+                        <X size={14} />
+                      </button>
+                    </div>
+                  ))}
+                  {selectedPensionTypes.map(item => (
+                    <div key={item} className={styles.selectedFilterChip}>
+                      <span>{item}</span>
+                      <button onClick={() => toggleArrayItem(selectedPensionTypes, setSelectedPensionTypes, item)}>
+                        <X size={14} />
+                      </button>
+                    </div>
+                  ))}
+                  {selectedSectors.map(item => (
+                    <div key={item} className={styles.selectedFilterChip}>
+                      <span>{item}</span>
+                      <button onClick={() => toggleArrayItem(selectedSectors, setSelectedSectors, item)}>
+                        <X size={14} />
+                      </button>
+                    </div>
+                  ))}
+                  {selectedTradingVolumes.map(item => (
+                    <div key={item} className={styles.selectedFilterChip}>
+                      <span>거래량: {item}</span>
+                      <button onClick={() => toggleArrayItem(selectedTradingVolumes, setSelectedTradingVolumes, item)}>
+                        <X size={14} />
+                      </button>
+                    </div>
+                  ))}
+                  {selectedExpenseRatios.map(item => (
+                    <div key={item} className={styles.selectedFilterChip}>
+                      <span>총보수: {item}</span>
+                      <button onClick={() => toggleArrayItem(selectedExpenseRatios, setSelectedExpenseRatios, item)}>
+                        <X size={14} />
+                      </button>
+                    </div>
+                  ))}
+                  {selectedListingPeriods.map(item => (
+                    <div key={item} className={styles.selectedFilterChip}>
+                      <span>상장: {item}</span>
+                      <button onClick={() => toggleArrayItem(selectedListingPeriods, setSelectedListingPeriods, item)}>
+                        <X size={14} />
+                      </button>
+                    </div>
+                  ))}
+                  {selectedHedgeTypes.map(item => (
+                    <div key={item} className={styles.selectedFilterChip}>
+                      <span>{item}</span>
+                      <button onClick={() => toggleArrayItem(selectedHedgeTypes, setSelectedHedgeTypes, item)}>
+                        <X size={14} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         )}
         
         {searchType === 'name' && (
-          <div className={styles.searchInterface}>
-            <h3 className={styles.sectionTitle}>ETF 종목명 또는 코드를 입력하세요</h3>
-            <div className={`${styles.searchInputWrapper} ${!nameQuery.trim() ? styles.required : ''}`}>
-              <Search className={styles.searchInputIcon} size={20} />
-              <input type="text" className={styles.searchInput} placeholder="예: KODEX 200, 069500, SPY"
+          <>
+            <CardHeader 
+              title="ETF 검색"
+              subtitle="찾고자 하는 ETF를 검색하세요"
+            />
+            <div className={styles.searchInputWrapper}>
+              <Search className={styles.searchInputIcon} size={18} />
+              <input type="text" className={styles.searchInput} placeholder="ETF 이름 또는 종목코드 검색..."
                 value={nameQuery} onChange={(e) => setNameQuery(e.target.value)} onKeyPress={(e) => e.key === 'Enter' && handleSearch()} />
             </div>
-          </div>
+          </>
         )}
         
         {searchType === 'holdings' && (
-          <div className={styles.searchInterface}>
-            <h3 className={styles.sectionTitle}>이 종목이 담긴 ETF를 찾아보세요</h3>
-            <div className={`${styles.searchInputWrapper} ${!holdingsQuery.trim() ? styles.required : ''}`}>
-              <Search className={styles.searchInputIcon} size={20} />
-              <input type="text" className={styles.searchInput} placeholder="예: 삼성전자, AAPL, NVDA"
+          <>
+            <CardHeader 
+              title="ETF 검색"
+              subtitle="보유종목으로 ETF를 검색하세요"
+            />
+            <div className={styles.searchInputWrapper}>
+              <Search className={styles.searchInputIcon} size={18} />
+              <input type="text" className={styles.searchInput} placeholder="ETF 이름 또는 종목코드 검색..."
                 value={holdingsQuery} onChange={(e) => setHoldingsQuery(e.target.value)} onKeyPress={(e) => e.key === 'Enter' && handleSearch()} />
             </div>
-          </div>
-        )}
-        
-        {searchType !== 'ai' && (
-          <div className={styles.searchButtonWrapper}>
-            <Button variant="primary" size="lg" onClick={handleSearch}
-              disabled={(searchType === 'name' && !nameQuery.trim()) || (searchType === 'holdings' && !holdingsQuery.trim())}
-              className={styles.searchButton}>
-              <Search size={20} />검색하기<ArrowRight size={20} />
-            </Button>
-            {hasSearched && <button className={styles.resetButton} onClick={resetSearch}>초기화</button>}
-          </div>
+          </>
         )}
       </Card>
       
+      {searchType !== 'ai' && (
+        <Button 
+          variant="primary" 
+          size="lg" 
+          onClick={handleSearch}
+          disabled={(searchType === 'name' && !nameQuery.trim()) || (searchType === 'holdings' && !holdingsQuery.trim())}
+          className={styles.searchButton}
+        >
+          <Search size={20} />
+          검색하기
+          <ArrowRight size={20} />
+        </Button>
+      )}
+      
       {hasSearched && searchType !== 'ai' && (
-        <div className={styles.resultsSection}>
+        <div ref={resultsSectionRef} className={styles.resultsSection}>
           <div className={styles.resultsHeader}>
             <h3 className={styles.resultsTitle}>검색 결과 <span className={styles.resultsCount}>{searchResults.length}개</span></h3>
             <div className={styles.sortWrapper}>
+              {/* 기간 선택 (등락률순일 때만 표시) */}
+              {sortBy === 'change' && searchType !== 'holdings' && (
+                <div className={styles.periodDropdown}>
+                  <select
+                    className={styles.periodSelect}
+                    value={resultPeriod}
+                    onChange={(e) => setResultPeriod(e.target.value as ResultPeriod)}
+                  >
+                    {RESULT_PERIOD_OPTIONS.map(option => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+              
+              {/* 정렬 선택 */}
               {searchType === 'holdings' ? (
                 <select className={styles.sortSelect} value={holdingSortBy} onChange={(e) => setHoldingSortBy(e.target.value as HoldingSortOption)}>
                   <option value="weight">보유비중순</option>
@@ -704,6 +1021,6 @@ export default function SearchPage() {
           )}
         </div>
       )}
-    </div>
+    </PageContainer>
   );
 }

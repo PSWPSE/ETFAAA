@@ -1,36 +1,42 @@
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Activity, X } from 'lucide-react';
-import { Card } from '../components/common';
+import { Activity, TrendingUp, Plus } from 'lucide-react';
+import { Card, ETFSearchCard } from '../components/common';
+import PageContainer from '../components/layout/PageContainer';
 import { getETFById, getCorrelatedETFs, koreanETFs, usETFs } from '../data/etfs';
-import { useETFStore } from '../store/etfStore';
 import { formatPrice, formatPercent, getChangeClass } from '../utils/format';
+import { useETFStore } from '../store/etfStore';
 import styles from './CorrelationPage.module.css';
+import type { ETF } from '../types/etf';
 
 export default function CorrelationPage() {
   const navigate = useNavigate();
   const { selectedMarket } = useETFStore();
-  
-  const [baseETFId, setBaseETFId] = useState<string | null>(null);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [showResults, setShowResults] = useState(false);
-  
-  const etfs = selectedMarket === 'korea' ? koreanETFs : usETFs;
-  
-  // 검색 필터링
-  const filteredETFs = useMemo(() => {
-    if (!searchQuery.trim()) return [];
-    const query = searchQuery.toLowerCase();
-    return etfs.filter(etf =>
-      etf.name.toLowerCase().includes(query) ||
-      etf.ticker.toLowerCase().includes(query) ||
-      etf.issuer.toLowerCase().includes(query)
-    ).slice(0, 10);
-  }, [searchQuery, etfs]);
+  const [baseETFId, setBaseETFId] = useState<string>('');
   
   // 기준 ETF 및 상관 ETF들
   const baseETF = baseETFId ? getETFById(baseETFId) : null;
   const correlatedETFs = baseETFId ? getCorrelatedETFs(baseETFId, 4) : { positive: [], negative: [] };
+  
+  // 전체 ETF 목록
+  const allETFs = selectedMarket === 'korea' ? koreanETFs : usETFs;
+  
+  // 인기 ETF (시가총액과 거래량 기준)
+  const popularETFs = useMemo(() => {
+    return [...allETFs]
+      .sort((a, b) => {
+        // 시가총액과 거래량을 함께 고려한 점수 계산
+        const scoreA = (a.marketCap * 0.6) + (a.volume * a.price * 0.4);
+        const scoreB = (b.marketCap * 0.6) + (b.volume * b.price * 0.4);
+        return scoreB - scoreA;
+      })
+      .slice(0, 12);
+  }, [allETFs]);
+  
+  // ETF 선택
+  const handleAddETF = (etf: ETF) => {
+    setBaseETFId(etf.id);
+  };
   
   // 매트릭스용 ETF 목록 (기준 + 양의 상관 3개 + 음의 상관 3개)
   const matrixETFs = useMemo(() => {
@@ -104,17 +110,6 @@ export default function CorrelationPage() {
     return matrix;
   }, [matrixETFs, correlatedETFs]);
   
-  const selectETF = (id: string) => {
-    setBaseETFId(id);
-    setSearchQuery('');
-    setShowResults(false);
-  };
-  
-  const clearETF = () => {
-    setBaseETFId(null);
-    setSearchQuery('');
-  };
-  
   const getCorrelationColor = (value: number): string => {
     if (value === 1) return 'rgba(99, 102, 241, 0.1)'; // 대각선 (자기 자신)
     if (value >= 0.7) return 'rgba(34, 197, 94, 0.2)'; // 강한 양의 상관
@@ -142,74 +137,58 @@ export default function CorrelationPage() {
   };
   
   return (
-    <div className={styles.page}>
+    <PageContainer 
+      title="연관도 분석" 
+      subtitle="ETF 간의 상관관계를 분석하세요"
+      showMarketSelector={true}
+    >
       {/* ETF 검색 */}
-      <Card className={`${styles.etfCard} ${!baseETF ? styles.required : ''}`}>
-        <div className={styles.etfCardHeader}>
-          <Activity size={20} />
-          <h3 className={styles.etfCardTitle}>기준 ETF 선택</h3>
-        </div>
-        <p className={styles.etfCardDescription}>상관관계를 분석할 기준 ETF를 검색하세요</p>
-        
-        {baseETF ? (
-          <div className={styles.selectedETF}>
-            <div className={styles.selectedETFInfo}>
-              <span className={styles.selectedETFName}>{baseETF.name}</span>
-              <span className={styles.selectedETFTicker}>{baseETF.ticker}</span>
-            </div>
-            <div className={styles.selectedETFRight}>
-              <span className={styles.selectedETFPrice}>{formatPrice(baseETF.price)}원</span>
-              <span className={getChangeClass(baseETF.changePercent)}>{formatPercent(baseETF.changePercent)}</span>
-              <button className={styles.clearButton} onClick={clearETF}>
-                <X size={16} />
-              </button>
-            </div>
-          </div>
-        ) : (
-          <div className={styles.searchSection}>
-            <div className={styles.searchInputWrapper}>
-              <Search size={18} className={styles.searchIcon} />
-              <input
-                type="text"
-                placeholder="ETF 이름 또는 티커 입력"
-                value={searchQuery}
-                onChange={(e) => {
-                  setSearchQuery(e.target.value);
-                  setShowResults(true);
-                }}
-                onFocus={() => setShowResults(true)}
-                className={styles.searchInput}
-              />
-              {showResults && filteredETFs.length > 0 && (
-                <div className={styles.searchResults}>
-                  {filteredETFs.map((etf) => (
-                    <button
-                      key={etf.id}
-                      className={styles.searchResultItem}
-                      onClick={() => selectETF(etf.id)}
-                    >
-                      <div className={styles.searchResultInfo}>
-                        <span className={styles.searchResultName}>{etf.name}</span>
-                        <span className={styles.searchResultTicker}>{etf.ticker} · {etf.issuer}</span>
-                      </div>
-                      <div className={styles.searchResultPrice}>
-                        <span>{formatPrice(etf.price)}원</span>
-                        <span className={getChangeClass(etf.changePercent)}>{formatPercent(etf.changePercent)}</span>
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-      </Card>
+      <ETFSearchCard
+        title="기준 ETF 선택"
+        subtitle="상관관계를 분석할 기준 ETF를 검색하세요"
+        selectedETFId={baseETFId}
+        onSelect={(id) => setBaseETFId(id)}
+        placeholder="ETF 이름 또는 티커 입력"
+        required={true}
+      />
       
       {!baseETF && (
-        <div className={styles.emptyState}>
-          <Activity size={48} className={styles.emptyIcon} />
-          <h3>기준 ETF를 검색하여 선택해보세요</h3>
-          <p>검색창에 ETF 이름이나 코드를 입력하면<br />상관관계를 분석할 ETF를 선택할 수 있습니다</p>
+        <div className={styles.popularSection}>
+          <div className={styles.popularHeader}>
+            <div className={styles.popularTitleGroup}>
+              <TrendingUp size={18} className={styles.popularIcon} />
+              <div>
+                <h3 className={styles.popularTitle}>최근 관심이 많이 받는 ETF</h3>
+                <p className={styles.popularSubtitle}>시가총액과 거래량 기준</p>
+              </div>
+            </div>
+          </div>
+          
+          <div className={styles.popularGrid}>
+            {popularETFs.map((etf, index) => (
+              <button
+                key={etf.id}
+                className={styles.popularCard}
+                onClick={() => handleAddETF(etf)}
+                style={{ animationDelay: `${index * 0.05}s` }}
+              >
+                <div className={styles.popularCardContent}>
+                  <span className={styles.popularRank}>{index + 1}</span>
+                  <div className={styles.popularCardInfo}>
+                    <h4 className={styles.popularCardName}>{etf.name}</h4>
+                    <div className={styles.popularCardMeta}>
+                      <span className={styles.popularCardTicker}>{etf.ticker}</span>
+                      <span className={styles.popularCardDivider}>•</span>
+                      <span className={`${styles.popularCardChange} ${getChangeClass(etf.changePercent)}`}>
+                        {formatPercent(etf.changePercent)}
+                      </span>
+                    </div>
+                  </div>
+                  <Plus size={16} className={styles.popularCardIcon} />
+                </div>
+              </button>
+            ))}
+          </div>
         </div>
       )}
       
@@ -366,6 +345,6 @@ export default function CorrelationPage() {
           </div>
         </>
       )}
-    </div>
+    </PageContainer>
   );
 }

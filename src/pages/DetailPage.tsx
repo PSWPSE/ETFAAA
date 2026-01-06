@@ -1025,20 +1025,23 @@ export default function DetailPage() {
             </div>
           </Card>
           
-          {/* 상관 관계 */}
+          {/* 연관도 */}
           {(correlatedETFs.positive.length > 0 || correlatedETFs.negative.length > 0) && (
             <Card className={styles.section}>
               <div className={styles.sectionHeaderWrapper}>
                 <div className={styles.sectionTitleWrapper}>
                   <Activity size={18} />
-                  <h3 className={styles.sectionTitle}>상관 관계</h3>
+                  <h3 className={styles.sectionTitle}>연관도</h3>
                 </div>
                 <p className={styles.sectionDescription}>이 ETF와 같거나 반대 방향으로 움직이는 ETF를 분석합니다</p>
               </div>
               
               {correlatedETFs.positive.length > 0 && (
-                <div className={styles.correlationGroup}>
-                  <h4 className={styles.correlationGroupTitle}>같은 방향 (양의 상관관계)</h4>
+                <div className={`${styles.correlationGroup} ${styles.positiveGroup}`}>
+                  <h4 className={styles.correlationGroupTitle}>
+                    <TrendingUp size={16} />
+                    같은 방향 (양의 상관관계)
+                  </h4>
                   <div className={styles.correlationList}>
                     {correlatedETFs.positive.slice(0, 5).map((r: any) => (
                       <button key={r.id} className={styles.correlationItem} onClick={() => navigate(`/etf/${r.id}`)}>
@@ -1060,8 +1063,11 @@ export default function DetailPage() {
               )}
               
               {correlatedETFs.negative.length > 0 && (
-                <div className={styles.correlationGroup}>
-                  <h4 className={styles.correlationGroupTitle}>반대 방향 (음의 상관관계)</h4>
+                <div className={`${styles.correlationGroup} ${styles.negativeGroup}`}>
+                  <h4 className={styles.correlationGroupTitle}>
+                    <TrendingDown size={16} />
+                    반대 방향 (음의 상관관계)
+                  </h4>
                   <div className={styles.correlationList}>
                     {correlatedETFs.negative.slice(0, 5).map((r: any) => (
                       <button key={r.id} className={styles.correlationItem} onClick={() => navigate(`/etf/${r.id}`)}>

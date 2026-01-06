@@ -1,309 +1,133 @@
-.page {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: var(--spacing-lg);
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-lg);
-  position: relative;
-  z-index: 1;
+/* 인기 ETF 섹션 */
+.popularSection {
+  margin-top: var(--spacing-md);
+  padding: var(--spacing-md);
+  background: var(--color-bg-secondary);
+  border-radius: var(--radius-md);
+  animation: fadeIn 0.3s ease-out;
 }
 
-/* ETF 검색 카드 */
-.etfCard {
-  position: relative;
-  border: 1px solid var(--color-border);
-  overflow: visible !important;
+.popularHeader {
+  margin-bottom: var(--spacing-md);
 }
 
-.etfCard.required {
-  border: 2px solid #EF4444 !important;
-  box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.1), 0 4px 12px rgba(239, 68, 68, 0.15) !important;
-  animation: pulseRequired 2s ease-in-out infinite;
-}
-
-@keyframes pulseRequired {
-  0%, 100% {
-    box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.1), 0 4px 12px rgba(239, 68, 68, 0.15);
-  }
-  50% {
-    box-shadow: 0 0 0 6px rgba(239, 68, 68, 0.15), 0 6px 16px rgba(239, 68, 68, 0.2);
-  }
-}
-
-.etfCardHeader {
+.popularTitleGroup {
   display: flex;
   align-items: center;
   gap: var(--spacing-sm);
-  margin-bottom: var(--spacing-xs);
 }
 
-.etfCardHeader svg {
+.popularIcon {
+  flex-shrink: 0;
+  color: var(--color-text-tertiary);
+}
+
+.popularTitle {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  margin: 0 0 2px 0;
+  letter-spacing: -0.01em;
+}
+
+.popularSubtitle {
+  font-size: 11px;
+  color: var(--color-text-tertiary);
+  margin: 0;
+  font-weight: 500;
+}
+
+.popularGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--spacing-xs);
+}
+
+.popularCard {
+  display: flex;
+  padding: 10px 12px;
+  background: var(--color-white);
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-md);
+  text-align: left;
+  transition: all var(--transition-fast);
+  cursor: pointer;
+  animation: fadeIn 0.3s ease-out backwards;
+}
+
+.popularCard:hover {
+  border-color: var(--color-primary);
+  background: var(--color-bg-secondary);
+}
+
+.popularCard:hover .popularCardIcon {
   color: var(--color-primary);
 }
 
-.etfCardTitle {
-  font-size: var(--font-size-lg);
-  font-weight: 700;
-  color: var(--color-text-primary);
-  margin: 0;
-}
-
-.etfCardDescription {
-  font-size: var(--font-size-sm);
-  color: var(--color-text-tertiary);
-  margin: 0 0 var(--spacing-md) 0;
-}
-
-/* 검색 섹션 wrapper */
-.searchSection {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  padding: 16px;
-  background: rgba(250, 251, 252, 0.6);
-  border-radius: var(--radius-md);
-  border: 1px solid rgba(229, 231, 235, 0.6);
-  transition: all 0.3s ease;
-  position: relative;
-  overflow: visible;
-}
-
-.searchSection:hover {
-  background: var(--color-white);
-  border-color: var(--color-border);
-  box-shadow: 0 2px 8px rgba(30, 58, 95, 0.04);
-}
-
-/* 빈 상태 */
-.emptyState {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 16px;
-  padding: 48px 24px;
-  text-align: center;
-  background: transparent;
-  border-radius: var(--radius-md);
-  border: 1px dashed var(--color-border);
-}
-
-.emptyIcon {
-  color: var(--color-text-tertiary);
-  opacity: 0.4;
-}
-
-.emptyState h3 {
-  font-size: var(--font-size-base);
-  font-weight: 700;
-  color: var(--color-text-primary);
-  margin: 0;
-}
-
-.emptyState p {
-  font-size: 13px;
-  color: var(--color-text-tertiary);
-  margin: 0;
-  line-height: 1.6;
-}
-
-/* 선택된 ETF */
-.selectedETF {
+.popularCardContent {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 14px 16px;
-  background: var(--color-bg);
-  border-radius: var(--radius-md);
-  border: 1px solid var(--color-border);
-}
-
-.selectedETFInfo {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  flex: 1;
-}
-
-.selectedETFName {
-  font-size: var(--font-size-md);
-  font-weight: 600;
-  color: var(--color-text-primary);
-}
-
-.selectedETFTicker {
-  font-size: var(--font-size-xs);
-  font-weight: 500;
-  color: var(--color-text-tertiary);
-}
-
-.selectedETFRight {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-sm);
-}
-
-.selectedETFPrice {
-  font-size: var(--font-size-sm);
-  font-weight: 600;
-  color: var(--color-text-primary);
-  font-feature-settings: 'tnum' on, 'lnum' on;
-}
-
-.clearButton {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background: var(--color-bg-secondary);
-  border: none;
-  cursor: pointer;
-  transition: all var(--transition-fast);
-  color: var(--color-text-tertiary);
-}
-
-.clearButton:hover {
-  background: var(--color-danger);
-  color: white;
-}
-
-/* 검색 입력 */
-.searchInputWrapper {
-  position: relative;
-  display: flex;
-  align-items: center;
-  overflow: visible;
-}
-
-.searchIcon {
-  position: absolute;
-  left: 14px;
-  color: var(--color-text-tertiary);
-  pointer-events: none;
-  z-index: 1;
-}
-
-.searchInput {
+  gap: 8px;
   width: 100%;
-  padding: 12px 16px 12px 44px;
-  font-size: var(--font-size-base);
-  color: var(--color-text-primary);
-  background: var(--color-white);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  transition: all 0.3s ease;
 }
 
-.searchInput:hover {
-  border-color: var(--color-text-secondary);
-}
-
-.searchInput:focus {
-  outline: none;
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(30, 58, 95, 0.1);
-}
-
-.searchInput::placeholder {
-  color: var(--color-text-tertiary);
-}
-
-.searchResults {
-  position: absolute;
-  top: calc(100% + 8px);
-  left: 0;
-  right: 0;
-  display: flex;
-  flex-direction: column;
-  background: var(--color-white);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  overflow: hidden;
-  box-shadow: 0 2px 8px rgba(30, 58, 95, 0.04);
-  max-height: 350px;
-  overflow-y: auto;
-  z-index: 1000;
-}
-
-.searchResultItem {
-  display: flex;
+.popularRank {
+  display: inline-flex;
   align-items: center;
-  gap: 12px;
-  padding: 12px 16px;
-  text-align: left;
-  border: none;
-  border-bottom: 1px solid var(--color-border-light);
-  background: transparent;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  animation: slideInResult 0.3s ease-out backwards;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--color-text-tertiary);
+  flex-shrink: 0;
 }
 
-@keyframes slideInResult {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.searchResultItem:last-child {
-  border-bottom: none;
-}
-
-.searchResultItem:hover {
-  background: var(--color-bg-secondary);
-}
-
-.searchResultInfo {
+.popularCardInfo {
   flex: 1;
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 2px;
 }
 
-.searchResultName {
-  font-size: 14px;
+.popularCardName {
+  font-size: 12px;
   font-weight: 600;
   color: var(--color-text-primary);
+  margin: 0;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.searchResultTicker {
-  font-size: 12px;
-  font-weight: 500;
-  color: var(--color-text-tertiary);
-}
-
-.searchResultPrice {
+.popularCardMeta {
   display: flex;
-  flex-direction: column;
-  align-items: flex-end;
+  align-items: center;
   gap: 4px;
-  flex-shrink: 0;
+  font-size: 10px;
 }
 
-.searchResultPrice > span:first-child {
-  font-size: 13px;
+.popularCardTicker {
   font-weight: 600;
-  color: var(--color-text-primary);
+  color: var(--color-text-tertiary);
+  font-family: var(--font-family-numeric);
+}
+
+.popularCardDivider {
+  color: var(--color-border);
+}
+
+.popularCardChange {
+  font-weight: 600;
+  font-family: var(--font-family-numeric);
   font-feature-settings: 'tnum' on, 'lnum' on;
-  white-space: nowrap;
 }
 
-.searchResultPrice > span:last-child {
-  font-size: 12px;
-  font-weight: 600;
-  white-space: nowrap;
+.popularCardIcon {
+  flex-shrink: 0;
+  color: var(--color-text-tertiary);
+  transition: all var(--transition-fast);
 }
 
 /* 섹션 헤더 */
@@ -761,21 +585,70 @@
     padding-left: 0;
     padding-right: 0;
   }
-  
-  .emptyState {
-    padding: 32px 16px;
+}
+
+@media (min-width: 640px) {
+  .popularCard {
+    padding: var(--spacing-sm) var(--spacing-md);
   }
-  
-  .emptyIcon {
-    width: 40px;
-    height: 40px;
+
+  .popularCardContent {
+    gap: var(--spacing-sm);
   }
-  
-  .emptyState h3 {
-    font-size: 14px;
+
+  .popularRank {
+    width: 20px;
+    height: 20px;
+    font-size: 11px;
   }
-  
-  .emptyState p {
-    font-size: 12px;
+
+  .popularCardName {
+    font-size: 13px;
+  }
+
+  .popularCardMeta {
+    gap: 6px;
+    font-size: 11px;
+  }
+
+  .popularGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .popularTitle {
+    font-size: var(--font-size-base);
+  }
+
+  .popularSubtitle {
+    font-size: var(--font-size-xs);
+  }
+
+  .popularIcon {
+    width: 18px;
+    height: 18px;
+  }
+}
+
+@media (min-width: 768px) {
+  .popularGrid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .popularSection {
+    padding: var(--spacing-lg);
+  }
+
+  .popularTitle {
+    font-size: var(--font-size-lg);
+  }
+
+  .popularSubtitle {
+    font-size: var(--font-size-sm);
+  }
+}
+
+@media (min-width: 1024px) {
+  .popularSection {
+    padding: var(--spacing-md) var(--spacing-lg);
   }
 }

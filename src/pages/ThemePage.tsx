@@ -1,8 +1,9 @@
 import { useState, useMemo, useRef, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, SortDesc, Search, X, LayoutGrid, List } from 'lucide-react';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, Treemap } from 'recharts';
 import { Card, Button } from '../components/common';
+import PageContainer from '../components/layout/PageContainer';
 import { koreanThemes, usThemes, koreanETFs, usETFs, getReturns } from '../data/etfs';
 import { useETFStore } from '../store/etfStore';
 import { formatPercent, formatLargeNumber, formatPrice } from '../utils/format';
@@ -10,6 +11,112 @@ import type { ThemeCategory } from '../types/etf';
 import styles from './ThemePage.module.css';
 
 type ViewMode = 'list' | 'map';
+
+// Treemap 커스텀 컨텐츠 컴포넌트
+interface CustomTreemapContentProps {
+  x?: number;
+  y?: number;
+  width?: number;
+  height?: number;
+  name?: string;
+  return?: number;
+  etfCount?: number;
+  id?: string;
+  onClick?: (id: string) => void;
+}
+
+const CustomTreemapContent: React.FC<CustomTreemapContentProps> = ({
+  x = 0,
+  y = 0,
+  width = 0,
+  height = 0,
+  name = '',
+  return: returnValue = 0,
+  etfCount = 0,
+  id = '',
+  onClick,
+}) => {
+  if (width < 40 || height < 40) return null; // 너무 작은 셀은 렌더링하지 않음
+  
+  const getHeatmapColor = (ret: number) => {
+    if (ret >= 30) return '#15803d'; // 진한 초록
+    if (ret >= 20) return '#16a34a'; // 초록
+    if (ret >= 10) return '#22c55e'; // 연한 초록
+    if (ret >= 5) return '#4ade80';  // 밝은 초록
+    if (ret >= 0) return '#86efac';  // 매우 밝은 초록
+    if (ret >= -5) return '#fca5a5'; // 밝은 빨강
+    if (ret >= -10) return '#f87171'; // 연한 빨강
+    if (ret >= -20) return '#ef4444'; // 빨강
+    return '#dc2626'; // 진한 빨강
+  };
+  
+  const getHeatmapTextColor = (ret: number) => {
+    return Math.abs(ret) >= 5 ? '#ffffff' : '#1f2937';
+  };
+  
+  const fontSize = width > 150 ? 14 : width > 100 ? 12 : 10;
+  const showEtfCount = height > 60;
+  
+  return (
+    <g>
+      <rect
+        x={x}
+        y={y}
+        width={width}
+        height={height}
+        style={{
+          fill: getHeatmapColor(returnValue),
+          cursor: 'pointer',
+        }}
+        onClick={() => onClick && onClick(id)}
+      />
+      <text
+        x={x + width / 2}
+        y={y + height / 2 - (showEtfCount ? 10 : 0)}
+        textAnchor="middle"
+        dominantBaseline="middle"
+        style={{
+          fill: getHeatmapTextColor(returnValue),
+          fontSize: `${fontSize}px`,
+          fontWeight: 700,
+          pointerEvents: 'none',
+        }}
+      >
+        {name.length > 15 ? `${name.slice(0, 13)}...` : name}
+      </text>
+      <text
+        x={x + width / 2}
+        y={y + height / 2 + (showEtfCount ? 8 : 12)}
+        textAnchor="middle"
+        dominantBaseline="middle"
+        style={{
+          fill: getHeatmapTextColor(returnValue),
+          fontSize: `${fontSize}px`,
+          fontWeight: 800,
+          pointerEvents: 'none',
+        }}
+      >
+        {returnValue >= 0 ? '+' : ''}{returnValue.toFixed(1)}%
+      </text>
+      {showEtfCount && (
+        <text
+          x={x + width / 2}
+          y={y + height / 2 + 24}
+          textAnchor="middle"
+          dominantBaseline="middle"
+          style={{
+            fill: getHeatmapTextColor(returnValue),
+            fontSize: `${fontSize - 2}px`,
+            fontWeight: 500,
+            pointerEvents: 'none',
+          }}
+        >
+          {etfCount}개 ETF
+        </text>
+      )}
+    </g>
+  );
+};
 
 // 기간 선택 옵션
 const PERIOD_OPTIONS = [
@@ -54,6 +161,7 @@ export default function ThemePage() {
   const [selectedIndex, setSelectedIndex] = useState(-1);
   const [etfSortBy, setEtfSortBy] = useState<EtfSortOption>('return');
   const [rotatingPeriod, setRotatingPeriod] = useState<'1d' | '1m' | '3m' | '1y'>('1y');
+  const [displayMetric, setDisplayMetric] = useState<'return' | 'etfCount'>('return');
   
   const searchRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -156,17 +264,19 @@ export default function ThemePage() {
   };
   
   // 정렬 토글
-  const toggleSort = () => {
-    setSortOrder(prev => prev === 'desc' ? 'asc' : 'desc');
-  };
-  
   // 테마 데이터 처리
   const processedThemes = useMemo(() => {
-    // 기간별 수익률 적용
-    let result = themes.map(theme => ({
-      ...theme,
-      periodReturn: getReturnByPeriod(theme.avgReturn, selectedPeriod),
-    }));
+    // 기간별 수익률 적용 및 AUM 합산
+    let result = themes.map(theme => {
+      const themeETFs = getETFsByTheme(theme.id);
+      const totalAUM = themeETFs.reduce((sum, etf) => sum + etf.marketCap, 0);
+      
+      return {
+        ...theme,
+        periodReturn: getReturnByPeriod(theme.avgReturn, selectedPeriod),
+        totalAUM,
+      };
+    });
     
     // 검색 필터링
     if (searchQuery.trim()) {
@@ -212,8 +322,8 @@ export default function ThemePage() {
     })).sort((a, b) => b.periodReturn - a.periodReturn);
     
     return {
-      top: allWithReturn.slice(0, 8).map(t => ({ name: t.name, return: t.periodReturn })),
-      bottom: allWithReturn.slice(-8).reverse().map(t => ({ name: t.name, return: t.periodReturn })),
+      top: allWithReturn.slice(0, 8).map(t => ({ id: t.id, name: t.name, return: t.periodReturn })),
+      bottom: allWithReturn.slice(-8).reverse().map(t => ({ id: t.id, name: t.name, return: t.periodReturn })),
     };
   }, [themes, selectedPeriod]);
   
@@ -242,10 +352,16 @@ export default function ThemePage() {
       if (cat === 'all') return null;
       const categoryThemes = themes
         .filter(t => t.category === cat)
-        .map(theme => ({
-          ...theme,
-          periodReturn: getReturnByPeriod(theme.avgReturn, selectedPeriod),
-        }))
+        .map(theme => {
+          const themeETFs = getETFsByTheme(theme.id);
+          const totalAUM = themeETFs.reduce((sum, etf) => sum + etf.marketCap, 0);
+          
+          return {
+            ...theme,
+            periodReturn: getReturnByPeriod(theme.avgReturn, selectedPeriod),
+            totalAUM,
+          };
+        })
         .sort((a, b) => b.periodReturn - a.periodReturn);
       
       return {
@@ -257,7 +373,7 @@ export default function ThemePage() {
           : 0,
       };
     }).filter(Boolean) as { category: ThemeCategory; label: string; themes: typeof processedThemes; avgReturn: number }[];
-  }, [themes, selectedPeriod]);
+  }, [themes, selectedPeriod, etfs]);
   
   // 히트맵 색상 계산
   const getHeatmapColor = (returnValue: number) => {
@@ -355,75 +471,11 @@ export default function ThemePage() {
   // 테마 선택 안됨 -> 테마 목록
   if (!themeId) {
     return (
-      <div className={styles.page}>
-        {/* 검색 바 */}
-        <div className={styles.searchBar} ref={searchRef}>
-          <div className={styles.searchInputWrapper}>
-            <Search size={18} className={styles.searchIcon} />
-            <input
-              ref={inputRef}
-              type="text"
-              className={styles.searchInput}
-              placeholder="테마 검색 (예: 반도체, AI, 배당...)"
-              value={searchQuery}
-              onChange={(e) => {
-                setSearchQuery(e.target.value);
-                setShowAutocomplete(true);
-                setSelectedIndex(-1);
-              }}
-              onFocus={() => {
-                if (searchQuery.trim()) {
-                  setShowAutocomplete(true);
-                }
-              }}
-              onKeyDown={handleKeyDown}
-            />
-            {searchQuery && (
-              <button
-                className={styles.clearButton}
-                onClick={() => {
-                  setSearchQuery('');
-                  setShowAutocomplete(false);
-                  setSelectedIndex(-1);
-                }}
-              >
-                <X size={16} />
-              </button>
-            )}
-          </div>
-          
-          {/* 자동완성 드롭다운 */}
-          {showAutocomplete && autocompleteResults.length > 0 && (
-            <div className={styles.autocompleteDropdown}>
-              {autocompleteResults.map((theme, index) => (
-                <button
-                  key={theme.id}
-                  className={`${styles.autocompleteItem} ${index === selectedIndex ? styles.selected : ''}`}
-                  onClick={() => handleSelectTheme(theme.id)}
-                  onMouseEnter={() => setSelectedIndex(index)}
-                >
-                  <div className={styles.autocompleteLeft}>
-                    <span className={styles.autocompleteName}>{theme.name}</span>
-                    <div className={styles.autocompleteMeta}>
-                      <span className={styles.autocompleteCategory}>
-                        {CATEGORY_OPTIONS.find(c => c.value === theme.category)?.label}
-                      </span>
-                      <span className={styles.autocompleteEtfCount}>
-                        {theme.etfCount}개 ETF
-                      </span>
-                    </div>
-                  </div>
-                  <div className={styles.autocompleteRight}>
-                    <span className={`${styles.autocompleteReturn} ${theme.periodReturn >= 0 ? styles.up : styles.down}`}>
-                      {theme.periodReturn >= 0 ? '+' : ''}{theme.periodReturn.toFixed(1)}%
-                    </span>
-                  </div>
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
-        
+      <PageContainer 
+        title="테마별 ETF" 
+        subtitle="투자 테마로 ETF를 찾아보세요"
+        showMarketSelector={true}
+      >
         {/* 수익률 차트 - 상위/하위 */}
         <Card padding="md" className={styles.chartCard}>
           <div className={styles.chartHeader}>
@@ -472,7 +524,12 @@ export default function ThemePage() {
                       formatter={(value: number) => [`${value.toFixed(1)}%`, '수익률']}
                       contentStyle={{ background: '#fff', border: '1px solid #E5E7EB', borderRadius: '8px', fontSize: '12px' }}
                     />
-                    <Bar dataKey="return" radius={[0, 4, 4, 0]}>
+                    <Bar 
+                      dataKey="return" 
+                      radius={[0, 4, 4, 0]}
+                      onClick={(data: any) => navigate(`/theme/${data.id}`)}
+                      cursor="pointer"
+                    >
                       {chartData.top.map((_, i) => (
                         <Cell key={i} fill={`hsl(142, ${70 - i * 5}%, ${45 + i * 3}%)`} />
                       ))}
@@ -509,7 +566,12 @@ export default function ThemePage() {
                       formatter={(value: number) => [`${value.toFixed(1)}%`, '수익률']}
                       contentStyle={{ background: '#fff', border: '1px solid #E5E7EB', borderRadius: '8px', fontSize: '12px' }}
                     />
-                    <Bar dataKey="return" radius={[0, 4, 4, 0]}>
+                    <Bar 
+                      dataKey="return" 
+                      radius={[0, 4, 4, 0]}
+                      onClick={(data: any) => navigate(`/theme/${data.id}`)}
+                      cursor="pointer"
+                    >
                       {chartData.bottom.map((entry, i) => (
                         <Cell key={i} fill={entry.return >= 0 ? '#10B981' : `hsl(0, ${60 + i * 4}%, ${55 - i * 2}%)`} />
                       ))}
@@ -521,23 +583,84 @@ export default function ThemePage() {
           </div>
         </Card>
         
-        {/* 테마 필터 & 정렬 통합 */}
-        <div className={styles.filterBar}>
-          <div className={styles.filterBarTop}>
-            <div className={styles.categoryTabs}>
-              {CATEGORY_OPTIONS.map((cat) => (
+        {/* 테마 검색 */}
+        <Card padding="md" className={styles.searchCard}>
+          <div className={styles.searchHeader}>
+            <h3 className={styles.searchTitle}>테마 검색</h3>
+          </div>
+          
+          <div className={styles.searchBar} ref={searchRef}>
+            <div className={styles.searchInputWrapper}>
+              <Search size={18} className={styles.searchIcon} />
+              <input
+                ref={inputRef}
+                type="text"
+                className={styles.searchInput}
+                placeholder="테마 검색 (예: 반도체, AI, 배당...)"
+                value={searchQuery}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  setShowAutocomplete(true);
+                  setSelectedIndex(-1);
+                }}
+                onFocus={() => {
+                  if (searchQuery.trim()) {
+                    setShowAutocomplete(true);
+                  }
+                }}
+                onKeyDown={handleKeyDown}
+              />
+              {searchQuery && (
                 <button
-                  key={cat.value}
-                  className={`${styles.categoryTab} ${selectedCategory === cat.value ? styles.active : ''}`}
-                  onClick={() => setSelectedCategory(cat.value)}
+                  className={styles.clearButton}
+                  onClick={() => {
+                    setSearchQuery('');
+                    setShowAutocomplete(false);
+                    setSelectedIndex(-1);
+                  }}
                 >
-                  <span className={styles.categoryLabel}>{cat.label}</span>
-                  {cat.value !== 'all' && categoryStats[cat.value] && (
-                    <span className={styles.categoryCount}>{categoryStats[cat.value].count}</span>
-                  )}
+                  <X size={16} />
                 </button>
-              ))}
+              )}
             </div>
+            
+            {/* 자동완성 드롭다운 */}
+            {showAutocomplete && autocompleteResults.length > 0 && (
+              <div className={styles.autocompleteDropdown}>
+                {autocompleteResults.map((theme, index) => (
+                  <button
+                    key={theme.id}
+                    className={`${styles.autocompleteItem} ${index === selectedIndex ? styles.selected : ''}`}
+                    onClick={() => handleSelectTheme(theme.id)}
+                    onMouseEnter={() => setSelectedIndex(index)}
+                  >
+                    <div className={styles.autocompleteLeft}>
+                      <span className={styles.autocompleteName}>{theme.name}</span>
+                      <div className={styles.autocompleteMeta}>
+                        <span className={styles.autocompleteCategory}>
+                          {CATEGORY_OPTIONS.find(c => c.value === theme.category)?.label}
+                        </span>
+                        <span className={styles.autocompleteEtfCount}>
+                          {theme.etfCount}개 ETF
+                        </span>
+                      </div>
+                    </div>
+                    <div className={styles.autocompleteRight}>
+                      <span className={`${styles.autocompleteReturn} ${theme.periodReturn >= 0 ? styles.up : styles.down}`}>
+                        {theme.periodReturn >= 0 ? '+' : ''}{theme.periodReturn.toFixed(1)}%
+                      </span>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        </Card>
+        
+        {/* 테마 전체보기 */}
+        <Card padding="md" className={styles.filterCard}>
+          <div className={styles.filterHeader}>
+            <h3 className={styles.filterTitle}>테마 전체보기</h3>
             <div className={styles.viewToggle}>
               <button
                 className={`${styles.viewButton} ${viewMode === 'list' ? styles.active : ''}`}
@@ -553,6 +676,24 @@ export default function ThemePage() {
               >
                 <LayoutGrid size={16} />
               </button>
+            </div>
+          </div>
+          
+          <div className={styles.filterBar}>
+          <div className={styles.filterBarTop}>
+            <div className={styles.categoryTabs}>
+              {CATEGORY_OPTIONS.map((cat) => (
+                <button
+                  key={cat.value}
+                  className={`${styles.categoryTab} ${selectedCategory === cat.value ? styles.active : ''}`}
+                  onClick={() => setSelectedCategory(cat.value)}
+                >
+                  <span className={styles.categoryLabel}>{cat.label}</span>
+                  {cat.value !== 'all' && categoryStats[cat.value] && (
+                    <span className={styles.categoryCount}>{categoryStats[cat.value].count}</span>
+                  )}
+                </button>
+              ))}
             </div>
           </div>
           <div className={styles.filterBarBottom}>
@@ -576,25 +717,33 @@ export default function ThemePage() {
                   </div>
                 )}
                 
-                <div className={styles.sortDropdown}>
-                  <SortDesc size={14} />
+                {/* 표시 항목 선택 드롭다운 */}
+                <div className={styles.displayDropdown}>
                   <select 
-                    value={sortField}
-                    onChange={(e) => setSortField(e.target.value as SortField)}
-                    className={styles.sortSelect}
+                    value={displayMetric}
+                    onChange={(e) => setDisplayMetric(e.target.value as 'return' | 'etfCount')}
+                    className={styles.displaySelect}
                   >
-                    {SORT_OPTIONS.map(option => (
-                      <option key={option.value} value={option.value}>{option.label}</option>
-                    ))}
+                    <option value="return">수익률</option>
+                    <option value="etfCount">ETF 수</option>
                   </select>
-                  <button className={styles.sortOrderButton} onClick={toggleSort}>
-                    {sortOrder === 'desc' ? '↓' : '↑'}
-                  </button>
+                </div>
+                
+                <div className={styles.sortOrderDropdown}>
+                  <select 
+                    value={sortOrder}
+                    onChange={(e) => setSortOrder(e.target.value as 'asc' | 'desc')}
+                    className={styles.sortOrderSelect}
+                  >
+                    <option value="desc">높은순</option>
+                    <option value="asc">낮은순</option>
+                  </select>
                 </div>
               </div>
             )}
           </div>
-        </div>
+          </div>
+        </Card>
         
         {/* 리스트 뷰 */}
         {viewMode === 'list' && (
@@ -665,24 +814,22 @@ export default function ThemePage() {
                     평균 {avgReturn >= 0 ? '+' : ''}{avgReturn.toFixed(1)}%
                   </span>
                 </div>
-                <div className={styles.heatmapGrid}>
-                  {processedThemes.map((theme) => (
-                    <div
-                      key={theme.id}
-                      className={styles.heatmapItem}
-                      style={{
-                        backgroundColor: getHeatmapColor(theme.periodReturn),
-                        color: getHeatmapTextColor(theme.periodReturn),
-                      }}
-                      onClick={() => navigate(`/theme/${theme.id}`)}
-                    >
-                      <span className={styles.heatmapName}>{theme.name}</span>
-                      <span className={styles.heatmapReturn}>
-                        {theme.periodReturn >= 0 ? '+' : ''}{theme.periodReturn.toFixed(1)}%
-                      </span>
-                      <span className={styles.heatmapEtfCount}>{theme.etfCount}개 ETF</span>
-                    </div>
-                  ))}
+                <div className={styles.treemapContainer}>
+                  <ResponsiveContainer width="100%" height={600}>
+                    <Treemap
+                      data={processedThemes.map(theme => ({
+                        name: theme.name,
+                        size: theme.totalAUM,
+                        return: theme.periodReturn,
+                        etfCount: theme.etfCount,
+                        id: theme.id,
+                      }))}
+                      dataKey="size"
+                      stroke="#fff"
+                      strokeWidth={2}
+                      content={<CustomTreemapContent onClick={(id: string) => navigate(`/theme/${id}`)} />}
+                    />
+                  </ResponsiveContainer>
                 </div>
               </div>
               );
@@ -696,24 +843,22 @@ export default function ThemePage() {
                       평균 {categoryData.avgReturn >= 0 ? '+' : ''}{categoryData.avgReturn.toFixed(1)}%
                     </span>
                   </div>
-                  <div className={styles.heatmapGrid}>
-                    {categoryData.themes.map((theme) => (
-                      <div
-                        key={theme.id}
-                        className={styles.heatmapItem}
-                        style={{
-                          backgroundColor: getHeatmapColor(theme.periodReturn),
-                          color: getHeatmapTextColor(theme.periodReturn),
-                        }}
-                        onClick={() => navigate(`/theme/${theme.id}`)}
-                      >
-                        <span className={styles.heatmapName}>{theme.name}</span>
-                        <span className={styles.heatmapReturn}>
-                          {theme.periodReturn >= 0 ? '+' : ''}{theme.periodReturn.toFixed(1)}%
-                        </span>
-                        <span className={styles.heatmapEtfCount}>{theme.etfCount}개 ETF</span>
-                      </div>
-                    ))}
+                  <div className={styles.treemapContainer}>
+                    <ResponsiveContainer width="100%" height={600}>
+                      <Treemap
+                        data={categoryData.themes.map(theme => ({
+                          name: theme.name,
+                          size: theme.totalAUM,
+                          return: theme.periodReturn,
+                          etfCount: theme.etfCount,
+                          id: theme.id,
+                        }))}
+                        dataKey="size"
+                        stroke="#fff"
+                        strokeWidth={2}
+                        content={<CustomTreemapContent onClick={(id: string) => navigate(`/theme/${id}`)} />}
+                      />
+                    </ResponsiveContainer>
                   </div>
                 </div>
               ))
@@ -737,7 +882,7 @@ export default function ThemePage() {
             </div>
           </div>
         )}
-      </div>
+      </PageContainer>
     );
   }
   
@@ -752,7 +897,7 @@ export default function ThemePage() {
   }
   
   return (
-    <div className={styles.page}>
+    <PageContainer>
       {/* Theme Header */}
       <Card padding="lg" className={styles.themeDetailHeader}>
         <div className={styles.detailHeaderContent}>
@@ -844,6 +989,6 @@ export default function ThemePage() {
           ))}
         </div>
       </Card>
-    </div>
+    </PageContainer>
   );
 }

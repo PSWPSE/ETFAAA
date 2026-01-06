@@ -2,6 +2,7 @@ import { useState, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, CalendarDays, ChevronUp, ChevronDown, Calendar } from 'lucide-react';
 import { Card, Badge } from '../components/common';
+import PageContainer from '../components/layout/PageContainer';
 import { koreanETFs, usETFs, getDividends, getReturns } from '../data/etfs';
 import { useETFStore } from '../store/etfStore';
 import { formatPrice, formatPercent } from '../utils/format';
@@ -346,29 +347,11 @@ export default function CalendarPage() {
   }, [calendarDays]);
   
   return (
-    <div className={styles.page}>
-      {/* 국가 선택 섹션 */}
-      <section className={styles.marketSelector}>
-        <div className={styles.marketSelectorHeader}>
-          <h3 className={styles.marketSelectorTitle}>홈 화면에서 보여줄 ETF 국가 선택</h3>
-        </div>
-        <div className={styles.marketOptions}>
-          <button
-            className={`${styles.marketOption} ${selectedMarket === 'korea' ? styles.active : ''}`}
-            onClick={() => setSelectedMarket('korea')}
-          >
-            <span className={styles.marketFlag}>🇰🇷</span>
-            <span className={styles.marketName}>한국</span>
-          </button>
-          <button
-            className={`${styles.marketOption} ${selectedMarket === 'us' ? styles.active : ''}`}
-            onClick={() => setSelectedMarket('us')}
-          >
-            <span className={styles.marketFlag}>🇺🇸</span>
-            <span className={styles.marketName}>미국</span>
-          </button>
-        </div>
-      </section>
+    <PageContainer 
+      title="배당 캘린더" 
+      subtitle="ETF 배당 일정을 한눈에 확인하세요"
+      showMarketSelector={true}
+    >
       
       {/* Calendar Card */}
       <Card padding="md">
@@ -649,6 +632,6 @@ export default function CalendarPage() {
         </Card>
         )}
       </div>
-    </div>
+    </PageContainer>
   );
 }

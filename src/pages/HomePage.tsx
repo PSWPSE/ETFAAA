@@ -6,6 +6,7 @@ import {
   Flame, Globe, DollarSign, Droplets, Target, Gift, TrendingUp
 } from 'lucide-react';
 import { Card } from '../components/common';
+import PageContainer from '../components/layout/PageContainer';
 import { koreanETFs, usETFs, koreanThemes, usThemes, getDividendForecast } from '../data/etfs';
 import { useETFStore } from '../store/etfStore';
 import { formatPrice, formatPercent, formatLargeNumber, getChangeClass } from '../utils/format';
@@ -14,11 +15,25 @@ import styles from './HomePage.module.css';
 // 시황 데이터 (더미)
 const MARKET_DATA = {
   indices: [
-    { name: 'KOSPI', value: 2486.75, change: 1.23 },
-    { name: 'KOSDAQ', value: 728.43, change: -0.45 },
-    { name: 'S&P 500', value: 5998.74, change: 0.87 },
-    { name: 'NASDAQ', value: 19764.88, change: 1.54 },
-    { name: '니케이225', value: 39568.06, change: 0.32 },
+    // 아시아
+    { name: 'KOSPI', value: 2486.75, change: 1.23, region: '🇰🇷' },
+    { name: 'KOSDAQ', value: 728.43, change: -0.45, region: '🇰🇷' },
+    { name: '니케이225', value: 39568.06, change: 0.32, region: '🇯🇵' },
+    { name: '항셍지수', value: 19284.56, change: -0.87, region: '🇭🇰' },
+    { name: '상하이종합', value: 3245.18, change: 0.56, region: '🇨🇳' },
+    { name: '센.ex', value: 79852.34, change: 1.12, region: '🇮🇳' },
+    { name: 'SET지수', value: 1387.92, change: -0.34, region: '🇹🇭' },
+    // 북아메리카
+    { name: 'S&P 500', value: 5998.74, change: 0.87, region: '🇺🇸' },
+    { name: 'NASDAQ', value: 19764.88, change: 1.54, region: '🇺🇸' },
+    { name: '다우존스', value: 42863.45, change: 0.65, region: '🇺🇸' },
+    { name: 'TSX종합', value: 24385.72, change: 0.42, region: '🇨🇦' },
+    // 유럽
+    { name: 'FTSE 100', value: 8245.63, change: -0.23, region: '🇬🇧' },
+    { name: 'DAX', value: 20184.25, change: 0.78, region: '🇩🇪' },
+    { name: 'CAC 40', value: 7456.89, change: 0.45, region: '🇫🇷' },
+    { name: 'FTSE MIB', value: 34512.78, change: -0.56, region: '🇮🇹' },
+    { name: 'IBEX 35', value: 11845.32, change: 0.34, region: '🇪🇸' },
   ],
   forex: [
     { name: 'USD/KRW', value: 1451.20, change: 0.15 },
@@ -52,12 +67,43 @@ export default function HomePage() {
   const etfs = selectedMarket === 'korea' ? koreanETFs : usETFs;
   const themes = selectedMarket === 'korea' ? koreanThemes : usThemes;
   
+  // ETF 통계 계산
+  const etfStats = useMemo(() => {
+    const up10Plus = etfs.filter(etf => etf.changePercent >= 10).length;
+    const up5Plus = etfs.filter(etf => etf.changePercent >= 5 && etf.changePercent < 10).length;
+    const up5Total = etfs.filter(etf => etf.changePercent >= 5).length;
+    const upAll = etfs.filter(etf => etf.changePercent > 0).length;
+    const downAll = etfs.filter(etf => etf.changePercent < 0).length;
+    const down5Plus = etfs.filter(etf => etf.changePercent <= -5 && etf.changePercent > -10).length;
+    const down5Total = etfs.filter(etf => etf.changePercent <= -5).length;
+    const down10Plus = etfs.filter(etf => etf.changePercent <= -10).length;
+    
+    // 비율 형식으로 변경 (숫자 : 숫자)
+    const upDownRatio = `${upAll} : ${downAll}`;
+    const up5Down5Ratio = `${up5Total} : ${down5Total}`;
+    
+    // 국기 이모지
+    const flag = selectedMarket === 'korea' ? '🇰🇷' : '🇺🇸';
+    
+    return [
+      { name: '10% 이상 상승', value: up10Plus, change: 0, isCount: true, type: 'up', region: flag },
+      { name: '5% 이상 상승', value: up5Plus, change: 0, isCount: true, type: 'up', region: flag },
+      { name: '전체 상승', value: upAll, change: 0, isCount: true, type: 'up', region: flag },
+      { name: '전체 하락', value: downAll, change: 0, isCount: true, type: 'down', region: flag },
+      { name: '5% 이상 하락', value: down5Plus, change: 0, isCount: true, type: 'down', region: flag },
+      { name: '10% 이상 하락', value: down10Plus, change: 0, isCount: true, type: 'down', region: flag },
+      { name: '상승 : 하락', value: upDownRatio, change: 0, isRatio: true, type: 'ratio', region: flag },
+      { name: '5%상승 : 5%하락', value: up5Down5Ratio, change: 0, isRatio: true, type: 'ratio', region: flag },
+    ];
+  }, [etfs, selectedMarket]);
+  
   // 시황 전광판 카테고리
   const marketCategories = useMemo(() => [
     { key: 'indices', label: '증시', icon: Globe, data: MARKET_DATA.indices },
     { key: 'forex', label: '환율', icon: DollarSign, data: MARKET_DATA.forex },
     { key: 'commodities', label: '원자재', icon: Droplets, data: MARKET_DATA.commodities },
-  ], []);
+    { key: 'etf', label: 'ETF', icon: BarChart3, data: etfStats },
+  ], [etfStats]);
   
   const currentMarketData = marketCategories[marketCategory];
   
@@ -113,7 +159,7 @@ export default function HomePage() {
           payDate: forecast?.nextPayDate || '',
         };
       })
-      .filter(e => e.forecast && e.forecast.daysUntilEx <= 14 && e.forecast.daysUntilEx > 0);
+      .filter(e => e.forecast && e.forecast.daysUntilEx <= 14 && e.forecast.daysUntilEx >= 0);
     
     // 정렬
     if (dividendSort === 'yield') {
@@ -225,29 +271,12 @@ export default function HomePage() {
   }, []);
 
   return (
-    <div className={styles.page}>
-      {/* 국가 선택 섹션 */}
-      <section className={styles.marketSelector}>
-        <div className={styles.marketSelectorHeader}>
-          <h3 className={styles.marketSelectorTitle}>홈 화면에서 보여줄 ETF 국가 선택</h3>
-        </div>
-        <div className={styles.marketOptions}>
-          <button
-            className={`${styles.marketOption} ${selectedMarket === 'korea' ? styles.active : ''}`}
-            onClick={() => setSelectedMarket('korea')}
-          >
-            <span className={styles.marketFlag}>🇰🇷</span>
-            <span className={styles.marketName}>한국</span>
-          </button>
-          <button
-            className={`${styles.marketOption} ${selectedMarket === 'us' ? styles.active : ''}`}
-            onClick={() => setSelectedMarket('us')}
-          >
-            <span className={styles.marketFlag}>🇺🇸</span>
-            <span className={styles.marketName}>미국</span>
-          </button>
-        </div>
-      </section>
+    <PageContainer 
+      title="ETF 홈" 
+      subtitle="다양한 ETF 정보를 한눈에 확인하세요"
+      showMarketSelector={true}
+    >
+      <div className={styles.homeContent}>
       
       {/* 시황 전광판 */}
       <section className={styles.marketTicker}>
@@ -272,17 +301,65 @@ export default function HomePage() {
           </span>
         </div>
         <div className={styles.tickerBoard} key={`${marketCategory}-${categoryPage}`}>
-          {currentPageData.map((item, i) => (
+          {currentPageData.map((item: any, i: number) => (
             <div key={item.name} className={styles.tickerItem} style={{ animationDelay: `${i * 0.1}s` }}>
-              <span className={styles.tickerItemName}>{item.name}</span>
+              <span className={styles.tickerItemName}>
+                {item.region && <span className={styles.tickerRegion}>{item.region}</span>}
+                {item.type === 'up' ? (
+                  <>
+                    {item.name.includes('10% 이상') ? (
+                      <>
+                        <span className={styles.upKeyword}>10% 이상</span> 상승
+                      </>
+                    ) : item.name.includes('5% 이상') ? (
+                      <>
+                        <span className={styles.upKeyword}>5% 이상</span> 상승
+                      </>
+                    ) : (
+                      item.name
+                    )}
+                  </>
+                ) : item.type === 'down' ? (
+                  <>
+                    {item.name.includes('10% 이상') ? (
+                      <>
+                        <span className={styles.downKeyword}>10% 이상</span> 하락
+                      </>
+                    ) : item.name.includes('5% 이상') ? (
+                      <>
+                        <span className={styles.downKeyword}>5% 이상</span> 하락
+                      </>
+                    ) : (
+                      item.name
+                    )}
+                  </>
+                ) : (
+                  item.name
+                )}
+              </span>
               <div className={styles.tickerItemRow}>
-                <span className={styles.tickerItemValue}>
-                  {item.unit ? `${item.value.toLocaleString()}` : item.value.toLocaleString()}
-                  {item.unit && <span className={styles.tickerItemUnit}>{item.unit}</span>}
-                </span>
-                <span className={`${styles.tickerItemChange} ${item.change >= 0 ? styles.up : styles.down}`}>
-                  {item.change >= 0 ? '+' : ''}{item.change.toFixed(2)}%
-                </span>
+                {item.isCount ? (
+                  // ETF 개수 표시 - 흰색, 일반 스타일
+                  <span className={styles.tickerItemValue}>
+                    {item.value.toLocaleString()}개
+                  </span>
+                ) : item.isRatio ? (
+                  // ETF 비율 표시 - 흰색, 일반 스타일
+                  <span className={styles.tickerItemValue}>
+                    {item.value}
+                  </span>
+                ) : (
+                  // 일반 값과 변동률 표시
+                  <>
+                    <span className={styles.tickerItemValue}>
+                      {item.unit ? `${item.value.toLocaleString()}` : item.value.toLocaleString()}
+                      {item.unit && <span className={styles.tickerItemUnit}>{item.unit}</span>}
+                    </span>
+                    <span className={`${styles.tickerItemChange} ${item.change >= 0 ? styles.up : styles.down}`}>
+                      {item.change >= 0 ? '+' : ''}{item.change.toFixed(2)}%
+                    </span>
+                  </>
+                )}
               </div>
             </div>
           ))}
@@ -343,7 +420,7 @@ export default function HomePage() {
             <h2 className={styles.sectionTitle}>실시간 급등</h2>
             <span className={styles.liveIndicator}>LIVE</span>
           </div>
-          <button className={styles.moreBtn} onClick={() => navigate('/search')}>
+          <button className={styles.moreBtn} onClick={() => navigate('/ranking?category=return&period=1d')}>
             전체 <ChevronRight size={16} />
           </button>
         </div>
@@ -410,7 +487,7 @@ export default function HomePage() {
             <Target size={20} className={styles.targetIcon} />
             <h2 className={styles.sectionTitle}>신기록 달성</h2>
           </div>
-          <button className={styles.moreBtn} onClick={() => navigate('/search?filter=52w')}>
+          <button className={styles.moreBtn} onClick={() => navigate('/high-low')}>
             전체 <ChevronRight size={16} />
           </button>
         </div>
@@ -531,7 +608,7 @@ export default function HomePage() {
               >
                 <div className={styles.dividendRank}>
                   <span className={`${styles.ddayBadge} ${etf.forecast?.daysUntilEx && etf.forecast.daysUntilEx <= 3 ? styles.urgent : ''}`}>
-                    D-{etf.forecast?.daysUntilEx}
+                    {etf.forecast?.daysUntilEx === 0 ? 'D-day' : `D-${etf.forecast?.daysUntilEx}`}
                   </span>
                 </div>
                 <div className={styles.dividendInfo}>
@@ -607,6 +684,7 @@ export default function HomePage() {
           ))}
         </Card>
       </section>
-    </div>
+      </div>
+    </PageContainer>
   );
 }

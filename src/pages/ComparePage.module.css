@@ -1,144 +1,75 @@
-.page {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-2xl);
-  margin: calc(var(--spacing-sm) * -1);
-  margin-top: 0;
-  padding: var(--spacing-md);
-  padding-top: var(--spacing-sm);
-  padding-bottom: 100px;
-  max-width: 100%;
-  overflow-x: hidden;
-}
-
-@media (min-width: 768px) {
-  .page {
-    gap: 48px;
-    padding: var(--spacing-xl) var(--spacing-2xl);
-    padding-bottom: 120px;
-  }
-}
-
-@media (min-width: 1024px) {
-  .page {
-    margin: calc(var(--spacing-lg) * -1);
-    margin-top: calc(var(--spacing-md) * -1);
-    padding: var(--spacing-2xl);
-    padding-bottom: 120px;
-  }
-}
-
-/* ==================== 선택 섹션 ==================== */
-.selectionSection {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-.selectionHeader {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  text-align: center;
-}
-
-.headerTitleGroup {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-}
-
-.headerIcon {
-  flex-shrink: 0;
-  color: var(--color-primary);
-  opacity: 0.9;
-}
-
-.selectionTitle {
-  font-size: var(--font-size-xl);
-  font-weight: 700;
-  color: var(--color-text-primary);
-  letter-spacing: -0.01em;
-  margin: 0;
-  line-height: 1.3;
-}
-
-.selectionSubtitle {
-  font-size: 13px;
-  color: var(--color-text-tertiary);
-  margin: 0;
-  font-weight: 500;
-}
-
-/* ==================== 검색 섹션 ==================== */
-.searchSection {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  padding: 16px;
-  background: rgba(250, 251, 252, 0.6);
-  border-radius: var(--radius-md);
-  border: 1px solid rgba(229, 231, 235, 0.6);
-  transition: all 0.3s ease;
-}
-
-.searchSection:hover {
-  background: var(--color-white);
-  border-color: var(--color-border);
-  box-shadow: 0 2px 8px rgba(30, 58, 95, 0.04);
-}
-
-/* searchSection에서 required 스타일 제거됨 - searchInput으로 이동 */
-
-.searchInputWrapper {
+/* ==================== 검색 카드 ==================== */
+.searchCard {
   position: relative;
-  display: flex;
-  align-items: center;
-}
-
-.searchIcon {
-  position: absolute;
-  left: 14px;
-  color: var(--color-text-tertiary);
-  pointer-events: none;
-  z-index: 1;
-}
-
-.searchInput {
-  width: 100%;
-  padding: 12px 16px 12px 44px;
-  font-size: var(--font-size-base);
-  color: var(--color-text-primary);
-  background: var(--color-white);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
+  z-index: 10;
+  overflow: visible;
   transition: all 0.3s ease;
 }
 
-.searchInput:hover {
-  border-color: var(--color-text-secondary);
-}
-
-.searchInput:disabled {
-  background: var(--color-bg-secondary);
-  cursor: not-allowed;
-  opacity: 0.6;
-}
-
-.searchInput.required {
+.searchCard.required {
   border: 2px solid #EF4444 !important;
   box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.1), 0 4px 12px rgba(239, 68, 68, 0.15) !important;
-  animation: pulseRequired 2s ease-in-out infinite;
+  animation: pulseRequiredCard 2s ease-in-out infinite;
 }
 
-@keyframes pulseRequired {
+@keyframes pulseRequiredCard {
   0%, 100% {
     box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.1), 0 4px 12px rgba(239, 68, 68, 0.15);
   }
   50% {
     box-shadow: 0 0 0 6px rgba(239, 68, 68, 0.15), 0 6px 16px rgba(239, 68, 68, 0.2);
   }
+}
+
+/* ==================== ETF Selector (ETFSearchCard와 동일) ==================== */
+.etfSelector {
+  position: relative;
+  margin-top: var(--spacing-sm);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+/* 검색 입력 */
+.etfSearchBox {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.etfSearchBox svg {
+  position: absolute;
+  left: 14px;
+  color: var(--color-text-tertiary);
+  pointer-events: none;
+}
+
+.etfSearchInput {
+  width: 100%;
+  height: 48px;
+  padding: 0 44px;
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  font-size: var(--font-size-base);
+  color: var(--color-text-primary);
+  transition: all var(--transition-fast);
+}
+
+.etfSearchInput:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.etfSearchInput:disabled {
+  background: var(--color-bg-secondary);
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.etfSearchInput::placeholder {
+  color: var(--color-text-tertiary);
 }
 
 .clearSearchBtn {
@@ -162,108 +93,101 @@
 }
 
 /* ==================== 검색 결과 ==================== */
-.searchResults {
-  display: flex;
-  flex-direction: column;
+/* 검색 결과 드롭다운 */
+.etfDropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
   background: var(--color-white);
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  overflow: hidden;
-  box-shadow: 0 2px 8px rgba(30, 58, 95, 0.04);
-  max-height: 350px;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  z-index: 1000;
+  max-height: 320px;
   overflow-y: auto;
 }
 
-.searchResultItem {
+.etfItem {
   display: flex;
+  justify-content: space-between;
   align-items: center;
-  gap: 12px;
-  padding: 12px 16px;
+  width: 100%;
+  padding: var(--spacing-sm) var(--spacing-md);
   text-align: left;
+  transition: background var(--transition-fast);
+  min-height: var(--touch-target-min);
+  gap: var(--spacing-md);
   border-bottom: 1px solid var(--color-border-light);
-  transition: all 0.2s ease;
-  animation: slideInResult 0.3s ease-out backwards;
 }
 
-@keyframes slideInResult {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.searchResultItem:last-child {
+.etfItem:last-child {
   border-bottom: none;
 }
 
-.searchResultItem:hover {
+.etfItem:hover {
   background: var(--color-bg-secondary);
 }
 
-.searchResultItem:hover .addIcon {
-  transform: scale(1.1);
-  color: var(--color-primary);
-}
-
-.resultInfo {
+.etfItemInfo {
   flex: 1;
-  min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 2px;
+  min-width: 0;
 }
 
-.resultName {
-  font-size: var(--font-size-base);
-  font-weight: 600;
+.etfItemName {
+  font-size: var(--font-size-sm);
+  font-weight: 500;
   color: var(--color-text-primary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.resultTicker {
+.etfItemMeta {
   font-size: var(--font-size-xs);
   color: var(--color-text-tertiary);
-  font-family: var(--font-family-numeric);
 }
 
-.resultPrice {
+.etfItemPrice {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
   gap: 2px;
-  font-family: var(--font-family-numeric);
+  flex-shrink: 0;
 }
 
-.resultPrice > span:first-child {
+.etfItemPrice span:first-child {
   font-size: var(--font-size-sm);
-  font-weight: 600;
+  font-weight: 500;
   color: var(--color-text-primary);
 }
 
-.resultPrice > span:last-child {
-  font-size: var(--font-size-xs);
-  font-weight: 600;
-}
-
 .addIcon {
+  color: var(--color-primary);
   flex-shrink: 0;
-  color: var(--color-text-tertiary);
-  transition: all var(--transition-fast);
 }
 
 .noResults {
-  padding: var(--spacing-xl);
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  padding: var(--spacing-lg);
   text-align: center;
-  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-tertiary);
   background: var(--color-white);
-  border: 1px solid var(--color-border-light);
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  z-index: 1000;
+}
+
+.noResults p {
+  margin: 0;
 }
 
 /* ==================== 선택된 ETF 섹션 ==================== */
@@ -471,55 +395,207 @@
 }
 
 .helpText {
-  text-align: center;
-  color: var(--color-text-tertiary);
-  font-size: 11px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--color-text-secondary);
+  font-size: 12px;
   font-weight: 500;
-  margin: 0;
-  padding: 10px 14px;
-  background: rgba(250, 251, 252, 0.8);
-  border-radius: var(--radius-md);
-  border: 1px solid rgba(229, 231, 235, 0.6);
-}
-
-@media (min-width: 640px) {
-  .helpText {
-    font-size: 12px;
-    padding: 12px 16px;
-  }
+  margin: 0 auto;
+  padding: 6px 12px;
+  background: rgba(59, 130, 246, 0.06);
+  border-radius: var(--radius-full);
+  border: 1px solid rgba(59, 130, 246, 0.15);
 }
 
 /* ==================== Empty State ==================== */
-.emptyState {
+/* ==================== 인기 ETF 섹션 ==================== */
+.popularSection {
+  margin-top: var(--spacing-md);
+  padding: var(--spacing-md);
+  background: var(--color-bg-secondary);
+  border-radius: var(--radius-md);
+  animation: fadeIn 0.3s ease-out;
+}
+
+.popularHeader {
+  margin-bottom: var(--spacing-md);
+}
+
+.popularTitleGroup {
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.popularIcon {
+  flex-shrink: 0;
+  color: var(--color-text-tertiary);
+}
+
+.popularTitle {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  margin: 0 0 2px 0;
+  letter-spacing: -0.01em;
+}
+
+.popularSubtitle {
+  font-size: 11px;
+  color: var(--color-text-tertiary);
+  margin: 0;
+  font-weight: 500;
+}
+
+.popularGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--spacing-xs);
+}
+
+.popularCard {
+  display: flex;
+  padding: 10px 12px;
+  background: var(--color-white);
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-md);
+  text-align: left;
+  transition: all var(--transition-fast);
+  cursor: pointer;
+  animation: fadeIn 0.3s ease-out backwards;
+}
+
+.popularCard:hover {
+  border-color: var(--color-primary);
+  background: var(--color-bg-secondary);
+}
+
+.popularCard:hover .popularCardIcon {
+  color: var(--color-primary);
+}
+
+@media (min-width: 640px) {
+  .popularCard {
+    padding: var(--spacing-sm) var(--spacing-md);
+  }
+}
+
+.popularCardContent {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+
+@media (min-width: 640px) {
+  .popularCardContent {
+    gap: var(--spacing-sm);
+  }
+}
+
+.popularRank {
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 16px;
-  padding: 48px 24px;
-  text-align: center;
-  background: transparent;
-  border-radius: var(--radius-md);
-  border: 1px dashed var(--color-border);
-}
-
-.emptyIcon {
-  color: var(--color-text-tertiary);
-  opacity: 0.4;
-}
-
-.emptyState h3 {
-  font-size: var(--font-size-base);
+  width: 18px;
+  height: 18px;
+  font-size: 10px;
   font-weight: 700;
+  color: var(--color-text-tertiary);
+  flex-shrink: 0;
+}
+
+@media (min-width: 640px) {
+  .popularRank {
+    width: 20px;
+    height: 20px;
+    font-size: 11px;
+  }
+}
+
+.popularCardInfo {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.popularCardName {
+  font-size: 12px;
+  font-weight: 600;
   color: var(--color-text-primary);
   margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.emptyState p {
-  font-size: 13px;
+@media (min-width: 640px) {
+  .popularCardName {
+    font-size: 13px;
+  }
+}
+
+.popularCardMeta {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+}
+
+@media (min-width: 640px) {
+  .popularCardMeta {
+    gap: 6px;
+    font-size: 11px;
+  }
+}
+
+.popularCardTicker {
+  font-weight: 600;
   color: var(--color-text-tertiary);
-  margin: 0;
-  line-height: 1.6;
+  font-family: var(--font-family-numeric);
+}
+
+.popularCardDivider {
+  color: var(--color-border);
+}
+
+.popularCardChange {
+  font-weight: 600;
+  font-family: var(--font-family-numeric);
+  font-feature-settings: 'tnum' on, 'lnum' on;
+}
+
+.popularCardIcon {
+  flex-shrink: 0;
+  color: var(--color-text-tertiary);
+  transition: all var(--transition-fast);
+}
+
+@media (min-width: 640px) {
+  .popularGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 768px) {
+  .popularGrid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (min-width: 768px) {
+  .popularSection {
+    padding: var(--spacing-lg);
+  }
+}
+
+@media (min-width: 1024px) {
+  .popularSection {
+    padding: var(--spacing-md) var(--spacing-lg);
+  }
 }
 
 /* ==================== 결과 섹션 ==================== */

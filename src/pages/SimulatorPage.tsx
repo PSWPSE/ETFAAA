@@ -1,7 +1,8 @@
 import { useState, useCallback, useRef } from 'react';
-import { Calendar, Search, Play, RotateCcw, ArrowLeft, TrendingUp, Zap, Activity } from 'lucide-react';
+import { Calendar, Play, RotateCcw, TrendingUp, Zap, Activity } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, LineChart, Line, Legend, BarChart, Bar, Cell } from 'recharts';
-import { Card, CardHeader, Button, Input, Select } from '../components/common';
+import { Card, CardHeader, Button, Input, Select, ETFSearchCard } from '../components/common';
+import PageContainer from '../components/layout/PageContainer';
 import { useETFStore } from '../store/etfStore';
 import { koreanETFs, usETFs, generatePriceHistory } from '../data/etfs';
 import { formatPrice, formatPercent, getChangeClass } from '../utils/format';
@@ -88,7 +89,7 @@ interface ComparisonResult {
 }
 
 export default function SimulatorPage() {
-  const { selectedMarket } = useETFStore();
+  const { selectedMarket, setSelectedMarket } = useETFStore();
   const [investmentType, setInvestmentType] = useState('lump');
   const [principal, setPrincipal] = useState('10,000,000');
   const [monthlyAmount, setMonthlyAmount] = useState('500,000');
@@ -96,8 +97,6 @@ export default function SimulatorPage() {
   const [startDate, setStartDate] = useState(() => getDatesByPreset('5y').startDate);
   const [endDate, setEndDate] = useState(() => getDatesByPreset('5y').endDate);
   const [selectedETFId, setSelectedETFId] = useState('');
-  const [showETFDropdown, setShowETFDropdown] = useState(false);
-  const [etfSearchQuery, setETFSearchQuery] = useState('');
   const [dividendOption, setDividendOption] = useState('reinvest');
   
   // 비교용 추가 상태
@@ -115,12 +114,6 @@ export default function SimulatorPage() {
   // 시장별 ETF 목록
   const etfList = selectedMarket === 'korea' ? koreanETFs : usETFs;
   const selectedETF = etfList.find(e => e.id === selectedETFId);
-  
-  // ETF 검색 필터링
-  const filteredETFs = etfList.filter(etf => 
-    etf.name.toLowerCase().includes(etfSearchQuery.toLowerCase()) ||
-    etf.ticker.toLowerCase().includes(etfSearchQuery.toLowerCase())
-  );
   
   // 입력값 변경 핸들러
   const handlePrincipalChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -156,13 +149,6 @@ export default function SimulatorPage() {
   const handleEndDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setEndDate(e.target.value);
     setSelectedPreset('');
-  };
-  
-  // ETF 선택 핸들러
-  const handleETFSelect = (etfId: string) => {
-    setSelectedETFId(etfId);
-    setShowETFDropdown(false);
-    setETFSearchQuery('');
   };
   
   // 시뮬레이션 실행 가능 여부
@@ -517,84 +503,23 @@ export default function SimulatorPage() {
   };
   
   return (
-    <div className={styles.page}>
+    <PageContainer 
+      title="투자 시뮬레이터" 
+      subtitle="과거 데이터로 투자 성과를 시뮬레이션하세요"
+      showMarketSelector={true}
+    >
       {/* ETF Selection */}
-      <Card padding="md" className={`${styles.etfCard} ${!selectedETF ? styles.required : ''}`}>
-        {!selectedETF && (
-          <CardHeader 
-            title="ETF 검색"
-            subtitle="실험할 ETF를 검색하세요"
-          />
-        )}
-        <div className={styles.etfSelector}>
-          {selectedETF ? (
-            /* 선택된 ETF 표시 */
-            <div className={styles.selectedETFCard}>
-              <div className={styles.selectedETFInfo}>
-                <span className={styles.selectedETFName}>{selectedETF.name}</span>
-                <span className={styles.selectedETFMeta}>
-                  {selectedETF.ticker} · {selectedETF.issuer} · {selectedETF.category}
-                </span>
-              </div>
-              <button 
-                className={styles.changeETFButton}
-                onClick={() => {
-                  setSelectedETFId('');
-                  setETFSearchQuery('');
-                }}
-              >
-                <ArrowLeft size={16} />
-                다른 ETF 선택
-              </button>
-            </div>
-          ) : (
-            /* 검색 입력 */
-            <>
-              <div className={styles.etfSearchBox}>
-                <Search size={18} />
-                <input
-                  type="text"
-                  placeholder="ETF 이름 또는 종목코드 검색..."
-                  value={etfSearchQuery}
-                  onChange={(e) => {
-                    setETFSearchQuery(e.target.value);
-                    setShowETFDropdown(true);
-                  }}
-                  onFocus={() => setShowETFDropdown(true)}
-                  className={styles.etfSearchInput}
-                />
-              </div>
-              
-              {/* 검색 결과 */}
-              {showETFDropdown && etfSearchQuery && (
-                <div className={styles.etfDropdown}>
-                  {filteredETFs.length > 0 ? (
-                    <div className={styles.etfList}>
-                      {filteredETFs.slice(0, 10).map(etf => (
-                        <button
-                          key={etf.id}
-                          className={styles.etfItem}
-                          onClick={() => handleETFSelect(etf.id)}
-                        >
-                          <div className={styles.etfItemInfo}>
-                            <span className={styles.etfItemName}>{etf.name}</span>
-                            <span className={styles.etfItemMeta}>{etf.issuer} · {etf.category}</span>
-                          </div>
-                          <span className={styles.etfItemTicker}>{etf.ticker}</span>
-                        </button>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className={styles.noResults}>
-                      검색 결과가 없습니다
-                    </div>
-                  )}
-                </div>
-              )}
-            </>
-          )}
-        </div>
-      </Card>
+      <ETFSearchCard
+        title="ETF 검색"
+        subtitle="실험할 ETF를 검색하세요"
+        selectedETFId={selectedETFId}
+        onSelect={(id) => {
+          setSelectedETFId(id);
+          setETFSearchQuery('');
+        }}
+        placeholder="ETF 이름 또는 종목코드 검색..."
+        required={true}
+      />
       
       {/* Input Section */}
       <Card padding="md">
@@ -1092,6 +1017,6 @@ export default function SimulatorPage() {
         * 본 백테스트는 과거 데이터 기반 시뮬레이션이며, 미래 수익을 보장하지 않습니다.
         실제 투자 시 수수료, 세금 등이 추가로 발생할 수 있습니다.
       </p>
-    </div>
+    </PageContainer>
   );
 }

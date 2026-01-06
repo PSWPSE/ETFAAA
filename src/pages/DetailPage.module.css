@@ -4,10 +4,7 @@
   display: flex;
   flex-direction: column;
   gap: var(--spacing-lg); /* 24px for mobile */
-  margin: calc(var(--spacing-sm) * -1);
-  margin-top: 0;
   padding: var(--spacing-md);
-  padding-top: var(--spacing-sm);
   padding-bottom: 180px;
 }
 
@@ -21,8 +18,6 @@
 
 @media (min-width: 1024px) {
   .page {
-    margin: calc(var(--spacing-lg) * -1);
-    margin-top: calc(var(--spacing-md) * -1);
     padding: var(--spacing-2xl);
     padding-bottom: 200px;
   }
@@ -1582,19 +1577,45 @@
 /* ==================== 상관 관계 ==================== */
 .correlationGroup {
   margin-bottom: var(--spacing-lg);
+  padding: var(--spacing-md);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border-light);
 }
 
 .correlationGroup:last-child {
   margin-bottom: 0;
 }
 
+.positiveGroup {
+  background: rgba(16, 185, 129, 0.03);
+  border-color: rgba(16, 185, 129, 0.15);
+}
+
+.negativeGroup {
+  background: rgba(59, 130, 246, 0.03);
+  border-color: rgba(59, 130, 246, 0.15);
+}
+
 .correlationGroupTitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   font-size: var(--font-size-sm);
   font-weight: 700;
   color: var(--color-text-primary);
   margin-bottom: var(--spacing-sm);
   padding-bottom: var(--spacing-xs);
   border-bottom: 1px solid var(--color-border-light);
+}
+
+.positiveGroup .correlationGroupTitle {
+  color: #059669;
+  border-bottom-color: rgba(16, 185, 129, 0.2);
+}
+
+.negativeGroup .correlationGroupTitle {
+  color: #2563eb;
+  border-bottom-color: rgba(59, 130, 246, 0.2);
 }
 
 .correlationList {
@@ -1607,12 +1628,14 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: var(--spacing-sm) 0;
+  padding: var(--spacing-sm) var(--spacing-xs);
+  margin: 0 calc(var(--spacing-xs) * -1);
   background: transparent;
   border: none;
   border-bottom: 1px solid var(--color-border-light);
+  border-radius: var(--radius-sm);
   text-align: left;
-  width: 100%;
+  width: calc(100% + var(--spacing-sm));
   transition: all var(--transition-fast);
   cursor: pointer;
 }
@@ -1622,7 +1645,15 @@
 }
 
 .correlationItem:hover {
-  background: var(--color-bg);
+  background: rgba(0, 0, 0, 0.02);
+}
+
+.positiveGroup .correlationItem:hover {
+  background: rgba(16, 185, 129, 0.06);
+}
+
+.negativeGroup .correlationItem:hover {
+  background: rgba(59, 130, 246, 0.06);
 }
 
 .correlationLeft {
@@ -1662,6 +1693,16 @@
   font-feature-settings: 'tnum' on, 'lnum' on;
   min-width: 36px;
   text-align: right;
+}
+
+.positiveGroup .correlationValue {
+  color: #059669;
+  font-weight: 700;
+}
+
+.negativeGroup .correlationValue {
+  color: #2563eb;
+  font-weight: 700;
 }
 
 .correlationPrice {
@@ -2146,8 +2187,13 @@
     font-size: 13px;
   }
   
+  .correlationGroup {
+    padding: var(--spacing-sm);
+  }
+  
   .correlationGroupTitle {
     font-size: 13px;
+    gap: 6px;
     margin-bottom: var(--spacing-xs);
   }
   
@@ -2207,8 +2253,6 @@
 
 @media (min-width: 768px) {
   .page {
-    max-width: 800px;
-    margin: 0 auto;
     padding: var(--spacing-lg);
     gap: var(--spacing-lg);
   }

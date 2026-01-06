@@ -2,6 +2,7 @@ import { NavLink } from 'react-router-dom';
 import { 
   Home, 
   Search, 
+  TrendingUp,
   BarChart3, 
   Calculator, 
   Calendar, 
@@ -14,6 +15,7 @@ import styles from './Sidebar.module.css';
 const navItems = [
   { path: '/', icon: Home, label: '홈' },
   { path: '/search', icon: Search, label: 'ETF 검색' },
+  { path: '/ranking', icon: TrendingUp, label: '랭킹' },
   { path: '/compare', icon: BarChart3, label: '비교분석' },
   { path: '/simulator', icon: Calculator, label: '투자 실험실' },
   { path: '/calendar', icon: Calendar, label: '배당캘린더' },

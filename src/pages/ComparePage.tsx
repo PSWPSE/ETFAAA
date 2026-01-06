@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { X, Plus, Search, ArrowRight, Info, TrendingUp, PieChart, BarChart2, Calendar, CheckCircle, XCircle } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, BarChart, Bar, Cell } from 'recharts';
 import { Card, CardHeader, Button } from '../components/common';
+import PageContainer from '../components/layout/PageContainer';
 import { useETFStore } from '../store/etfStore';
 import { koreanETFs, usETFs, generatePriceHistory, getReturns, getRiskMetrics } from '../data/etfs';
 import { formatPrice, formatPercent, getChangeClass, formatLargeNumber } from '../utils/format';
@@ -37,7 +38,7 @@ const PERIOD_OPTIONS = [
 export default function ComparePage() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  const { selectedMarket, compareList } = useETFStore();
+  const { selectedMarket, setSelectedMarket, compareList } = useETFStore();
   
   // 상태 관리
   const [selectedETFs, setSelectedETFs] = useState<ETF[]>([]);
@@ -102,6 +103,21 @@ export default function ComparePage() {
       )
       .slice(0, 10);
   }, [searchQuery, allETFs, selectedETFs]);
+  
+  // 인기 ETF (시가총액과 거래량 기준)
+  const popularETFs = useMemo(() => {
+    const selectedIds = selectedETFs.map(e => e.id);
+    
+    return [...allETFs]
+      .filter(etf => !selectedIds.includes(etf.id))
+      .sort((a, b) => {
+        // 시가총액과 거래량을 함께 고려한 점수 계산
+        const scoreA = (a.marketCap * 0.6) + (a.volume * a.price * 0.4);
+        const scoreB = (b.marketCap * 0.6) + (b.volume * b.price * 0.4);
+        return scoreB - scoreA;
+      })
+      .slice(0, 12);
+  }, [allETFs, selectedETFs]);
   
   // ETF 추가
   const handleAddETF = (etf: ETF) => {
@@ -264,26 +280,28 @@ export default function ComparePage() {
   };
   
   return (
-    <div className={styles.page}>
-      {/* ETF 선택 섹션 */}
-      <div ref={selectionSectionRef} className={styles.selectionSection}>
-        <div className={styles.selectionHeader}>
-          <div className={styles.headerTitleGroup}>
-            <div>
-              <h1 className={styles.selectionTitle}>ETF 비교 분석</h1>
-              <p className={styles.selectionSubtitle}>최대 {MAX_COMPARE}개의 ETF를 선택하여 비교하세요</p>
-            </div>
-          </div>
-        </div>
+    <PageContainer 
+      title="ETF 비교 분석" 
+      subtitle={`최대 ${MAX_COMPARE}개의 ETF를 선택하여 비교하세요`}
+      showMarketSelector={true}
+    >
+      {/* ETF 검색 */}
+      <Card 
+        padding="md" 
+        className={`${styles.searchCard} ${selectedETFs.length < 2 ? styles.required : ''}`}
+      >
+        <CardHeader 
+          title="ETF 검색"
+          subtitle="비교할 ETF를 검색하세요"
+        />
         
-        {/* 검색 입력 */}
-        <div className={styles.searchSection}>
-          <div className={styles.searchInputWrapper}>
-            <Search className={styles.searchIcon} size={20} />
+        <div ref={selectionSectionRef} className={styles.etfSelector}>
+          <div className={styles.etfSearchBox}>
+            <Search size={18} />
             <input
               type="text"
-              className={`${styles.searchInput} ${selectedETFs.length < 2 ? styles.required : ''}`}
-              placeholder="ETF 이름 또는 코드로 검색... (예: KODEX 200, SPY)"
+              className={styles.etfSearchInput}
+              placeholder="ETF 이름 또는 종목코드 검색..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               disabled={selectedETFs.length >= MAX_COMPARE}
@@ -300,19 +318,19 @@ export default function ComparePage() {
           
           {/* 검색 결과 */}
           {searchQuery && searchResults.length > 0 && (
-            <div className={styles.searchResults}>
+            <div className={styles.etfDropdown}>
               {searchResults.map((etf, index) => (
                 <button
                   key={etf.id}
-                  className={styles.searchResultItem}
+                  className={styles.etfItem}
                   onClick={() => handleAddETF(etf)}
                   style={{ animationDelay: `${index * 0.05}s` }}
                 >
-                  <div className={styles.resultInfo}>
-                    <span className={styles.resultName}>{etf.name}</span>
-                    <span className={styles.resultTicker}>{etf.ticker}</span>
+                  <div className={styles.etfItemInfo}>
+                    <span className={styles.etfItemName}>{etf.name}</span>
+                    <span className={styles.etfItemMeta}>{etf.issuer} · {etf.category}</span>
                   </div>
-                  <div className={styles.resultPrice}>
+                  <div className={styles.etfItemPrice}>
                     <span>{formatPrice(etf.price)}원</span>
                     <span className={getChangeClass(etf.changePercent)}>
                       {formatPercent(etf.changePercent)}
@@ -330,69 +348,104 @@ export default function ComparePage() {
             </div>
           )}
         </div>
-        
-        {/* 선택된 ETF 목록 */}
-        {selectedETFs.length > 0 && (
-          <div className={styles.selectedSection}>
-            <div className={styles.selectedHeader}>
-              <h3 className={styles.selectedTitle}>
-                선택한 ETF <span className={styles.selectedCount}>({selectedETFs.length}/{MAX_COMPARE})</span>
-              </h3>
-              <button className={styles.clearAllBtn} onClick={handleClearAll}>
-                전체 삭제
-              </button>
-            </div>
-            
-            <div className={styles.selectedList}>
-              {selectedETFs.map((etf, index) => (
-                <div
-                  key={etf.id}
-                  className={styles.selectedChip}
-                  style={{ 
-                    borderColor: COLORS[index],
-                    color: COLORS[index],
-                    animationDelay: `${index * 0.1}s`
-                  }}
-                >
-                  <span className={styles.chipDot} style={{ backgroundColor: COLORS[index] }} />
-                  <span className={styles.chipName}>{etf.name}</span>
-                  <button 
-                    className={styles.chipRemoveBtn}
-                    onClick={() => handleRemoveETF(etf.id)}
-                    aria-label="삭제"
-                  >
-                    <X size={14} />
-                  </button>
-                </div>
-              ))}
-            </div>
-            
-            {/* 비교하기 버튼 */}
-            {selectedETFs.length >= 2 && !showResults && (
-              <Button
-                size="lg"
-                onClick={handleStartCompare}
-                rightIcon={<ArrowRight size={20} />}
-                className={styles.compareButton}
+      </Card>
+      
+      {/* 선택된 ETF 목록 */}
+      {selectedETFs.length > 0 && (
+        <div className={styles.selectedSection}>
+          <div className={styles.selectedHeader}>
+            <h3 className={styles.selectedTitle}>
+              선택한 ETF <span className={styles.selectedCount}>({selectedETFs.length}/{MAX_COMPARE})</span>
+            </h3>
+            <button className={styles.clearAllBtn} onClick={handleClearAll}>
+              전체 삭제
+            </button>
+          </div>
+          
+          <div className={styles.selectedList}>
+            {selectedETFs.map((etf, index) => (
+              <div
+                key={etf.id}
+                className={styles.selectedChip}
+                style={{ 
+                  borderColor: COLORS[index],
+                  color: COLORS[index],
+                  animationDelay: `${index * 0.1}s`
+                }}
               >
-                비교 분석 시작하기
-              </Button>
-            )}
-            
-            {selectedETFs.length === 1 && (
-              <p className={styles.helpText}>최소 2개 이상의 ETF를 선택해야 비교할 수 있습니다</p>
-            )}
+                <span className={styles.chipDot} style={{ backgroundColor: COLORS[index] }} />
+                <span className={styles.chipName}>{etf.name}</span>
+                <button 
+                  className={styles.chipRemoveBtn}
+                  onClick={() => handleRemoveETF(etf.id)}
+                  aria-label="삭제"
+                >
+                  <X size={14} />
+                </button>
+              </div>
+            ))}
           </div>
-        )}
-        
-        {selectedETFs.length === 0 && !searchQuery && (
-          <div className={styles.emptyState}>
-            <BarChart2 size={48} className={styles.emptyIcon} />
-            <h3>ETF를 검색하여 선택해보세요</h3>
-            <p>검색창에 ETF 이름이나 코드를 입력하면<br />비교하고 싶은 ETF를 선택할 수 있습니다</p>
+          
+          {/* 비교하기 버튼 */}
+          {selectedETFs.length >= 2 && (
+            <Button
+              size="lg"
+              onClick={handleStartCompare}
+              rightIcon={<ArrowRight size={20} />}
+              className={styles.compareButton}
+            >
+              비교 분석 {showResults ? '다시 ' : ''}시작하기
+            </Button>
+          )}
+          
+          {selectedETFs.length === 1 && (
+            <p className={styles.helpText}>
+              <Info size={12} />
+              1개 더 선택하면 비교할 수 있습니다
+            </p>
+          )}
+        </div>
+      )}
+      
+      {!showResults && !searchQuery && (
+        <div className={styles.popularSection}>
+          <div className={styles.popularHeader}>
+            <div className={styles.popularTitleGroup}>
+              <TrendingUp size={18} className={styles.popularIcon} />
+              <div>
+                <h3 className={styles.popularTitle}>최근 관심이 많이 받는 ETF</h3>
+                <p className={styles.popularSubtitle}>시가총액과 거래량 기준</p>
+              </div>
+            </div>
           </div>
-        )}
-      </div>
+          
+          <div className={styles.popularGrid}>
+            {popularETFs.map((etf, index) => (
+              <button
+                key={etf.id}
+                className={styles.popularCard}
+                onClick={() => handleAddETF(etf)}
+                style={{ animationDelay: `${index * 0.05}s` }}
+              >
+                <div className={styles.popularCardContent}>
+                  <span className={styles.popularRank}>{index + 1}</span>
+                  <div className={styles.popularCardInfo}>
+                    <h4 className={styles.popularCardName}>{etf.name}</h4>
+                    <div className={styles.popularCardMeta}>
+                      <span className={styles.popularCardTicker}>{etf.ticker}</span>
+                      <span className={styles.popularCardDivider}>•</span>
+                      <span className={`${styles.popularCardChange} ${getChangeClass(etf.changePercent)}`}>
+                        {formatPercent(etf.changePercent)}
+                      </span>
+                    </div>
+                  </div>
+                  <Plus size={16} className={styles.popularCardIcon} />
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
       
       {/* 비교 결과 섹션 */}
       {showResults && selectedETFs.length >= 2 && (
@@ -1215,6 +1268,6 @@ export default function ComparePage() {
           </div>
         </div>
       )}
-    </div>
+    </PageContainer>
   );
 }

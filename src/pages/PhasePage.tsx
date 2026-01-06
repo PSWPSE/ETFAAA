@@ -5,6 +5,7 @@ import {
   AlertTriangle, ChevronRight
 } from 'lucide-react';
 import { Card } from '../components/common';
+import PageContainer from '../components/layout/PageContainer';
 import { koreanETFs, usETFs, getPhaseAnalysis } from '../data/etfs';
 import { useETFStore } from '../store/etfStore';
 import { formatPrice, formatPercent, getChangeClass } from '../utils/format';
@@ -409,32 +410,13 @@ export default function PhasePage() {
   };
   
   return (
-    <div className={styles.page} ref={pageRef}>
-      {/* Market Selector */}
-      <section className={styles.marketSelector}>
-        <div className={styles.marketSelectorHeader}>
-          <h3 className={styles.marketSelectorTitle}>홈 화면에서 보여줄 ETF 국가 선택</h3>
-        </div>
-        <div className={styles.marketOptions}>
-          <button
-            className={`${styles.marketOption} ${selectedMarket === 'korea' ? styles.active : ''}`}
-            onClick={() => setSelectedMarket('korea')}
-          >
-            <span className={styles.marketFlag}>🇰🇷</span>
-            <span className={styles.marketName}>한국</span>
-          </button>
-          <button
-            className={`${styles.marketOption} ${selectedMarket === 'us' ? styles.active : ''}`}
-            onClick={() => setSelectedMarket('us')}
-          >
-            <span className={styles.marketFlag}>🇺🇸</span>
-            <span className={styles.marketName}>미국</span>
-          </button>
-        </div>
-      </section>
-      
+    <PageContainer 
+      title="시장 국면" 
+      subtitle="현재 시장 상황에 맞는 ETF를 찾아보세요"
+      showMarketSelector={true}
+    >
       {/* Phase Analysis Matrix */}
-      <section className={styles.matrixSection}>
+      <section ref={pageRef} className={styles.matrixSection}>
         {/* Ticker Banner */}
         {tickerItems.length > 0 && (
           <div className={styles.tickerBanner}>
@@ -546,6 +528,6 @@ export default function PhasePage() {
           </section>
         );
       })}
-    </div>
+    </PageContainer>
   );
 }

@@ -1,45 +1,8 @@
-.page {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-2xl);
-  margin: calc(var(--spacing-sm) * -1);
-  margin-top: 0;
-  padding: var(--spacing-md);
-  padding-top: var(--spacing-sm);
-  padding-bottom: 180px;
-}
-
-@media (min-width: 768px) {
-  .page {
-    gap: 48px;
-    padding: var(--spacing-xl) var(--spacing-2xl);
-    padding-bottom: 200px;
-  }
-}
-
-@media (min-width: 1024px) {
-  .page {
-    margin: calc(var(--spacing-lg) * -1);
-    margin-top: calc(var(--spacing-md) * -1);
-    padding: var(--spacing-2xl);
-    padding-bottom: 200px;
-  }
-}
-
 /* ==================== 검색 방식 선택 섹션 ==================== */
 .searchMethodSection {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-md);
-}
-
-.searchMethodTitle {
-  font-size: var(--font-size-lg);
-  font-weight: 700;
-  color: var(--color-text-primary);
-  letter-spacing: -0.01em;
-  margin: 0;
-  text-align: center;
 }
 
 .searchTypeTabs {
@@ -113,17 +76,33 @@
 
 /* ==================== 검색 카드 ==================== */
 .searchCard {
-  border: 1px solid var(--color-border);
-  box-shadow: 0 1px 3px rgba(30, 58, 95, 0.04);
-  background: var(--color-white);
-  border-radius: var(--radius-lg);
-  padding: var(--spacing-lg);
+  position: relative;
+  z-index: 10;
+  overflow: visible;
+  transition: all 0.3s ease;
+}
+
+.searchCard.required,
+.filterOptions.required,
+.chatInputWrapper.required {
+  border: 2px solid #EF4444 !important;
+  box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.1), 0 4px 12px rgba(239, 68, 68, 0.15) !important;
+  animation: pulseRequiredCard 2s ease-in-out infinite;
+}
+
+@keyframes pulseRequiredCard {
+  0%, 100% {
+    box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.1), 0 4px 12px rgba(239, 68, 68, 0.15);
+  }
+  50% {
+    box-shadow: 0 0 0 6px rgba(239, 68, 68, 0.15), 0 6px 16px rgba(239, 68, 68, 0.2);
+  }
 }
 
 .searchInterface {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: var(--spacing-sm);
 }
 
 /* ==================== Chat Interface ==================== */
@@ -428,93 +407,183 @@
 }
 
 /* ==================== 검색 입력 ==================== */
+/* 검색 입력 (ETFSearchCard와 동일) */
 .searchInputWrapper {
   position: relative;
   display: flex;
   align-items: center;
-  transition: all 0.3s ease;
-}
-
-.searchInputWrapper.required {
-  border-radius: var(--radius-md);
-  padding: 2px;
-  background: linear-gradient(135deg, #EF4444 0%, #EF4444 100%);
-  box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.1), 0 4px 12px rgba(239, 68, 68, 0.15);
-  animation: pulseRequired 2s ease-in-out infinite;
-}
-
-.searchInputWrapper.required .searchInput {
-  border: none;
-  background: var(--color-white);
-}
-
-@keyframes pulseRequired {
-  0%, 100% {
-    box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.1), 0 4px 12px rgba(239, 68, 68, 0.15);
-  }
-  50% {
-    box-shadow: 0 0 0 6px rgba(239, 68, 68, 0.15), 0 6px 16px rgba(239, 68, 68, 0.2);
-  }
+  margin-top: var(--spacing-sm);
 }
 
 .searchInputIcon {
   position: absolute;
-  left: var(--spacing-md);
+  left: 14px;
   color: var(--color-text-tertiary);
   pointer-events: none;
-  z-index: 1;
 }
 
 .searchInput {
   width: 100%;
   height: 48px;
-  padding: 0 var(--spacing-md) 0 44px;
-  background: var(--color-bg);
+  padding: 0 44px;
+  background: var(--color-white);
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-lg);
   font-size: var(--font-size-base);
-  font-weight: 500;
   color: var(--color-text-primary);
   transition: all var(--transition-fast);
 }
 
-/* ==================== 스크리너 필터 ==================== */
-.screenerFilters {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
+.searchInput:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
-.filterSection {
+.searchInput::placeholder {
+  color: var(--color-text-tertiary);
+}
+
+/* ==================== 스크리너 필터 ==================== */
+/* 필터 카테고리 탭 */
+.filterCategoryTabs {
   display: flex;
-  flex-direction: column;
-  gap: 12px;
-  padding: 16px;
+  flex-wrap: wrap;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-xs) 0;
+  margin-bottom: var(--spacing-md);
+}
+
+.filterCategoryTab {
+  flex-shrink: 0;
+  padding: 8px 16px;
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-full);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+}
+
+.filterCategoryTab:hover {
+  background: var(--color-white);
+  border-color: var(--color-border);
+  color: var(--color-text-primary);
+}
+
+.filterCategoryTab.active {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: var(--color-white);
+  font-weight: 600;
+}
+
+/* 필터 옵션 영역 */
+.filterOptions {
+  padding: var(--spacing-md);
   background: rgba(250, 251, 252, 0.6);
   border-radius: var(--radius-md);
   border: 1px solid rgba(229, 231, 235, 0.6);
-  transition: all 0.2s ease;
+  min-height: 120px;
 }
 
-.filterSection:hover {
-  background: var(--color-white);
-  border-color: var(--color-border);
-  box-shadow: 0 2px 8px rgba(30, 58, 95, 0.04);
-}
-
-.filterSection:last-child {
-  border-bottom: 1px solid rgba(229, 231, 235, 0.6);
-}
-
-.filterTitle {
+.filterOptionsHeader {
   font-size: 13px;
-  font-weight: 700;
-  color: var(--color-text-primary);
-  margin: 0;
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
-  opacity: 0.8;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  margin-bottom: var(--spacing-sm);
+  padding-bottom: var(--spacing-xs);
+  border-bottom: 1px solid var(--color-border-light);
 }
+
+/* 선택된 필터 섹션 */
+.selectedFiltersSection {
+  margin-top: var(--spacing-md);
+  padding: var(--spacing-md);
+  background: var(--color-bg-secondary);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border-light);
+}
+
+.selectedFiltersHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--spacing-sm);
+}
+
+.selectedFiltersLabel {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+.selectedFiltersCount {
+  color: var(--color-primary);
+  font-weight: 700;
+}
+
+.clearAllFiltersButton {
+  padding: 4px 12px;
+  background: transparent;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.clearAllFiltersButton:hover {
+  background: var(--color-white);
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.selectedFilterChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-xs);
+}
+
+.selectedFilterChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: var(--color-white);
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-full);
+  font-size: 12px;
+  color: var(--color-text-primary);
+  font-weight: 500;
+  animation: fadeIn 0.2s ease-out;
+}
+
+.selectedFilterChip span {
+  white-space: nowrap;
+}
+
+.selectedFilterChip button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  background: none;
+  border: none;
+  color: var(--color-text-tertiary);
+  cursor: pointer;
+  transition: color var(--transition-fast);
+}
+
+.selectedFilterChip button:hover {
+  color: var(--color-danger);
+}
+
 
 .filterSubSection {
   display: flex;
@@ -644,54 +713,13 @@
 }
 
 /* ==================== 검색 버튼 ==================== */
-.searchButtonWrapper {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding-top: 20px;
-  margin-top: 20px;
-}
-
 .searchButton {
-  flex: 1;
+  width: 100%;
+  margin-top: calc(var(--spacing-xs) * 0.5);
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  height: 50px;
-  font-size: 14px;
-  font-weight: 700;
-  border-radius: var(--radius-md);
-  transition: all 0.2s ease;
-  box-shadow: 0 2px 8px rgba(30, 58, 95, 0.12);
-}
-
-.searchButton:not(:disabled):hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 16px rgba(30, 58, 95, 0.2);
-}
-
-.searchButton:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  box-shadow: none;
-}
-
-.resetButton {
-  padding: 12px 20px;
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--color-text-tertiary);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  transition: all 0.2s ease;
-  background: var(--color-white);
-}
-
-.resetButton:hover {
-  background: var(--color-bg);
-  border-color: var(--color-text-secondary);
-  color: var(--color-text-primary);
+  gap: var(--spacing-sm);
 }
 
 /* ==================== 검색 결과 섹션 ==================== */
@@ -743,7 +771,30 @@
 .sortWrapper {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--spacing-xs);
+}
+
+.periodDropdown {
+  display: flex;
+  align-items: center;
+}
+
+.periodSelect {
+  padding: 8px 12px;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-text-primary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  outline: none;
+}
+
+.periodSelect:hover {
+  background: var(--color-white);
+  border-color: var(--color-primary);
 }
 
 .sortSelect {
@@ -1082,13 +1133,41 @@
     left: 12px;
   }
 
-  .filterSection {
-    padding: 12px;
-    gap: 10px;
+  .filterCategoryTab {
+    padding: 6px 12px;
+    font-size: 12px;
   }
 
-  .filterTitle {
+  .filterOptions {
+    padding: var(--spacing-sm);
+    min-height: 100px;
+  }
+
+  .selectedFiltersSection {
+    padding: var(--spacing-sm);
+  }
+
+  .selectedFiltersLabel {
+    font-size: 12px;
+  }
+
+  .clearAllFiltersButton {
+    padding: 4px 10px;
     font-size: 11px;
+  }
+
+  .selectedFilterChip {
+    padding: 5px 10px;
+    font-size: 11px;
+  }
+
+  .filterOptionsHeader {
+    font-size: 12px;
+  }
+
+  .periodSelect {
+    font-size: 12px;
+    padding: 6px 10px;
   }
 
   .filterChip {
@@ -1274,11 +1353,16 @@
     font-size: var(--font-size-xl);
   }
 
-  .filterSection {
-    padding: 20px;
+  .filterCategoryTab {
+    padding: 10px 20px;
+    font-size: 14px;
   }
 
-  .filterTitle {
+  .filterOptions {
+    padding: var(--spacing-lg);
+  }
+
+  .filterOptionsHeader {
     font-size: 14px;
   }
 
