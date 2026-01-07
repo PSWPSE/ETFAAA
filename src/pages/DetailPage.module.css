@@ -617,14 +617,14 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
-  margin-bottom: var(--spacing-xl); /* 24px → 32px */
+  margin-bottom: var(--spacing-lg);
 }
 
 .sectionTitleWrapper {
   display: flex;
   align-items: center;
   gap: var(--spacing-xs);
-  margin-bottom: var(--spacing-md);
+  margin-bottom: 0;
 }
 
 .sectionTitleWrapper svg {

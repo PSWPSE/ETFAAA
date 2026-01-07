@@ -152,6 +152,7 @@ export default function CorrelationPage() {
         required={true}
       />
       
+      {/* 최근 관심이 많이 받는 ETF */}
       {!baseETF && (
         <div className={styles.popularSection}>
           <div className={styles.popularHeader}>

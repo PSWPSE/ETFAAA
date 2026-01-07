@@ -549,23 +549,23 @@
 .sortDropdown {
   display: flex;
   align-items: center;
-  padding: var(--spacing-xs) var(--spacing-sm);
-  background: var(--color-bg-secondary);
-  border: 1px solid transparent;
-  border-radius: var(--radius-full);
+  padding: 8px 12px;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
   transition: all var(--transition-fast);
 }
 
 .sortDropdown:hover {
-  border-color: var(--color-border);
-  background: var(--color-bg);
+  background: var(--color-white);
+  border-color: var(--color-primary);
 }
 
 .sortSelect {
   background: transparent;
   border: none;
   font-size: var(--font-size-sm);
-  font-weight: 500;
+  font-weight: 600;
   color: var(--color-primary);
   cursor: pointer;
   padding: 0 4px;
@@ -578,23 +578,23 @@
 .sortOrderDropdown {
   display: flex;
   align-items: center;
-  padding: var(--spacing-xs) var(--spacing-sm);
-  background: var(--color-bg-secondary);
-  border: 1px solid transparent;
-  border-radius: var(--radius-full);
+  padding: 8px 12px;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
   transition: all var(--transition-fast);
 }
 
 .sortOrderDropdown:hover {
-  border-color: var(--color-border);
-  background: var(--color-bg);
+  background: var(--color-white);
+  border-color: var(--color-primary);
 }
 
 .sortOrderSelect {
   background: transparent;
   border: none;
   font-size: var(--font-size-sm);
-  font-weight: 500;
+  font-weight: 600;
   color: var(--color-primary);
   cursor: pointer;
   padding: 0 4px;
@@ -608,10 +608,10 @@
 .displayDropdown {
   display: flex;
   align-items: center;
-  padding: var(--spacing-xs) var(--spacing-sm);
-  background: var(--color-bg-secondary);
-  border: 1px solid transparent;
-  border-radius: var(--radius-full);
+  padding: 8px 12px;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
   transition: all var(--transition-fast);
 }
 
@@ -621,8 +621,8 @@
 
 .periodDropdown:hover,
 .displayDropdown:hover {
-  border-color: var(--color-border);
-  background: var(--color-bg);
+  background: var(--color-white);
+  border-color: var(--color-primary);
 }
 
 .periodSelect,
@@ -630,7 +630,7 @@
   background: transparent;
   border: none;
   font-size: var(--font-size-sm);
-  font-weight: 500;
+  font-weight: 600;
   color: var(--color-primary);
   cursor: pointer;
   padding: 0 4px;

@@ -486,12 +486,6 @@ export default function PhasePage() {
                   <span className={styles.sectionDescription}>{section.description}</span>
                 </div>
               </div>
-              <button 
-                className={styles.moreBtn} 
-                onClick={() => navigate(`/phase/detail?category=${section.id}&period=${section.period}`)}
-              >
-                전체 <ChevronRight size={16} />
-              </button>
             </div>
             
             {hasData ? (

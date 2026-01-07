@@ -641,20 +641,20 @@
   justify-content: center;
   gap: 6px;
   min-width: 85px;
-  padding: var(--spacing-xs) var(--spacing-sm);
-  background: #ffffff;
+  padding: 8px 12px;
+  background: var(--color-bg);
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-full);
+  border-radius: var(--radius-md);
   font-size: var(--font-size-sm);
-  font-weight: 500;
+  font-weight: 600;
   color: var(--color-text-primary);
   cursor: pointer;
   transition: all var(--transition-fast);
 }
 
 .filterButton:hover {
+  background: var(--color-white);
   border-color: var(--color-primary);
-  background: rgba(95, 155, 143, 0.05);
 }
 
 .filterButton.active {
@@ -672,25 +672,25 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: var(--spacing-xs) var(--spacing-sm);
-  background: #ffffff;
+  padding: 8px 12px;
+  background: var(--color-bg);
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-full);
+  border-radius: var(--radius-md);
   font-size: var(--font-size-sm);
   color: var(--color-text-secondary);
   transition: all var(--transition-fast);
 }
 
 .sortDropdown:hover {
+  background: var(--color-white);
   border-color: var(--color-primary);
-  background: rgba(95, 155, 143, 0.05);
 }
 
 .sortSelect {
   background: transparent;
   border: none;
   font-size: var(--font-size-sm);
-  font-weight: 500;
+  font-weight: 600;
   color: var(--color-text-primary);
   cursor: pointer;
   padding-right: 4px;
@@ -703,24 +703,24 @@
 .periodDropdown {
   display: flex;
   align-items: center;
-  padding: var(--spacing-xs) var(--spacing-sm);
-  background: #ffffff;
+  padding: 8px 12px;
+  background: var(--color-bg);
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-full);
+  border-radius: var(--radius-md);
   transition: all var(--transition-fast);
   animation: slideIn 0.2s ease-out;
 }
 
 .periodDropdown:hover {
+  background: var(--color-white);
   border-color: var(--color-primary);
-  background: rgba(95, 155, 143, 0.05);
 }
 
 .periodSelect {
   background: transparent;
   border: none;
   font-size: var(--font-size-sm);
-  font-weight: 500;
+  font-weight: 600;
   color: var(--color-primary);
   cursor: pointer;
   padding: 0 4px;

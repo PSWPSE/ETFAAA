@@ -135,10 +135,11 @@
 .marketTicker {
   display: flex;
   flex-direction: column;
-  background: linear-gradient(135deg, #1a2332 0%, #243347 100%);
+  background: #ffffff;
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   overflow: hidden;
-  box-shadow: 0 2px 12px rgba(26, 35, 50, 0.12);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.06);
 }
 
 .tickerHeader {
@@ -146,8 +147,8 @@
   align-items: center;
   justify-content: space-between;
   padding: var(--spacing-xs) var(--spacing-sm);
-  background: rgba(0, 0, 0, 0.15);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  background: #ffffff;
+  border-bottom: 1px solid var(--color-border);
 }
 
 .tickerTabs {
@@ -162,18 +163,20 @@
   padding: var(--spacing-xs) var(--spacing-sm);
   font-size: var(--font-size-xs);
   font-weight: 500;
-  color: rgba(255, 255, 255, 0.5);
+  color: var(--color-text-secondary);
   border-radius: var(--radius-sm);
   transition: all var(--transition-fast);
 }
 
 .tickerTab:hover {
-  color: rgba(255, 255, 255, 0.75);
+  color: var(--color-primary);
+  background: rgba(95, 155, 143, 0.08);
 }
 
 .tickerTab.active {
-  background: rgba(255, 255, 255, 0.12);
-  color: #fff;
+  background: var(--color-primary);
+  color: #ffffff;
+  font-weight: 600;
 }
 
 .tickerTime {
@@ -181,7 +184,8 @@
   align-items: center;
   gap: 6px;
   font-size: 10px;
-  color: rgba(255, 255, 255, 0.5);
+  color: var(--color-text-secondary);
+  font-weight: 500;
 }
 
 .tickerTime::before {
@@ -212,14 +216,19 @@
   justify-content: center; /* 수직 중앙 정렬 */
   gap: 6px; /* 간격 조정 */
   padding: 10px 12px; /* 패딩 최적화 */
-  background: transparent;
-  border-right: 1px solid rgba(255, 255, 255, 0.06);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  background: #ffffff;
+  border-right: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border);
   animation: tickerSlideIn 0.4s ease forwards;
   opacity: 0;
   position: relative;
   height: 76px; /* 정확한 높이 지정 */
   overflow: hidden; /* 넘치는 콘텐츠 숨김 */
+  transition: all var(--transition-fast);
+}
+
+.tickerItem:hover {
+  background: rgba(95, 155, 143, 0.03);
 }
 
 .tickerItemRow {
@@ -254,7 +263,8 @@
   align-items: center;
   gap: 6px;
   font-size: 11px; /* 고정 크기 */
-  color: rgba(255, 255, 255, 0.55);
+  color: var(--color-text-secondary);
+  font-weight: 500;
   letter-spacing: 0.2px;
   line-height: 1.2;
   white-space: nowrap;
@@ -281,8 +291,8 @@
 .tickerItemValue {
   font-family: var(--font-family-numeric);
   font-size: 18px; /* 모바일 크기 */
-  font-weight: 700;
-  color: #fff;
+  font-weight: 800;
+  color: var(--color-text-primary);
   font-feature-settings: 'tnum' on, 'lnum' on;
   letter-spacing: -0.02em;
   line-height: 1.2;
@@ -304,7 +314,7 @@
   gap: 2px;
   font-family: var(--font-family-numeric);
   font-size: 11px; /* 크기 축소 */
-  font-weight: 600;
+  font-weight: 700;
   font-feature-settings: 'tnum' on, 'lnum' on;
   padding: 3px 6px;
   border-radius: 3px;
@@ -314,12 +324,12 @@
 }
 
 .tickerItemChange.up {
-  color: #22c55e;
+  color: #16a34a;
   background: none;
 }
 
 .tickerItemChange.down {
-  color: #ef4444;
+  color: #dc2626;
   background: none;
 }
 
@@ -329,7 +339,8 @@
   align-items: center;
   gap: 10px;
   padding: 12px;
-  background: rgba(0, 0, 0, 0.15);
+  background: #ffffff;
+  border-top: 1px solid var(--color-border);
   height: 38px; /* 고정 높이 */
 }
 
@@ -337,18 +348,18 @@
   width: 7px;
   height: 7px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.25);
+  background: rgba(95, 155, 143, 0.2);
   cursor: pointer;
   transition: all var(--transition-fast);
   flex-shrink: 0;
 }
 
 .indicatorDot:hover {
-  background: rgba(255, 255, 255, 0.45);
+  background: rgba(95, 155, 143, 0.5);
 }
 
 .indicatorDot.active {
-  background: #fff;
+  background: var(--color-primary);
   width: 20px;
   border-radius: 3.5px;
 }
@@ -1119,13 +1130,20 @@
 
 /* ==================== 기간 배지 ==================== */
 .periodBadge {
-  padding: 4px 10px;
-  font-size: var(--font-size-xs);
+  padding: 8px 12px;
+  font-size: var(--font-size-sm);
   font-weight: 600;
-  color: var(--color-text-secondary);
-  background: #ffffff;
+  color: var(--color-text-primary);
+  background: var(--color-bg);
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-md);
+  transition: all var(--transition-fast);
+  cursor: pointer;
+}
+
+.periodBadge:hover {
+  background: var(--color-white);
+  border-color: var(--color-primary);
 }
 
 /* ==================== 핫 테마 ==================== */

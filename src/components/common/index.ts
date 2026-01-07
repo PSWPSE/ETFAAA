@@ -9,4 +9,6 @@ export { default as Badge } from './Badge';
 export { default as MarketSelector } from './MarketSelector';
 export { default as MarketSelectorCompact } from './MarketSelectorCompact';
 export { default as ScrollToTop } from './ScrollToTop';
+export { default as SelectedFilters } from './SelectedFilters';
+export type { FilterChip } from './SelectedFilters';
 

@@ -655,6 +655,80 @@ export default function ComparePage() {
             {/* 수익률 탭 */}
             {activeTab === 'returns' && (
               <div className={styles.returnsSection}>
+                {/* 수익률 추이 차트 */}
+                <Card padding="md" className={styles.chartCard}>
+                  <div className={styles.chartHeader}>
+                    <CardHeader title="수익률 추이 비교" subtitle={`최근 ${selectedPeriodLabel} 상대 수익률 추이 (%)`} />
+                    <div className={styles.periodSelector}>
+                      {PERIOD_OPTIONS.map((option) => (
+                        <button
+                          key={option.value}
+                          className={`${styles.periodButton} ${selectedPeriod === option.value ? styles.active : ''}`}
+                          onClick={() => setSelectedPeriod(option.value)}
+                        >
+                          {option.shortLabel}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <div className={styles.chartContainer}>
+                    <ResponsiveContainer width="100%" height={320}>
+                      <LineChart 
+                        data={priceData}
+                        margin={{ top: 20, right: 30, left: 10, bottom: 20 }}
+                      >
+                        <XAxis 
+                          dataKey="date" 
+                          tickFormatter={(v) => v.slice(5)}
+                          tick={{ fontSize: 11, fill: '#6B7280', fontWeight: 500 }}
+                          axisLine={{ stroke: '#E5E7EB' }}
+                          tickLine={false}
+                          interval="preserveStartEnd"
+                          padding={{ left: 10, right: 10 }}
+                        />
+                        <YAxis 
+                          tick={{ fontSize: 11, fill: '#9CA3AF' }}
+                          axisLine={false}
+                          tickLine={false}
+                          tickFormatter={(v) => `${v}%`}
+                          width={50}
+                          domain={yDomain}
+                          allowDataOverflow={false}
+                          scale="linear"
+                        />
+                        <Tooltip 
+                          formatter={(value: number) => [`${value.toFixed(2)}%`, '수익률']}
+                          labelFormatter={(label) => label}
+                          contentStyle={{
+                            background: '#fff',
+                            border: '1px solid #E5E7EB',
+                            borderRadius: '8px',
+                            fontSize: '13px',
+                            boxShadow: '0 2px 4px rgba(0, 0, 0, 0.08)',
+                          }}
+                        />
+                        <Legend 
+                          wrapperStyle={{ paddingTop: '16px' }} 
+                          verticalAlign="bottom"
+                          iconType="circle"
+                        />
+                        {selectedETFs.map((etf, index) => (
+                          <Line 
+                            key={etf.id}
+                            type="monotone" 
+                            dataKey={etf.name}
+                            stroke={COLORS[index]} 
+                            strokeWidth={2.5}
+                            dot={false}
+                            isAnimationActive={true}
+                            animationDuration={1000}
+                          />
+                        ))}
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+                </Card>
+
                 {/* 수익률 비교 바 차트 */}
                 <Card padding="md" className={styles.chartCard}>
                   <CardHeader title="기간별 수익률 비교" subtitle="각 기간별로 ETF 수익률을 직접 비교" />

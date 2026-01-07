@@ -192,118 +192,88 @@
 
 /* ==================== 선택된 ETF 섹션 ==================== */
 .selectedSection {
+  margin-top: var(--spacing-md);
+  padding: var(--spacing-md);
+  background: #ffffff;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
   display: flex;
   flex-direction: column;
-  gap: 12px;
-}
-
-@media (min-width: 640px) {
-  .selectedSection {
-    gap: 16px;
-  }
+  gap: var(--spacing-sm);
+  box-shadow: var(--shadow-card);
 }
 
 .selectedHeader {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 10px;
-}
-
-@media (min-width: 640px) {
-  .selectedHeader {
-    gap: 12px;
-  }
 }
 
 .selectedTitle {
   font-size: 13px;
-  font-weight: 700;
+  font-weight: 600;
   color: var(--color-text-primary);
   margin: 0;
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
-  opacity: 0.8;
 }
 
 .selectedCount {
-  font-size: 11px;
-  font-weight: 700;
   color: var(--color-primary);
-}
-
-@media (min-width: 640px) {
-  .selectedCount {
-    font-size: 12px;
-  }
+  font-weight: 700;
 }
 
 .clearAllBtn {
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--color-text-tertiary);
-  padding: 5px 10px;
+  padding: 4px 12px;
+  background: var(--color-bg);
   border: 1px solid var(--color-border);
-  border-radius: 20px;
-  transition: all 0.2s ease;
-  background: var(--color-white);
-}
-
-@media (min-width: 640px) {
-  .clearAllBtn {
-    font-size: 12px;
-    padding: 6px 12px;
-  }
+  border-radius: var(--radius-md);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
 }
 
 .clearAllBtn:hover {
-  color: var(--color-danger);
-  border-color: var(--color-danger);
-  background: rgba(239, 68, 68, 0.04);
+  background: var(--color-bg-secondary);
+  border-color: var(--color-primary);
+  color: var(--color-primary);
 }
 
 .selectedList {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--spacing-sm);
+  gap: var(--spacing-xs);
+  margin-bottom: var(--spacing-md);
 }
 
 .selectedChip {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px 12px;
-  background: var(--color-white);
-  border: 1.5px solid;
-  border-radius: 20px;
+  gap: 6px;
+  padding: 6px 12px;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
   font-size: 12px;
+  color: var(--color-text-primary);
   font-weight: 600;
-  animation: scaleIn 0.4s ease-out backwards;
-  box-shadow: 0 1px 3px rgba(30, 58, 95, 0.06);
-  transition: all 0.2s ease;
-}
-
-@media (min-width: 640px) {
-  .selectedChip {
-    gap: 10px;
-    padding: 10px 16px;
-    font-size: 13px;
-  }
+  animation: fadeIn 0.2s ease-out;
+  transition: all var(--transition-fast);
 }
 
 .selectedChip:hover {
-  box-shadow: 0 2px 6px rgba(30, 58, 95, 0.12);
-  transform: translateY(-1px);
+  background: var(--color-bg-secondary);
+  border-color: var(--color-primary);
 }
 
-@keyframes scaleIn {
+@keyframes fadeIn {
   from {
     opacity: 0;
-    transform: scale(0.95);
+    transform: translateY(-4px);
   }
   to {
     opacity: 1;
-    transform: scale(1);
+    transform: translateY(0);
   }
 }
 
@@ -326,20 +296,17 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 20px;
-  height: 20px;
   padding: 0;
-  background: transparent;
-  color: inherit;
-  border-radius: var(--radius-full);
-  opacity: 0.6;
+  background: none;
+  border: none;
+  color: var(--color-text-secondary);
+  cursor: pointer;
   transition: all var(--transition-fast);
   flex-shrink: 0;
 }
 
 .chipRemoveBtn:hover {
-  opacity: 1;
-  background: rgba(0, 0, 0, 0.05);
+  color: var(--color-danger);
 }
 
 .addCardPlaceholder {
@@ -398,28 +365,30 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  color: var(--color-text-secondary);
+  color: var(--color-primary);
   font-size: 12px;
   font-weight: 500;
   margin: 0 auto;
   padding: 6px 12px;
-  background: rgba(59, 130, 246, 0.06);
+  background: rgba(95, 155, 143, 0.08);
   border-radius: var(--radius-full);
-  border: 1px solid rgba(59, 130, 246, 0.15);
+  border: 1px solid rgba(95, 155, 143, 0.2);
 }
 
 /* ==================== Empty State ==================== */
 /* ==================== 인기 ETF 섹션 ==================== */
 .popularSection {
   margin-top: var(--spacing-md);
-  padding: var(--spacing-md);
-  background: var(--color-bg-secondary);
+  padding: var(--spacing-lg);
+  background: #ffffff;
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
   animation: fadeIn 0.3s ease-out;
 }
 
 .popularHeader {
-  margin-bottom: var(--spacing-md);
+  margin-bottom: var(--spacing-lg);
 }
 
 .popularTitleGroup {
@@ -430,20 +399,20 @@
 
 .popularIcon {
   flex-shrink: 0;
-  color: var(--color-text-tertiary);
+  color: var(--color-primary);
 }
 
 .popularTitle {
-  font-size: var(--font-size-sm);
-  font-weight: 600;
-  color: var(--color-text-secondary);
-  margin: 0 0 2px 0;
+  font-size: var(--font-size-md);
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin: 0 0 4px 0;
   letter-spacing: -0.01em;
 }
 
 .popularSubtitle {
-  font-size: 11px;
-  color: var(--color-text-tertiary);
+  font-size: 12px;
+  color: var(--color-text-secondary);
   margin: 0;
   font-weight: 500;
 }
@@ -451,14 +420,14 @@
 .popularGrid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: var(--spacing-xs);
+  gap: var(--spacing-sm);
 }
 
 .popularCard {
   display: flex;
-  padding: 10px 12px;
-  background: var(--color-white);
-  border: 1px solid var(--color-border-light);
+  padding: 14px 16px;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   text-align: left;
   transition: all var(--transition-fast);
@@ -468,7 +437,8 @@
 
 .popularCard:hover {
   border-color: var(--color-primary);
-  background: var(--color-bg-secondary);
+  background: var(--color-white);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
 }
 
 .popularCard:hover .popularCardIcon {
@@ -477,20 +447,20 @@
 
 @media (min-width: 640px) {
   .popularCard {
-    padding: var(--spacing-sm) var(--spacing-md);
+    padding: 16px 18px;
   }
 }
 
 .popularCardContent {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 12px;
   width: 100%;
 }
 
 @media (min-width: 640px) {
   .popularCardContent {
-    gap: var(--spacing-sm);
+    gap: 14px;
   }
 }
 
@@ -498,19 +468,21 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 18px;
-  height: 18px;
-  font-size: 10px;
+  width: 22px;
+  height: 22px;
+  font-size: 11px;
   font-weight: 700;
-  color: var(--color-text-tertiary);
+  color: var(--color-text-secondary);
+  background: var(--color-white);
+  border-radius: var(--radius-sm);
   flex-shrink: 0;
 }
 
 @media (min-width: 640px) {
   .popularRank {
-    width: 20px;
-    height: 20px;
-    font-size: 11px;
+    width: 24px;
+    height: 24px;
+    font-size: 12px;
   }
 }
 
@@ -519,11 +491,11 @@
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 4px;
 }
 
 .popularCardName {
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 600;
   color: var(--color-text-primary);
   margin: 0;
@@ -534,21 +506,21 @@
 
 @media (min-width: 640px) {
   .popularCardName {
-    font-size: 13px;
+    font-size: 14px;
   }
 }
 
 .popularCardMeta {
   display: flex;
   align-items: center;
-  gap: 4px;
-  font-size: 10px;
+  gap: 6px;
+  font-size: 11px;
 }
 
 @media (min-width: 640px) {
   .popularCardMeta {
-    gap: 6px;
-    font-size: 11px;
+    gap: 8px;
+    font-size: 12px;
   }
 }
 

@@ -1,7 +1,8 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { TrendingUp, TrendingDown, ChevronDown, BarChart3, Coins, Building2, ArrowDownToLine, SortDesc, SlidersHorizontal, X } from 'lucide-react';
-import { Card, CardHeader, Button } from '../components/common';
+import { Card, CardHeader, Button, SelectedFilters } from '../components/common';
+import type { FilterChip } from '../components/common';
 import PageContainer from '../components/layout/PageContainer';
 import { useETFStore } from '../store/etfStore';
 import { koreanETFs, usETFs, getReturns } from '../data/etfs';
@@ -120,6 +121,43 @@ export default function RankingPage() {
   
   // 활성 필터 개수 ('전체' 제외)
   const activeFilterCount = Object.values(selectedFilters).reduce((sum, arr) => sum + arr.filter(v => v !== '전체').length, 0);
+  
+  // 선택된 필터를 FilterChip 배열로 변환
+  const selectedFilterChips = useMemo<FilterChip[]>(() => {
+    const chips: FilterChip[] = [];
+    
+    Object.entries(selectedFilters).forEach(([key, values]) => {
+      const categoryLabel = FILTER_CATEGORIES.find(c => c.value === key)?.label || key;
+      values.filter(v => v !== '전체').forEach(value => {
+        chips.push({
+          id: `${key}-${value}`,
+          label: `${categoryLabel}: ${value}`,
+          value: value
+        });
+      });
+    });
+    
+    return chips;
+  }, [selectedFilters]);
+  
+  // 선택된 필터 제거 함수
+  const handleRemoveFilter = (id: string) => {
+    const [category, ...valueParts] = id.split('-');
+    const value = valueParts.join('-');
+    toggleFilter(category as FilterCategory, value);
+  };
+  
+  // 모든 필터 초기화 함수
+  const handleClearAllFilters = () => {
+    setSelectedFilters({
+      region: [],
+      asset: [],
+      leverage: [],
+      pension: [],
+      sector: [],
+    });
+    setActiveFilterCategory(null);
+  };
   
   // ETF별 랭킹 값 계산
   const etfsWithRankingValue = useMemo(() => {
@@ -406,50 +444,11 @@ export default function RankingPage() {
               )}
               
               {/* 선택된 필터 표시 */}
-              {activeFilterCount > 0 && (
-                <div className={styles.activeFiltersSection}>
-                  <div className={styles.activeFiltersHeader}>
-                    <span className={styles.activeFiltersTitle}>선택된 필터</span>
-                    <button
-                      className={styles.clearAllButton}
-                      onClick={() => {
-                        setSelectedFilters({
-                          region: [],
-                          asset: [],
-                          leverage: [],
-                          pension: [],
-                          sector: [],
-                        });
-                        setActiveFilterCategory(null);
-                      }}
-                    >
-                      전체 초기화
-                    </button>
-                  </div>
-                  <div className={styles.activeFiltersList}>
-                    {Object.entries(selectedFilters).map(([key, values]) => 
-                      values.length > 0 && (
-                        <div key={key} className={styles.activeFilterGroup}>
-                          <span className={styles.activeFilterGroupLabel}>
-                            {FILTER_CATEGORIES.find(c => c.value === key)?.label}:
-                          </span>
-                          {values.map(value => (
-                            <span key={value} className={styles.activeFilterTag}>
-                              {value}
-                              <button
-                                className={styles.removeFilterButton}
-                                onClick={() => toggleFilter(key as FilterCategory, value)}
-                              >
-                                <X size={12} />
-                              </button>
-                            </span>
-                          ))}
-                        </div>
-                      )
-                    )}
-                  </div>
-                </div>
-              )}
+              <SelectedFilters
+                filters={selectedFilterChips}
+                onRemove={handleRemoveFilter}
+                onClearAll={handleClearAllFilters}
+              />
             </Card>
           )}
           

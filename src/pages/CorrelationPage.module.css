@@ -1,14 +1,16 @@
 /* 인기 ETF 섹션 */
 .popularSection {
   margin-top: var(--spacing-md);
-  padding: var(--spacing-md);
-  background: var(--color-bg-secondary);
+  padding: var(--spacing-lg);
+  background: #ffffff;
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
   animation: fadeIn 0.3s ease-out;
 }
 
 .popularHeader {
-  margin-bottom: var(--spacing-md);
+  margin-bottom: var(--spacing-lg);
 }
 
 .popularTitleGroup {
@@ -19,20 +21,20 @@
 
 .popularIcon {
   flex-shrink: 0;
-  color: var(--color-text-tertiary);
+  color: var(--color-primary);
 }
 
 .popularTitle {
-  font-size: var(--font-size-sm);
-  font-weight: 600;
-  color: var(--color-text-secondary);
-  margin: 0 0 2px 0;
+  font-size: var(--font-size-md);
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin: 0 0 4px 0;
   letter-spacing: -0.01em;
 }
 
 .popularSubtitle {
-  font-size: 11px;
-  color: var(--color-text-tertiary);
+  font-size: 12px;
+  color: var(--color-text-secondary);
   margin: 0;
   font-weight: 500;
 }
@@ -40,14 +42,14 @@
 .popularGrid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: var(--spacing-xs);
+  gap: var(--spacing-sm);
 }
 
 .popularCard {
   display: flex;
-  padding: 10px 12px;
-  background: var(--color-white);
-  border: 1px solid var(--color-border-light);
+  padding: 14px 16px;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   text-align: left;
   transition: all var(--transition-fast);
@@ -57,30 +59,53 @@
 
 .popularCard:hover {
   border-color: var(--color-primary);
-  background: var(--color-bg-secondary);
+  background: var(--color-white);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
 }
 
 .popularCard:hover .popularCardIcon {
   color: var(--color-primary);
 }
 
+@media (min-width: 640px) {
+  .popularCard {
+    padding: 16px 18px;
+  }
+}
+
 .popularCardContent {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 12px;
   width: 100%;
+}
+
+@media (min-width: 640px) {
+  .popularCardContent {
+    gap: 14px;
+  }
 }
 
 .popularRank {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 18px;
-  height: 18px;
-  font-size: 10px;
+  width: 22px;
+  height: 22px;
+  font-size: 11px;
   font-weight: 700;
-  color: var(--color-text-tertiary);
+  color: var(--color-text-secondary);
+  background: var(--color-white);
+  border-radius: var(--radius-sm);
   flex-shrink: 0;
+}
+
+@media (min-width: 640px) {
+  .popularRank {
+    width: 24px;
+    height: 24px;
+    font-size: 12px;
+  }
 }
 
 .popularCardInfo {
@@ -88,11 +113,11 @@
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 4px;
 }
 
 .popularCardName {
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 600;
   color: var(--color-text-primary);
   margin: 0;
@@ -101,11 +126,24 @@
   text-overflow: ellipsis;
 }
 
+@media (min-width: 640px) {
+  .popularCardName {
+    font-size: 14px;
+  }
+}
+
 .popularCardMeta {
   display: flex;
   align-items: center;
-  gap: 4px;
-  font-size: 10px;
+  gap: 6px;
+  font-size: 11px;
+}
+
+@media (min-width: 640px) {
+  .popularCardMeta {
+    gap: 8px;
+    font-size: 12px;
+  }
 }
 
 .popularCardTicker {
@@ -611,44 +649,8 @@
 }
 
 @media (min-width: 640px) {
-  .popularCard {
-    padding: var(--spacing-sm) var(--spacing-md);
-  }
-
-  .popularCardContent {
-    gap: var(--spacing-sm);
-  }
-
-  .popularRank {
-    width: 20px;
-    height: 20px;
-    font-size: 11px;
-  }
-
-  .popularCardName {
-    font-size: 13px;
-  }
-
-  .popularCardMeta {
-    gap: 6px;
-    font-size: 11px;
-  }
-
   .popularGrid {
     grid-template-columns: repeat(2, 1fr);
-  }
-
-  .popularTitle {
-    font-size: var(--font-size-base);
-  }
-
-  .popularSubtitle {
-    font-size: var(--font-size-xs);
-  }
-
-  .popularIcon {
-    width: 18px;
-    height: 18px;
   }
 }
 
@@ -656,17 +658,11 @@
   .popularGrid {
     grid-template-columns: repeat(3, 1fr);
   }
+}
 
+@media (min-width: 768px) {
   .popularSection {
     padding: var(--spacing-lg);
-  }
-
-  .popularTitle {
-    font-size: var(--font-size-lg);
-  }
-
-  .popularSubtitle {
-    font-size: var(--font-size-sm);
   }
 }
 

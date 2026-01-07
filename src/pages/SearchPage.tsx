@@ -1,7 +1,8 @@
 import { useState, useRef, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search, Sparkles, SlidersHorizontal, Package, ArrowRight, Send, FileText, ChevronDown, X } from 'lucide-react';
-import { Card, CardHeader, Button } from '../components/common';
+import { Card, CardHeader, Button, SelectedFilters } from '../components/common';
+import type { FilterChip } from '../components/common';
 import PageContainer from '../components/layout/PageContainer';
 import { useETFStore } from '../store/etfStore';
 import { koreanETFs, usETFs, filterOptions, getReturns } from '../data/etfs';
@@ -113,28 +114,78 @@ export default function SearchPage() {
   const etfs = selectedMarket === 'korea' ? koreanETFs : usETFs;
   const [searchResults, setSearchResults] = useState(etfs);
   
-  // 선택된 필터 개수 계산
-  const activeFiltersCount = useMemo(() => {
-    let count = 0;
-    if (selectedListingCountries.length > 0) count += selectedListingCountries.length;
-    if (selectedInvestRegions.length > 0) count += selectedInvestRegions.length;
-    if (selectedAssetTypes.length > 0) count += selectedAssetTypes.length;
-    if (selectedDomesticAUM.length > 0) count += selectedDomesticAUM.length;
-    if (selectedForeignAUM.length > 0) count += selectedForeignAUM.length;
-    if (selectedLeverageTypes.length > 0) count += selectedLeverageTypes.length;
-    if (selectedInverseTypes.length > 0) count += selectedInverseTypes.length;
-    if (selectedDividendFreq.length > 0) count += selectedDividendFreq.length;
-    if (dividendMin || dividendMax) count += 1;
-    if (selectedReturnPeriod) count += 1;
-    if (returnMin || returnMax) count += 1;
-    if (selectedIssuers.length > 0) count += selectedIssuers.length;
-    if (selectedPensionTypes.length > 0) count += selectedPensionTypes.length;
-    if (selectedSectors.length > 0) count += selectedSectors.length;
-    if (selectedTradingVolumes.length > 0) count += selectedTradingVolumes.length;
-    if (selectedExpenseRatios.length > 0) count += selectedExpenseRatios.length;
-    if (selectedListingPeriods.length > 0) count += selectedListingPeriods.length;
-    if (selectedHedgeTypes.length > 0) count += selectedHedgeTypes.length;
-    return count;
+  // 선택된 필터를 FilterChip 배열로 변환
+  const selectedFilterChips = useMemo<FilterChip[]>(() => {
+    const chips: FilterChip[] = [];
+    
+    selectedListingCountries.forEach(item => 
+      chips.push({ id: `listing-${item}`, label: item, value: item })
+    );
+    selectedInvestRegions.forEach(item => 
+      chips.push({ id: `region-${item}`, label: item, value: item })
+    );
+    selectedAssetTypes.forEach(item => 
+      chips.push({ id: `asset-${item}`, label: item, value: item })
+    );
+    selectedDomesticAUM.forEach(item => 
+      chips.push({ id: `aum-domestic-${item}`, label: `국내: ${item}`, value: item })
+    );
+    selectedForeignAUM.forEach(item => 
+      chips.push({ id: `aum-foreign-${item}`, label: `해외: ${item}`, value: item })
+    );
+    selectedLeverageTypes.forEach(item => 
+      chips.push({ id: `leverage-${item}`, label: `레버리지: ${item}`, value: item })
+    );
+    selectedInverseTypes.forEach(item => 
+      chips.push({ id: `inverse-${item}`, label: `인버스: ${item}`, value: item })
+    );
+    selectedDividendFreq.forEach(item => 
+      chips.push({ id: `dividend-freq-${item}`, label: `배당: ${item}`, value: item })
+    );
+    if (dividendMin || dividendMax) {
+      chips.push({ 
+        id: 'dividend-range', 
+        label: `배당률: ${dividendMin || '0'}% ~ ${dividendMax || '∞'}%`, 
+        value: 'dividend-range' 
+      });
+    }
+    if (selectedReturnPeriod) {
+      chips.push({ 
+        id: 'return-period', 
+        label: `수익기간: ${selectedReturnPeriod}`, 
+        value: selectedReturnPeriod 
+      });
+    }
+    if (returnMin || returnMax) {
+      chips.push({ 
+        id: 'return-range', 
+        label: `수익률: ${returnMin || '-∞'}% ~ ${returnMax || '∞'}%`, 
+        value: 'return-range' 
+      });
+    }
+    selectedIssuers.forEach(item => 
+      chips.push({ id: `issuer-${item}`, label: `운용사: ${item}`, value: item })
+    );
+    selectedPensionTypes.forEach(item => 
+      chips.push({ id: `pension-${item}`, label: item, value: item })
+    );
+    selectedSectors.forEach(item => 
+      chips.push({ id: `sector-${item}`, label: item, value: item })
+    );
+    selectedTradingVolumes.forEach(item => 
+      chips.push({ id: `volume-${item}`, label: `거래량: ${item}`, value: item })
+    );
+    selectedExpenseRatios.forEach(item => 
+      chips.push({ id: `expense-${item}`, label: `총보수: ${item}`, value: item })
+    );
+    selectedListingPeriods.forEach(item => 
+      chips.push({ id: `listing-period-${item}`, label: `상장: ${item}`, value: item })
+    );
+    selectedHedgeTypes.forEach(item => 
+      chips.push({ id: `hedge-${item}`, label: item, value: item })
+    );
+    
+    return chips;
   }, [
     selectedListingCountries, selectedInvestRegions, selectedAssetTypes,
     selectedDomesticAUM, selectedForeignAUM, selectedLeverageTypes, selectedInverseTypes,
@@ -142,6 +193,9 @@ export default function SearchPage() {
     selectedIssuers, selectedPensionTypes, selectedSectors, selectedTradingVolumes,
     selectedExpenseRatios, selectedListingPeriods, selectedHedgeTypes
   ]);
+  
+  // 선택된 필터 개수 계산
+  const activeFiltersCount = selectedFilterChips.length;
   
   const sortedResults = [...searchResults].sort((a, b) => {
     if (searchType === 'holdings' && holdingsQuery) {
@@ -202,6 +256,88 @@ export default function SearchPage() {
     } else {
       setItems([...items, item]);
     }
+  };
+  
+  // 선택된 필터 제거 함수
+  const handleRemoveFilter = (id: string) => {
+    if (id.startsWith('listing-')) {
+      const value = id.replace('listing-', '');
+      setSelectedListingCountries(prev => prev.filter(item => item !== value));
+    } else if (id.startsWith('region-')) {
+      const value = id.replace('region-', '');
+      setSelectedInvestRegions(prev => prev.filter(item => item !== value));
+    } else if (id.startsWith('asset-')) {
+      const value = id.replace('asset-', '');
+      setSelectedAssetTypes(prev => prev.filter(item => item !== value));
+    } else if (id.startsWith('aum-domestic-')) {
+      const value = id.replace('aum-domestic-', '');
+      setSelectedDomesticAUM(prev => prev.filter(item => item !== value));
+    } else if (id.startsWith('aum-foreign-')) {
+      const value = id.replace('aum-foreign-', '');
+      setSelectedForeignAUM(prev => prev.filter(item => item !== value));
+    } else if (id.startsWith('leverage-')) {
+      const value = id.replace('leverage-', '');
+      setSelectedLeverageTypes(prev => prev.filter(item => item !== value));
+    } else if (id.startsWith('inverse-')) {
+      const value = id.replace('inverse-', '');
+      setSelectedInverseTypes(prev => prev.filter(item => item !== value));
+    } else if (id.startsWith('dividend-freq-')) {
+      const value = id.replace('dividend-freq-', '');
+      setSelectedDividendFreq(prev => prev.filter(item => item !== value));
+    } else if (id === 'dividend-range') {
+      setDividendMin('');
+      setDividendMax('');
+    } else if (id === 'return-period') {
+      setSelectedReturnPeriod(null);
+    } else if (id === 'return-range') {
+      setReturnMin('');
+      setReturnMax('');
+    } else if (id.startsWith('issuer-')) {
+      const value = id.replace('issuer-', '');
+      setSelectedIssuers(prev => prev.filter(item => item !== value));
+    } else if (id.startsWith('pension-')) {
+      const value = id.replace('pension-', '');
+      setSelectedPensionTypes(prev => prev.filter(item => item !== value));
+    } else if (id.startsWith('sector-')) {
+      const value = id.replace('sector-', '');
+      setSelectedSectors(prev => prev.filter(item => item !== value));
+    } else if (id.startsWith('volume-')) {
+      const value = id.replace('volume-', '');
+      setSelectedTradingVolumes(prev => prev.filter(item => item !== value));
+    } else if (id.startsWith('expense-')) {
+      const value = id.replace('expense-', '');
+      setSelectedExpenseRatios(prev => prev.filter(item => item !== value));
+    } else if (id.startsWith('listing-period-')) {
+      const value = id.replace('listing-period-', '');
+      setSelectedListingPeriods(prev => prev.filter(item => item !== value));
+    } else if (id.startsWith('hedge-')) {
+      const value = id.replace('hedge-', '');
+      setSelectedHedgeTypes(prev => prev.filter(item => item !== value));
+    }
+  };
+  
+  // 모든 필터 초기화 함수
+  const handleClearAllFilters = () => {
+    setSelectedListingCountries([]);
+    setSelectedInvestRegions([]);
+    setSelectedAssetTypes([]);
+    setSelectedDomesticAUM([]);
+    setSelectedForeignAUM([]);
+    setSelectedLeverageTypes([]);
+    setSelectedInverseTypes([]);
+    setSelectedDividendFreq([]);
+    setDividendMin('');
+    setDividendMax('');
+    setSelectedReturnPeriod(null);
+    setReturnMin('');
+    setReturnMax('');
+    setSelectedIssuers([]);
+    setSelectedPensionTypes([]);
+    setSelectedSectors([]);
+    setSelectedTradingVolumes([]);
+    setSelectedExpenseRatios([]);
+    setSelectedListingPeriods([]);
+    setSelectedHedgeTypes([]);
   };
   
   const toggleIssuer = (issuer: string) => toggleArrayItem(selectedIssuers, setSelectedIssuers, issuer);
@@ -664,188 +800,11 @@ export default function SearchPage() {
             </div>
             
             {/* 선택된 필터 표시 */}
-            {activeFiltersCount > 0 && (
-              <div className={styles.selectedFiltersSection}>
-                <div className={styles.selectedFiltersHeader}>
-                  <span className={styles.selectedFiltersLabel}>
-                    선택된 필터 <span className={styles.selectedFiltersCount}>({activeFiltersCount})</span>
-                  </span>
-                  <button 
-                    className={styles.clearAllFiltersButton}
-                    onClick={() => {
-                      setSelectedListingCountries([]);
-                      setSelectedInvestRegions([]);
-                      setSelectedAssetTypes([]);
-                      setSelectedDomesticAUM([]);
-                      setSelectedForeignAUM([]);
-                      setSelectedLeverageTypes([]);
-                      setSelectedInverseTypes([]);
-                      setSelectedDividendFreq([]);
-                      setDividendMin('');
-                      setDividendMax('');
-                      setSelectedReturnPeriod(null);
-                      setReturnMin('');
-                      setReturnMax('');
-                      setSelectedIssuers([]);
-                      setSelectedPensionTypes([]);
-                      setSelectedSectors([]);
-                      setSelectedTradingVolumes([]);
-                      setSelectedExpenseRatios([]);
-                      setSelectedListingPeriods([]);
-                      setSelectedHedgeTypes([]);
-                    }}
-                  >
-                    전체 초기화
-                  </button>
-                </div>
-                <div className={styles.selectedFilterChips}>
-                  {selectedListingCountries.map(item => (
-                    <div key={item} className={styles.selectedFilterChip}>
-                      <span>{item}</span>
-                      <button onClick={() => toggleArrayItem(selectedListingCountries, setSelectedListingCountries, item)}>
-                        <X size={14} />
-                      </button>
-                    </div>
-                  ))}
-                  {selectedInvestRegions.map(item => (
-                    <div key={item} className={styles.selectedFilterChip}>
-                      <span>{item}</span>
-                      <button onClick={() => toggleArrayItem(selectedInvestRegions, setSelectedInvestRegions, item)}>
-                        <X size={14} />
-                      </button>
-                    </div>
-                  ))}
-                  {selectedAssetTypes.map(item => (
-                    <div key={item} className={styles.selectedFilterChip}>
-                      <span>{item}</span>
-                      <button onClick={() => toggleArrayItem(selectedAssetTypes, setSelectedAssetTypes, item)}>
-                        <X size={14} />
-                      </button>
-                    </div>
-                  ))}
-                  {selectedDomesticAUM.map(item => (
-                    <div key={item} className={styles.selectedFilterChip}>
-                      <span>국내: {item}</span>
-                      <button onClick={() => toggleArrayItem(selectedDomesticAUM, setSelectedDomesticAUM, item)}>
-                        <X size={14} />
-                      </button>
-                    </div>
-                  ))}
-                  {selectedForeignAUM.map(item => (
-                    <div key={item} className={styles.selectedFilterChip}>
-                      <span>해외: {item}</span>
-                      <button onClick={() => toggleArrayItem(selectedForeignAUM, setSelectedForeignAUM, item)}>
-                        <X size={14} />
-                      </button>
-                    </div>
-                  ))}
-                  {selectedLeverageTypes.map(item => (
-                    <div key={item} className={styles.selectedFilterChip}>
-                      <span>레버리지: {item}</span>
-                      <button onClick={() => toggleArrayItem(selectedLeverageTypes, setSelectedLeverageTypes, item)}>
-                        <X size={14} />
-                      </button>
-                    </div>
-                  ))}
-                  {selectedInverseTypes.map(item => (
-                    <div key={item} className={styles.selectedFilterChip}>
-                      <span>인버스: {item}</span>
-                      <button onClick={() => toggleArrayItem(selectedInverseTypes, setSelectedInverseTypes, item)}>
-                        <X size={14} />
-                      </button>
-                    </div>
-                  ))}
-                  {selectedDividendFreq.map(item => (
-                    <div key={item} className={styles.selectedFilterChip}>
-                      <span>배당: {item}</span>
-                      <button onClick={() => toggleArrayItem(selectedDividendFreq, setSelectedDividendFreq, item)}>
-                        <X size={14} />
-                      </button>
-                    </div>
-                  ))}
-                  {(dividendMin || dividendMax) && (
-                    <div className={styles.selectedFilterChip}>
-                      <span>배당률: {dividendMin || '0'}% ~ {dividendMax || '∞'}%</span>
-                      <button onClick={() => { setDividendMin(''); setDividendMax(''); }}>
-                        <X size={14} />
-                      </button>
-                    </div>
-                  )}
-                  {selectedReturnPeriod && (
-                    <div className={styles.selectedFilterChip}>
-                      <span>수익기간: {selectedReturnPeriod}</span>
-                      <button onClick={() => setSelectedReturnPeriod(null)}>
-                        <X size={14} />
-                      </button>
-                    </div>
-                  )}
-                  {(returnMin || returnMax) && (
-                    <div className={styles.selectedFilterChip}>
-                      <span>수익률: {returnMin || '-∞'}% ~ {returnMax || '∞'}%</span>
-                      <button onClick={() => { setReturnMin(''); setReturnMax(''); }}>
-                        <X size={14} />
-                      </button>
-                    </div>
-                  )}
-                  {selectedIssuers.map(item => (
-                    <div key={item} className={styles.selectedFilterChip}>
-                      <span>운용사: {item}</span>
-                      <button onClick={() => toggleIssuer(item)}>
-                        <X size={14} />
-                      </button>
-                    </div>
-                  ))}
-                  {selectedPensionTypes.map(item => (
-                    <div key={item} className={styles.selectedFilterChip}>
-                      <span>{item}</span>
-                      <button onClick={() => toggleArrayItem(selectedPensionTypes, setSelectedPensionTypes, item)}>
-                        <X size={14} />
-                      </button>
-                    </div>
-                  ))}
-                  {selectedSectors.map(item => (
-                    <div key={item} className={styles.selectedFilterChip}>
-                      <span>{item}</span>
-                      <button onClick={() => toggleArrayItem(selectedSectors, setSelectedSectors, item)}>
-                        <X size={14} />
-                      </button>
-                    </div>
-                  ))}
-                  {selectedTradingVolumes.map(item => (
-                    <div key={item} className={styles.selectedFilterChip}>
-                      <span>거래량: {item}</span>
-                      <button onClick={() => toggleArrayItem(selectedTradingVolumes, setSelectedTradingVolumes, item)}>
-                        <X size={14} />
-                      </button>
-                    </div>
-                  ))}
-                  {selectedExpenseRatios.map(item => (
-                    <div key={item} className={styles.selectedFilterChip}>
-                      <span>총보수: {item}</span>
-                      <button onClick={() => toggleArrayItem(selectedExpenseRatios, setSelectedExpenseRatios, item)}>
-                        <X size={14} />
-                      </button>
-                    </div>
-                  ))}
-                  {selectedListingPeriods.map(item => (
-                    <div key={item} className={styles.selectedFilterChip}>
-                      <span>상장: {item}</span>
-                      <button onClick={() => toggleArrayItem(selectedListingPeriods, setSelectedListingPeriods, item)}>
-                        <X size={14} />
-                      </button>
-                    </div>
-                  ))}
-                  {selectedHedgeTypes.map(item => (
-                    <div key={item} className={styles.selectedFilterChip}>
-                      <span>{item}</span>
-                      <button onClick={() => toggleArrayItem(selectedHedgeTypes, setSelectedHedgeTypes, item)}>
-                        <X size={14} />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
+            <SelectedFilters
+              filters={selectedFilterChips}
+              onRemove={handleRemoveFilter}
+              onClearAll={handleClearAllFilters}
+            />
           </div>
         )}
         

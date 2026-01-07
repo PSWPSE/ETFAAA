@@ -22,11 +22,12 @@
 
 .select {
   width: 100%;
-  padding: 0 36px 0 var(--spacing-md);
-  background: var(--color-white);
+  padding: 8px 36px 8px 12px;
+  background: var(--color-bg);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
-  font-size: var(--font-size-base);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
   color: var(--color-text-primary);
   cursor: pointer;
   appearance: none;
@@ -34,27 +35,30 @@
 }
 
 .select:hover {
-  border-color: var(--color-text-tertiary);
+  background: var(--color-white);
+  border-color: var(--color-primary);
 }
 
 .select:focus {
   outline: none;
-  /* 테두리 효과 제거 - 커서 깜박임만 표시 */
+  background: var(--color-white);
+  border-color: var(--color-primary);
 }
 
 /* Sizes */
 .sm {
-  height: 32px;
-  font-size: var(--font-size-sm);
+  padding: 6px 32px 6px 10px;
+  font-size: var(--font-size-xs);
 }
 
 .md {
-  height: 44px;
+  padding: 8px 36px 8px 12px;
+  font-size: var(--font-size-sm);
 }
 
 .lg {
-  height: 52px;
-  font-size: var(--font-size-lg);
+  padding: 10px 40px 10px 14px;
+  font-size: var(--font-size-base);
 }
 
 .icon {
