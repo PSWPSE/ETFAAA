@@ -176,39 +176,50 @@
 }
 
 .matrix {
-  display: grid;
-  grid-template-columns: 80px repeat(7, minmax(80px, 1fr));
-  gap: 0;
+  display: table;
   width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
   border: 1px solid var(--color-border-light);
   border-radius: var(--radius-md);
   overflow: hidden;
 }
 
 .matrixRow {
-  display: contents;
+  display: table-row;
 }
 
 @media (max-width: 767px) {
   .matrix {
-    grid-template-columns: 60px repeat(7, minmax(60px, 1fr));
+    display: table;
+    min-width: 100%;
   }
 }
 
 .matrixCorner {
+  display: table-cell;
+  width: 80px;
+  min-width: 80px;
   background: var(--color-bg-secondary);
   border-bottom: 1px solid var(--color-border);
   border-right: 1px solid var(--color-border);
 }
 
+@media (max-width: 767px) {
+  .matrixCorner {
+    width: 60px;
+    min-width: 60px;
+  }
+}
+
 .matrixHeader {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: table-cell;
+  text-align: center;
+  vertical-align: middle;
   padding: 14px 8px;
   min-height: 48px;
+  min-width: 80px;
   background: var(--color-bg-secondary);
-  border: none;
   border-bottom: 1px solid var(--color-border);
   border-right: 1px solid var(--color-border-light);
   cursor: pointer;
@@ -217,7 +228,6 @@
 
 .matrixHeader:hover {
   background: var(--color-bg);
-  transform: translateY(-2px);
 }
 
 .matrixHeader:last-child {
@@ -246,13 +256,14 @@
 }
 
 .matrixLabel {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: table-cell;
+  text-align: center;
+  vertical-align: middle;
   padding: 14px 8px;
   min-height: 48px;
+  width: 80px;
+  min-width: 80px;
   background: var(--color-bg-secondary);
-  border: none;
   border-bottom: 1px solid var(--color-border-light);
   border-right: 1px solid var(--color-border);
   cursor: pointer;
@@ -261,7 +272,6 @@
 
 .matrixLabel:hover {
   background: var(--color-bg);
-  transform: translateX(-2px);
 }
 
 .matrixLabelTicker {
@@ -285,11 +295,12 @@
 }
 
 .matrixCell {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: table-cell;
+  text-align: center;
+  vertical-align: middle;
   padding: 14px 8px;
   min-height: 48px;
+  min-width: 80px;
   font-size: 13px;
   font-weight: 700;
   font-feature-settings: 'tnum' on, 'lnum' on;
@@ -305,10 +316,8 @@
 }
 
 .matrixCell:hover {
-  transform: scale(1.08);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  box-shadow: inset 0 0 0 2px var(--color-primary);
   z-index: 10;
-  border-radius: 4px;
 }
 
 /* Legend */
@@ -514,11 +523,18 @@
   .matrixLabel {
     padding: 12px 6px;
     min-height: 40px;
+    min-width: 60px;
+  }
+  
+  .matrixLabel {
+    width: 60px;
+    min-width: 60px;
   }
   
   .matrixCell {
     padding: 12px 6px;
     min-height: 40px;
+    min-width: 60px;
     font-size: 11px;
   }
   
@@ -576,7 +592,10 @@
     min-width: 45px;
   }
   
-  .matrixHeader:hover,
+  .matrixHeader:hover {
+    transform: none;
+  }
+  
   .matrixLabel:hover {
     transform: none;
   }
