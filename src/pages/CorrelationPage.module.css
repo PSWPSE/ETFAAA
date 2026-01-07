@@ -176,30 +176,26 @@
 }
 
 .matrix {
-  display: table;
-  width: 100%;
-  border-collapse: separate;
-  border-spacing: 0;
+  display: flex;
+  flex-direction: column;
   border: 1px solid var(--color-border-light);
   border-radius: var(--radius-md);
   overflow: hidden;
 }
 
 .matrixRow {
-  display: table-row;
+  display: flex;
 }
 
 @media (max-width: 767px) {
   .matrix {
-    display: table;
     min-width: 100%;
   }
 }
 
 .matrixCorner {
-  display: table-cell;
+  flex: 0 0 80px;
   width: 80px;
-  min-width: 80px;
   background: var(--color-bg-secondary);
   border-bottom: 1px solid var(--color-border);
   border-right: 1px solid var(--color-border);
@@ -207,19 +203,21 @@
 
 @media (max-width: 767px) {
   .matrixCorner {
+    flex: 0 0 60px;
     width: 60px;
-    min-width: 60px;
   }
 }
 
 .matrixHeader {
-  display: table-cell;
-  text-align: center;
-  vertical-align: middle;
+  flex: 1;
+  min-width: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   padding: 14px 8px;
   min-height: 48px;
-  min-width: 80px;
   background: var(--color-bg-secondary);
+  border: none;
   border-bottom: 1px solid var(--color-border);
   border-right: 1px solid var(--color-border-light);
   cursor: pointer;
@@ -228,6 +226,7 @@
 
 .matrixHeader:hover {
   background: var(--color-bg);
+  transform: translateY(-2px);
 }
 
 .matrixHeader:last-child {
@@ -256,14 +255,15 @@
 }
 
 .matrixLabel {
-  display: table-cell;
-  text-align: center;
-  vertical-align: middle;
+  flex: 0 0 80px;
+  width: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   padding: 14px 8px;
   min-height: 48px;
-  width: 80px;
-  min-width: 80px;
   background: var(--color-bg-secondary);
+  border: none;
   border-bottom: 1px solid var(--color-border-light);
   border-right: 1px solid var(--color-border);
   cursor: pointer;
@@ -272,6 +272,7 @@
 
 .matrixLabel:hover {
   background: var(--color-bg);
+  transform: translateX(-2px);
 }
 
 .matrixLabelTicker {
@@ -295,12 +296,13 @@
 }
 
 .matrixCell {
-  display: table-cell;
-  text-align: center;
-  vertical-align: middle;
+  flex: 1;
+  min-width: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   padding: 14px 8px;
   min-height: 48px;
-  min-width: 80px;
   font-size: 13px;
   font-weight: 700;
   font-feature-settings: 'tnum' on, 'lnum' on;
@@ -316,8 +318,10 @@
 }
 
 .matrixCell:hover {
-  box-shadow: inset 0 0 0 2px var(--color-primary);
+  transform: scale(1.08);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
   z-index: 10;
+  border-radius: 4px;
 }
 
 /* Legend */
@@ -523,12 +527,15 @@
   .matrixLabel {
     padding: 12px 6px;
     min-height: 40px;
+  }
+  
+  .matrixHeader {
     min-width: 60px;
   }
   
   .matrixLabel {
+    flex: 0 0 60px;
     width: 60px;
-    min-width: 60px;
   }
   
   .matrixCell {
@@ -592,10 +599,7 @@
     min-width: 45px;
   }
   
-  .matrixHeader:hover {
-    transform: none;
-  }
-  
+  .matrixHeader:hover,
   .matrixLabel:hover {
     transform: none;
   }
