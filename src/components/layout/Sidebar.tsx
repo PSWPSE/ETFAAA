@@ -57,7 +57,7 @@ export default function Sidebar() {
                 }
                 end={item.path === '/'}
               >
-                <item.icon size={20} className={styles.navIcon} />
+                <item.icon size={20} strokeWidth={1.5} className={styles.navIcon} />
                 <span className={styles.navLabel}>{item.label}</span>
               </NavLink>
             </li>

@@ -9,6 +9,7 @@
   padding-bottom: 120px;
   max-width: 100%;
   overflow-x: hidden;
+  background: transparent !important;
 }
 
 @media (min-width: 768px) {
@@ -38,6 +39,7 @@
   gap: var(--spacing-md);
   padding-bottom: var(--spacing-md);
   border-bottom: 2px solid var(--color-border-light);
+  background: transparent;
 }
 
 .headerMain {
@@ -99,6 +101,7 @@
   display: flex;
   flex-direction: column;
   gap: var(--spacing-2xl);
+  background: transparent;
 }
 
 @media (min-width: 768px) {

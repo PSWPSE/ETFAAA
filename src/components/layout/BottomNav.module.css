@@ -4,7 +4,7 @@
   left: 0;
   right: 0;
   height: var(--bottom-nav-height);
-  background: var(--color-white);
+  background: var(--bg-layer-header);
   border-top: 1px solid var(--color-border-light);
   display: flex;
   align-items: stretch;
@@ -31,7 +31,7 @@
 }
 
 .navItem.active {
-  color: var(--color-primary);
+  color: var(--color-brand);
 }
 
 .navIcon {
@@ -63,7 +63,7 @@
   bottom: var(--bottom-nav-height);
   left: 0;
   right: 0;
-  background: var(--color-white);
+  background: var(--bg-layer-modal);
   border-top-left-radius: var(--radius-xl);
   border-top-right-radius: var(--radius-xl);
   z-index: 160;
@@ -125,7 +125,7 @@
 }
 
 .moreMenuItem.active {
-  background: var(--color-primary);
+  background: var(--color-brand);
   color: var(--color-white);
 }
 

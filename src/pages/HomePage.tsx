@@ -643,7 +643,6 @@ export default function HomePage() {
           <div className={styles.sectionTitleGroup}>
             <TrendingUp size={20} className={styles.trendIcon} />
             <h2 className={styles.sectionTitle}>핫 테마</h2>
-            <span className={styles.periodBadge}>1주 수익률</span>
           </div>
           <button className={styles.moreBtn} onClick={() => navigate('/theme')}>
             전체 <ChevronRight size={16} />
@@ -678,7 +677,7 @@ export default function HomePage() {
                 <span className={`${styles.themeReturnValue} ${getChangeClass(theme.avgReturn)}`}>
                   {theme.avgReturn >= 0 ? '+' : ''}{theme.avgReturn.toFixed(1)}%
                 </span>
-                <span className={styles.themeSubReturn}>평균 수익률</span>
+                <span className={styles.themeSubReturn}>최근 1주일 수익률</span>
               </div>
             </button>
           ))}

@@ -1,36 +1,51 @@
-/* CSS Variables - Design System */
+/* CSS Variables - Design System (ETF.com Inspired) */
 :root {
-  /* Colors */
-  --color-primary: #1E3A5F;
-  --color-primary-light: #2D5A8A;
-  --color-primary-dark: #0F2640;
-  --color-secondary: #4A90A4;
-  --color-accent: #E8A838;
+  /* Brand Colors - Sage Green Theme */
+  --color-brand: #5f9b8f;
+  --color-brand-light: #7ab3a8;
+  --color-brand-lighter: #e8f4f1;
+  --color-brand-dark: #4a7d73;
+  
+  /* Primary Colors */
+  --color-primary: #5f9b8f;
+  --color-primary-light: #7ab3a8;
+  --color-primary-dark: #4a7d73;
+  --color-secondary: #2b3d4f;
+  --color-accent: #5f9b8f;
   
   /* Semantic Colors */
-  --color-success: #22C55E;
-  --color-warning: #F59E0B;
-  --color-danger: #EF4444;
-  --color-info: #3B82F6;
+  --color-success: #10b981;
+  --color-warning: #f59e0b;
+  --color-danger: #ef4444;
+  --color-info: #3b82f6;
   
-  /* Neutrals */
-  --color-white: #FFFFFF;
-  --color-bg: #FAFBFC;
-  --color-bg-secondary: #F3F4F6;
-  --color-border: #E5E7EB;
-  --color-border-light: #F0F1F3;
-  --color-text-primary: #1F2937;
-  --color-text-secondary: #6B7280;
-  --color-text-tertiary: #9CA3AF;
+  /* Neutrals - Professional Gray Scale */
+  --color-white: #ffffff;
+  --color-bg: #f5f5f5;
+  --color-bg-secondary: #f8f9fa;
+  --color-bg-gray: #fafbfc;
+  --color-border: #e5e7eb;
+  --color-border-light: #f0f1f3;
+  
+  /* Background System - Layered Architecture */
+  --bg-layer-0: #f5f5f5;        /* Page base background (가장 뒤) */
+  --bg-layer-1: #f8f9fa;        /* Sidebar, Navigation (중간) */
+  --bg-layer-2: #ffffff;        /* Content cards, Main content (가장 앞) */
+  --bg-layer-header: #f8f9fa;   /* Header background - 통일 */
+  --bg-layer-modal: #ffffff;    /* Modal, Dialog background */
+  --color-text-primary: #2b3d4f;
+  --color-text-secondary: #6c757d;
+  --color-text-tertiary: #9ca3af;
+  --color-text-muted: #999999;
   
   /* Chart Colors */
-  --chart-1: #1E3A5F;
-  --chart-2: #4A90A4;
-  --chart-3: #E8A838;
-  --chart-4: #22C55E;
-  --chart-5: #EF4444;
-  --chart-up: #EF4444;
-  --chart-down: #3B82F6;
+  --chart-1: #5f9b8f;
+  --chart-2: #2b3d4f;
+  --chart-3: #7ab3a8;
+  --chart-4: #10b981;
+  --chart-5: #ef4444;
+  --chart-up: #10b981;
+  --chart-down: #ef4444;
   
   /* Spacing */
   --spacing-xs: 4px;
@@ -40,44 +55,54 @@
   --spacing-xl: 32px;
   --spacing-2xl: 48px;
   
-  /* Border Radius */
-  --radius-sm: 6px;
-  --radius-md: 10px;
-  --radius-lg: 16px;
-  --radius-xl: 24px;
+  /* Border Radius - Minimal */
+  --radius-sm: 4px;
+  --radius-md: 4px;
+  --radius-lg: 6px;
+  --radius-xl: 8px;
   --radius-full: 9999px;
   
-  /* Shadows */
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.06), 0 2px 4px -1px rgba(0, 0, 0, 0.04);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
-  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  /* Shadows - Subtle Professional */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.03);
+  --shadow-md: 0 2px 4px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02);
+  --shadow-lg: 0 4px 8px rgba(0, 0, 0, 0.06), 0 2px 4px rgba(0, 0, 0, 0.03);
+  --shadow-xl: 0 8px 16px rgba(0, 0, 0, 0.08), 0 4px 8px rgba(0, 0, 0, 0.04);
+  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.04);
   
-  /* Typography */
-  --font-family: 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
-  --font-family-numeric: 'Plus Jakarta Sans', 'Pretendard Variable', Pretendard, -apple-system, sans-serif;
-  --font-size-xs: 11px;
-  --font-size-sm: 13px;
-  --font-size-base: 15px;
-  --font-size-lg: 17px;
+  /* Typography - Professional & Clean */
+  --font-family: 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, system-ui, 'Roboto', sans-serif;
+  --font-family-numeric: 'Roboto', 'Pretendard Variable', system-ui, sans-serif;
+  --font-size-xs: 12px;
+  --font-size-sm: 14px;
+  --font-size-base: 16px;
+  --font-size-lg: 18px;
   --font-size-xl: 20px;
   --font-size-2xl: 24px;
-  --font-size-3xl: 30px;
+  --font-size-3xl: 32px;
+  --font-size-4xl: 48px;
+  --font-size-hero: 72px;
   
-  /* Layout */
-  --header-height: 56px;
+  /* Layout - ETF.com Style */
+  --header-height: 64px;
   --bottom-nav-height: 64px;
-  --sidebar-width: 240px;
+  --sidebar-width: 230px;
   --sidebar-collapsed-width: 72px;
-  --content-max-width: 1200px;
+  --content-max-width: 1400px;
   
   /* Touch Target */
   --touch-target-min: 44px;
   
-  /* Transitions */
-  --transition-fast: 150ms ease;
-  --transition-normal: 250ms ease;
-  --transition-slow: 350ms ease;
+  /* Transitions - Fast & Professional */
+  --transition-fast: 150ms ease-in-out;
+  --transition-normal: 200ms ease-in-out;
+  --transition-slow: 300ms ease-in-out;
+  
+  /* Icon Size */
+  --icon-xs: 16px;
+  --icon-sm: 20px;
+  --icon-md: 24px;
+  --icon-lg: 32px;
+  --icon-xl: 48px;
 }
 
 /* Reset & Base */
@@ -97,10 +122,11 @@ html {
 body {
   font-family: var(--font-family);
   font-size: var(--font-size-base);
-  line-height: 1.5;
+  line-height: 1.6;
   color: var(--color-text-primary);
-  background-color: var(--color-white);
+  background-color: var(--color-bg);
   overflow-x: hidden;
+  font-weight: 400;
 }
 
 #root {

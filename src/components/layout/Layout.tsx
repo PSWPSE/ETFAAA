@@ -1,5 +1,4 @@
 import { ReactNode } from 'react';
-import Header from './Header';
 import Sidebar from './Sidebar';
 import ComparisonBar from './ComparisonBar';
 // import BottomNav from './BottomNav';
@@ -12,7 +11,6 @@ interface LayoutProps {
 export default function Layout({ children }: LayoutProps) {
   return (
     <div className={styles.layout}>
-      <Header />
       <Sidebar />
       <main className={styles.main}>
         <div className={styles.content}>

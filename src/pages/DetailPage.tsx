@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Plus, Check, Share2, TrendingUp, TrendingDown, Activity, Calculator, ChevronRight, Clock, Target, Zap, Shield, Users, Info, PieChart as PieChartIcon, Globe, List, DollarSign, BarChart3, Calendar, Layers, Newspaper } from 'lucide-react';
-import { XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, AreaChart, Area, BarChart, Bar } from 'recharts';
+import { XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, AreaChart, Area, BarChart, Bar, ReferenceLine, Label } from 'recharts';
 import { Card, Button, Badge } from '../components/common';
 import { Tabs, TabList, Tab, TabPanel } from '../components/common';
 import { getETFById, generatePriceHistory, getReturns, getHoldings, getDividends, getRiskMetrics, getExtendedETFInfo, getSimilarETFs, getSectorAllocation, getAssetAllocation, getCountryAllocation, getDividendChartData, getDividendForecast, getExtendedRiskMetrics, getMonthlyReturns, getTechnicalIndicators, getGrowthSimulation, getFundFlows, getTaxInfo, getCompetingETFs, getRelatedNews, getCostAnalysis, getCorrelatedETFs } from '../data/etfs';
@@ -255,6 +255,50 @@ export default function DetailPage() {
                     boxShadow: 'var(--shadow-md)',
                   }}
                 />
+                <ReferenceLine
+                  y={etf.price}
+                  stroke="var(--color-primary)"
+                  strokeDasharray="3 3"
+                  strokeWidth={1.5}
+                  label={{
+                    value: `${formatPrice(etf.price)}원`,
+                    position: 'insideTopRight',
+                    fill: 'var(--color-white)',
+                    fontSize: 11,
+                    fontWeight: 600,
+                    offset: 10,
+                    content: (props: any) => {
+                      const { viewBox } = props;
+                      const x = viewBox.width - 10;
+                      const y = viewBox.y;
+                      
+                      return (
+                        <g>
+                          <rect
+                            x={x - 70}
+                            y={y - 12}
+                            width={70}
+                            height={20}
+                            fill="var(--color-primary)"
+                            rx={4}
+                            ry={4}
+                            opacity={0.95}
+                          />
+                          <text
+                            x={x - 35}
+                            y={y + 2}
+                            fill="white"
+                            fontSize={11}
+                            fontWeight={600}
+                            textAnchor="middle"
+                          >
+                            {`${formatPrice(etf.price)}원`}
+                          </text>
+                        </g>
+                      );
+                    }
+                  }}
+                />
                 <Area 
                   type="monotone" 
                   dataKey="price" 
@@ -264,6 +308,10 @@ export default function DetailPage() {
                 />
               </AreaChart>
             </ResponsiveContainer>
+          </div>
+          <div className={styles.chartFooter}>
+            <Clock size={12} />
+            <span>Last | {new Date().toLocaleDateString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit' }).replace(/\. /g, '.')} {new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })}</span>
           </div>
         </div>
         
@@ -620,11 +668,11 @@ export default function DetailPage() {
                     <span className={styles.dividendInfoValue}>{formatPrice(dividends[0]?.amount || 0)}원</span>
                   </div>
                   <div className={styles.dividendInfoItem}>
-                    <span className={styles.dividendInfoLabel}>예상 배당락</span>
+                    <span className={styles.dividendInfoLabel}>다음 매수 마감일</span>
                     <span className={styles.dividendInfoValue}>{dividendForecast?.nextExDate || '-'}</span>
                   </div>
                   <div className={styles.dividendInfoItem}>
-                    <span className={styles.dividendInfoLabel}>예상 금액</span>
+                    <span className={styles.dividendInfoLabel}>다음 배당 예상금액</span>
                     <span className={styles.dividendInfoValue}>{formatPrice(dividendForecast?.estimatedAmount || 0)}원</span>
                   </div>
                 </div>
@@ -1087,6 +1135,12 @@ export default function DetailPage() {
                   </div>
                 </div>
               )}
+              
+              <div className={styles.correlationNote}>
+                <strong>상관도란?</strong> 두 ETF의 가격이 얼마나 비슷하게 움직이는지를 나타내는 지표입니다. 
+                100%에 가까울수록 같은 방향으로 움직이고, -100%에 가까울수록 반대 방향으로 움직입니다. 
+                포트폴리오 분산 투자 시 상관도가 낮은 ETF를 함께 보유하면 리스크를 줄일 수 있습니다.
+              </div>
             </Card>
           )}
         </TabPanel>

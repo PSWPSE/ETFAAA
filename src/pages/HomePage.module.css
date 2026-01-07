@@ -67,11 +67,11 @@
   gap: var(--spacing-md);
   padding: var(--spacing-md) var(--spacing-lg);
   background: var(--color-white);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-sm);
   text-align: left;
   transition: all var(--transition-fast);
-  border: 1px solid var(--color-border-light);
-  box-shadow: 0 2px 4px rgba(30, 58, 95, 0.04);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-card);
   opacity: 0;
   transform: translateY(20px);
 }
@@ -85,9 +85,8 @@
 .animated .serviceCard:nth-child(3) { animation-delay: 0.4s; }
 
 .serviceCard:hover {
-  border-color: var(--color-primary);
-  box-shadow: 0 4px 12px rgba(30, 58, 95, 0.1);
-  transform: translateY(-2px);
+  border-color: var(--color-brand);
+  box-shadow: var(--shadow-md);
 }
 
 .serviceIcon {
@@ -96,17 +95,16 @@
   justify-content: center;
   width: 44px;
   height: 44px;
-  background: rgba(30, 58, 95, 0.06);
-  color: var(--color-primary);
-  border-radius: var(--radius-md);
+  background: var(--color-brand-lighter);
+  color: var(--color-brand);
+  border-radius: var(--radius-sm);
   flex-shrink: 0;
   transition: all var(--transition-fast);
 }
 
 .serviceCard:hover .serviceIcon {
-  background: var(--color-primary);
+  background: var(--color-brand);
   color: var(--color-white);
-  transform: scale(1.05);
 }
 
 .serviceInfo {
@@ -317,12 +315,12 @@
 
 .tickerItemChange.up {
   color: #22c55e;
-  background: rgba(34, 197, 94, 0.15);
+  background: none;
 }
 
 .tickerItemChange.down {
   color: #ef4444;
-  background: rgba(239, 68, 68, 0.15);
+  background: none;
 }
 
 .tickerIndicator {
@@ -1125,8 +1123,8 @@
   font-size: var(--font-size-xs);
   font-weight: 600;
   color: var(--color-text-secondary);
-  background: linear-gradient(135deg, rgba(139, 92, 246, 0.08) 0%, rgba(139, 92, 246, 0.12) 100%);
-  border: 1px solid rgba(139, 92, 246, 0.15);
+  background: #ffffff;
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
 }
 
@@ -1284,7 +1282,7 @@
   
   .tickerItemChange {
     font-size: 12px;
-    padding: 3px 7px;
+    padding: 0;
   }
   
   /* 서비스 카드 */
@@ -1409,7 +1407,7 @@
   
   .tickerItemChange {
     font-size: 13px;
-    padding: 4px 8px;
+    padding: 0;
   }
   
   /* 서비스 카드 - 더 큰 패딩 */
@@ -1517,6 +1515,6 @@
   
   .tickerItemChange {
     font-size: 14px;
-    padding: 4px 9px;
+    padding: 0;
   }
 }
