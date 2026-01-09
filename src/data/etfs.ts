@@ -1826,13 +1826,13 @@ export const getExtendedRiskMetrics = (etfId: string) => {
 };
 
 // 월별 수익률 히트맵 데이터
-export const getMonthlyReturns = (etfId: string) => {
+export const getMonthlyReturns = (_etfId: string) => {
   const years = [2022, 2023, 2024];
   const months = ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'];
-  
+
   return years.map(year => ({
     year,
-    returns: months.map((month, idx) => ({
+    returns: months.map((month) => ({
       month,
       value: Math.random() * 20 - 10, // -10% ~ +10%
     })),
@@ -2155,11 +2155,11 @@ export const getRelatedNews = (etfId: string) => {
     { title: `ETF 수익률 TOP10에 ${themes[0] || etf.category} 상품 다수`, source: '서울경제' },
   ];
   
-  return newsTemplates.slice(0, 5).map((news, idx) => ({
-    id: `news-${idx}`,
+  return newsTemplates.slice(0, 5).map((news, index) => ({
+    id: `news-${index}`,
     title: news.title,
     source: news.source,
-    date: new Date(now.getTime() - idx * 24 * 60 * 60 * 1000 * (1 + Math.random() * 3)).toISOString().slice(0, 10),
+    date: new Date(now.getTime() - index * 24 * 60 * 60 * 1000 * (1 + Math.random() * 3)).toISOString().slice(0, 10),
     url: '#',
     summary: `${etf.name}에 대한 시장 분석 및 투자 전망...`,
   }));

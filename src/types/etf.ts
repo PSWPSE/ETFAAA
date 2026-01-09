@@ -99,13 +99,17 @@ export interface PhaseAnalysis {
 
 // 테마
 // 테마 카테고리 타입
-export type ThemeCategory = 
+export type ThemeCategory =
   | 'index'      // 투자국가/지역/대표지수
   | 'strategy'   // 투자전략
   | 'sector'     // 산업/업종/섹터
   | 'asset'      // 투자자산
   | 'single'     // 단일종목
-  | 'leverage';  // 레버리지/인버스
+  | 'leverage'   // 레버리지/인버스
+  | 'bond'       // 채권
+  | 'region'     // 지역/국가
+  | 'commodity'  // 원자재
+  | 'theme';     // 테마/메가트렌드
 
 export interface Theme {
   id: string;
@@ -114,6 +118,7 @@ export interface Theme {
   etfCount: number;
   avgReturn: number;
   category: ThemeCategory;
+  representativeETFId?: string; // 대표 ETF ID
 }
 
 // 상관관계
@@ -147,4 +152,33 @@ export interface FilterOptions {
 // 정렬 옵션
 export type SortField = 'name' | 'price' | 'change' | 'volume' | 'marketCap' | 'dividendYield';
 export type SortOrder = 'asc' | 'desc';
+
+// 시장 지수
+export interface MarketIndex {
+  symbol: string;
+  name: string;
+  value: number;
+  change: number;
+  changePercent: number;
+  region: string;
+}
+
+// 환율
+export interface ForexRate {
+  symbol: string;
+  name: string;
+  value: number;
+  change: number;
+  changePercent: number;
+}
+
+// 원자재
+export interface Commodity {
+  symbol: string;
+  name: string;
+  value: number;
+  change: number;
+  changePercent: number;
+  unit: string;
+}
 

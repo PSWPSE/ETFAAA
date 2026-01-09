@@ -1,3 +1,7 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 /* CSS Variables - Design System (ETF.com Inspired) */
 :root {
   /* Brand Colors - Sage Green Theme */

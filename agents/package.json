@@ -1,0 +1,28 @@
+{
+  "name": "etf-validation-agents",
+  "version": "1.0.0",
+  "description": "Multi-agent ETF data validation system using Claude Agent SDK",
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsx src/index.ts",
+    "validate": "tsx src/index.ts",
+    "validate:korean": "tsx src/index.ts --source=korean-etf",
+    "validate:us": "tsx src/index.ts --source=us-etf",
+    "validate:market": "tsx src/index.ts --source=market"
+  },
+  "dependencies": {
+    "@anthropic-ai/claude-agent-sdk": "^0.1.0",
+    "zod": "^3.22.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.6.0",
+    "tsx": "^4.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

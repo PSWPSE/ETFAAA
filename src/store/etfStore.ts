@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import type { ETF, SortField, SortOrder } from '../types/etf';
 
-export type Market = 'korea' | 'us';
+export type Market = 'korea' | 'us' | 'all';
 
 interface ETFStore {
   // 시장 선택

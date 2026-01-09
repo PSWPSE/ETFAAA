@@ -1,13 +1,12 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { TrendingUp, TrendingDown, ChevronDown, BarChart3, Coins, Building2, ArrowDownToLine, SortDesc, SlidersHorizontal, X } from 'lucide-react';
-import { Card, CardHeader, Button, SelectedFilters } from '../components/common';
+import { ChevronDown, BarChart3, Coins, Building2, ArrowDownToLine, SortDesc, SlidersHorizontal } from 'lucide-react';
+import { Card, SelectedFilters } from '../components/common';
 import type { FilterChip } from '../components/common';
 import PageContainer from '../components/layout/PageContainer';
 import { useETFStore } from '../store/etfStore';
-import { koreanETFs, usETFs, getReturns } from '../data/etfs';
-import { formatPrice, formatPercent, formatLargeNumber } from '../utils/format';
-import styles from './RankingPage.module.css';
+import { koreanETFs, usETFs, getReturns } from '../data';
+import { formatPercent, formatLargeNumber, formatPriceByMarket, formatLargeNumberByMarket } from '../utils/format';
 
 type Period = '1d' | '1m' | '3m' | '6m' | '1y';
 type RankingType = 'top' | 'bottom';
@@ -49,25 +48,25 @@ const FILTER_CATEGORIES = [
 export default function RankingPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { selectedMarket, setSelectedMarket } = useETFStore();
+  const { selectedMarket } = useETFStore();
   const [rankingCategory, setRankingCategory] = useState<RankingCategory>('return');
   const [selectedPeriod, setSelectedPeriod] = useState<Period>('1y');
   const [rankingType, setRankingType] = useState<RankingType>('top');
-  
+
   // URL 파라미터로부터 초기 상태 설정
   useEffect(() => {
     const category = searchParams.get('category') as RankingCategory;
     const period = searchParams.get('period') as Period;
-    
+
     if (category && ['return', 'dividend', 'aum', 'flow'].includes(category)) {
       setRankingCategory(category);
     }
-    
+
     if (period && ['1d', '1m', '3m', '6m', '1y'].includes(period)) {
       setSelectedPeriod(period);
     }
   }, [searchParams]);
-  
+
   // 필터 상태
   const [showFilters, setShowFilters] = useState(false);
   const [activeFilterCategory, setActiveFilterCategory] = useState<FilterCategory>(null);
@@ -84,15 +83,15 @@ export default function RankingPage() {
     pension: [],
     sector: [],
   });
-  
+
   const etfs = selectedMarket === 'korea' ? koreanETFs : usETFs;
-  
+
   // 필터 토글 헬퍼
   const toggleFilter = (category: FilterCategory, value: string) => {
     if (!category) return;
     setSelectedFilters(prev => {
       const currentValues = prev[category];
-      
+
       // '전체' 클릭 시
       if (value === '전체') {
         return {
@@ -100,7 +99,7 @@ export default function RankingPage() {
           [category]: currentValues.includes('전체') ? [] : ['전체'],
         };
       }
-      
+
       // 다른 옵션 클릭 시
       let newValues: string[];
       if (currentValues.includes(value)) {
@@ -110,7 +109,7 @@ export default function RankingPage() {
         // 새로 선택하는 경우 '전체' 제거하고 추가
         newValues = [...currentValues.filter(v => v !== '전체'), value];
       }
-      
+
       // 아무것도 선택되지 않으면 '전체'로 돌아감
       return {
         ...prev,
@@ -118,14 +117,14 @@ export default function RankingPage() {
       };
     });
   };
-  
+
   // 활성 필터 개수 ('전체' 제외)
   const activeFilterCount = Object.values(selectedFilters).reduce((sum, arr) => sum + arr.filter(v => v !== '전체').length, 0);
-  
+
   // 선택된 필터를 FilterChip 배열로 변환
   const selectedFilterChips = useMemo<FilterChip[]>(() => {
     const chips: FilterChip[] = [];
-    
+
     Object.entries(selectedFilters).forEach(([key, values]) => {
       const categoryLabel = FILTER_CATEGORIES.find(c => c.value === key)?.label || key;
       values.filter(v => v !== '전체').forEach(value => {
@@ -136,17 +135,17 @@ export default function RankingPage() {
         });
       });
     });
-    
+
     return chips;
   }, [selectedFilters]);
-  
+
   // 선택된 필터 제거 함수
   const handleRemoveFilter = (id: string) => {
     const [category, ...valueParts] = id.split('-');
     const value = valueParts.join('-');
     toggleFilter(category as FilterCategory, value);
   };
-  
+
   // 모든 필터 초기화 함수
   const handleClearAllFilters = () => {
     setSelectedFilters({
@@ -158,12 +157,12 @@ export default function RankingPage() {
     });
     setActiveFilterCategory(null);
   };
-  
+
   // ETF별 랭킹 값 계산
   const etfsWithRankingValue = useMemo(() => {
     return etfs.map(etf => {
       let rankingValue = 0;
-      
+
       switch (rankingCategory) {
         case 'return': {
           const returns = getReturns(etf.id);
@@ -217,88 +216,88 @@ export default function RankingPage() {
           break;
         }
       }
-      
+
       return {
         ...etf,
         rankingValue,
       };
     });
   }, [etfs, rankingCategory, selectedPeriod]);
-  
+
   // 필터링 및 정렬
   const rankedETFs = useMemo(() => {
     let filtered = [...etfsWithRankingValue];
-    
+
     // 투자지역 필터 ('전체'가 아닌 경우에만 적용)
     const regionFilters = selectedFilters.region.filter(v => v !== '전체');
     if (regionFilters.length > 0) {
-      filtered = filtered.filter(etf => 
-        regionFilters.some(region => 
+      filtered = filtered.filter(etf =>
+        regionFilters.some(region =>
           etf.themes.includes(region) || etf.name.includes(region)
         )
       );
     }
-    
+
     // 기초자산 필터 ('전체'가 아닌 경우에만 적용)
     const assetFilters = selectedFilters.asset.filter(v => v !== '전체');
     if (assetFilters.length > 0) {
-      filtered = filtered.filter(etf => 
-        assetFilters.some(type => 
+      filtered = filtered.filter(etf =>
+        assetFilters.some(type =>
           etf.category.includes(type) || etf.themes.includes(type)
         )
       );
     }
-    
+
     // 레버리지/인버스 필터 ('전체'가 아닌 경우에만 적용)
     const leverageFilters = selectedFilters.leverage.filter(v => v !== '전체');
     if (leverageFilters.length > 0) {
-      filtered = filtered.filter(etf => 
-        leverageFilters.some(type => 
-          etf.category.includes('레버리지') || 
+      filtered = filtered.filter(etf =>
+        leverageFilters.some(_type =>
+          etf.category.includes('레버리지') ||
           etf.category.includes('인버스') ||
           etf.name.includes('레버리지') ||
           etf.name.includes('인버스')
         )
       );
     }
-    
+
     // 연금 필터 ('전체'가 아닌 경우에만 적용)
     const pensionFilters = selectedFilters.pension.filter(v => v !== '전체');
     if (pensionFilters.length > 0) {
-      filtered = filtered.filter(etf => 
-        pensionFilters.some(type => 
+      filtered = filtered.filter(etf =>
+        pensionFilters.some(type =>
           etf.themes.includes(type.replace('연금', ''))
         )
       );
     }
-    
+
     // 섹터 필터 ('전체'가 아닌 경우에만 적용)
     const sectorFilters = selectedFilters.sector.filter(v => v !== '전체');
     if (sectorFilters.length > 0) {
-      filtered = filtered.filter(etf => 
-        sectorFilters.some(sector => 
+      filtered = filtered.filter(etf =>
+        sectorFilters.some(sector =>
           etf.themes.includes(sector) || etf.name.includes(sector)
         )
       );
     }
-    
+
     // 정렬
-    filtered.sort((a, b) => 
-      rankingType === 'top' 
-        ? b.rankingValue - a.rankingValue 
+    filtered.sort((a, b) =>
+      rankingType === 'top'
+        ? b.rankingValue - a.rankingValue
         : a.rankingValue - b.rankingValue
     );
-    
+
     return filtered.slice(0, 50); // 상위/하위 50개
   }, [
-    etfsWithRankingValue, 
-    selectedFilters, 
+    etfsWithRankingValue,
+    selectedFilters,
     rankingType
   ]);
-  
+
   const periodLabel = PERIOD_OPTIONS.find(p => p.value === selectedPeriod)?.label || '1년';
   const categoryLabel = RANKING_CATEGORIES.find(c => c.value === rankingCategory)?.label.replace(' 랭킹', '') || '수익률';
-  
+
   // 값 포맷 함수
   const formatRankingValue = (value: number) => {
     switch (rankingCategory) {
@@ -307,59 +306,60 @@ export default function RankingPage() {
       case 'dividend':
         return `${value.toFixed(2)}%`;
       case 'aum':
-        return formatLargeNumber(value);
+        return formatLargeNumberByMarket(value, selectedMarket);
       case 'flow':
-        return formatLargeNumber(Math.abs(value));
+        return formatLargeNumberByMarket(Math.abs(value), selectedMarket);
       default:
         return value.toFixed(2);
     }
   };
-  
+
   return (
-    <PageContainer 
-      title="ETF 랭킹" 
+    <PageContainer
+      title="ETF 랭킹"
       subtitle="다양한 기준으로 ETF 랭킹을 확인하세요"
       showMarketSelector={true}
     >
-      
+
       {/* 랭킹 기준 선택 */}
-      <div className={styles.rankingMethodSection}>
-        <div className={styles.rankingTypeTabs}>
+      <div className="flex flex-col">
+        <div className="grid grid-cols-2 gap-sm md:grid-cols-4 md:gap-md">
           {RANKING_CATEGORIES.map(category => {
             const Icon = category.icon;
+            const isSelected = rankingCategory === category.value;
             return (
               <button
                 key={category.value}
-                className={`${styles.rankingTypeTab} ${rankingCategory === category.value ? styles.active : ''}`}
+                className={`flex flex-col items-center justify-center gap-xs p-md border rounded-md cursor-pointer transition-all duration-150 text-sm font-semibold min-h-[85px] max-md:py-2.5 max-md:px-2 max-md:text-xs max-md:min-h-[75px] hover:border-primary hover:shadow-[0_2px_8px_rgba(30,58,95,0.08)] hover:-translate-y-0.5 ${isSelected ? 'bg-primary border-primary text-white shadow-[0_4px_12px_rgba(30,58,95,0.15)]' : 'bg-white border-border text-text-secondary hover:text-primary'}`}
                 onClick={() => setRankingCategory(category.value)}
               >
-                <Icon size={20} className={styles.categoryIcon} />
-                <span className={styles.tabLabel}>{category.label}</span>
+                <Icon size={20} className={`flex-shrink-0 transition-all duration-150 ${isSelected ? 'scale-110 text-white' : ''}`} />
+                <span className={`font-bold text-center leading-[1.3] ${isSelected ? 'text-white' : ''}`}>{category.label}</span>
               </button>
             );
           })}
         </div>
       </div>
-      
-      
+
+
       {/* 랭킹 리스트 */}
-      <div className={styles.rankingSection}>
-          <div className={styles.rankingHeader}>
-            <h3 className={styles.rankingTitle}>
-              랭킹 목록 <span className={styles.rankingCount}>{rankedETFs.length}개</span>
+      <div className="flex flex-col gap-md">
+          <div className="flex justify-between items-center">
+            <h3 className="text-lg font-bold text-text-primary m-0 flex items-center gap-2">
+              랭킹 목록 <span className="text-sm font-medium text-text-tertiary">{rankedETFs.length}개</span>
             </h3>
-            <div className={styles.sortWrapper}>
-              <button 
-                className={`${styles.filterButton} ${showFilters || activeFilterCount > 0 ? styles.active : ''}`}
+            <div className="flex items-center gap-sm max-md:flex-wrap max-md:gap-xs">
+              <button
+                className={`flex items-center justify-center gap-1.5 min-w-[85px] py-2 px-3 bg-layer-1 border border-border rounded-md text-sm font-semibold text-text-primary cursor-pointer transition-all duration-150 max-md:text-xs max-md:py-1.5 max-md:px-2.5 hover:bg-white hover:border-primary ${showFilters || activeFilterCount > 0 ? 'bg-primary border-primary text-white hover:bg-primary/90 hover:border-primary/90' : ''}`}
                 onClick={() => setShowFilters(!showFilters)}
               >
                 <SlidersHorizontal size={16} />
                 필터 {activeFilterCount > 0 && `(${activeFilterCount})`}
               </button>
               {(rankingCategory === 'return' || rankingCategory === 'flow') && (
-                <div className={styles.periodDropdown}>
+                <div className="flex items-center py-2 px-3 bg-layer-1 border border-border rounded-md transition-all duration-150 animate-[slideIn_0.2s_ease-out] max-md:py-1.5 max-md:px-2.5 hover:bg-white hover:border-primary">
                   <select
-                    className={styles.periodSelect}
+                    className="bg-transparent border-none text-sm font-semibold text-primary cursor-pointer p-0 pr-1 max-md:text-xs focus:outline-none"
                     value={selectedPeriod}
                     onChange={(e) => setSelectedPeriod(e.target.value as Period)}
                   >
@@ -371,10 +371,10 @@ export default function RankingPage() {
                   </select>
                 </div>
               )}
-              <div className={styles.sortDropdown}>
+              <div className="flex items-center gap-1.5 py-2 px-3 bg-layer-1 border border-border rounded-md text-sm text-text-secondary transition-all duration-150 max-md:text-xs max-md:py-1.5 max-md:px-2.5 hover:bg-white hover:border-primary">
                 <SortDesc size={14} />
                 <select
-                  className={styles.sortSelect}
+                  className="bg-transparent border-none text-sm font-semibold text-text-primary cursor-pointer pr-1 max-md:text-xs focus:outline-none"
                   value={rankingType}
                   onChange={(e) => setRankingType(e.target.value as RankingType)}
                 >
@@ -384,41 +384,41 @@ export default function RankingPage() {
               </div>
             </div>
           </div>
-          
+
           {/* 필터 섹션 */}
           {showFilters && (
-            <Card padding="md" className={styles.filterCard}>
+            <Card padding="md" className="relative z-10 overflow-visible transition-all duration-300 my-md max-md:!p-3">
               {/* 필터 카테고리 드롭다운 */}
-              <div className={styles.filterCategoryDropdown}>
-                <div className={styles.dropdownWrapper}>
+              <div className="flex flex-col gap-xs">
+                <div className="relative flex-1">
                   <select
-                    className={styles.categorySelect}
+                    className="w-full py-3 px-4 pr-10 bg-white border border-border rounded-md text-base font-medium text-text-primary cursor-pointer transition-all duration-150 appearance-none max-md:py-2.5 max-md:px-3 max-md:text-xs lg:py-3.5 lg:px-[18px] lg:text-sm hover:border-primary hover:bg-layer-1 focus:outline-none focus:border-primary focus:shadow-[0_0_0_3px_rgba(59,130,246,0.1)]"
                     value={activeFilterCategory || ''}
                     onChange={(e) => setActiveFilterCategory(e.target.value as FilterCategory || null)}
                   >
                     <option value="">카테고리 선택</option>
                     {FILTER_CATEGORIES.map(cat => {
-                      const count = selectedFilters[cat.value as keyof typeof selectedFilters].filter(v => v !== '전체').length;
+                      const count = cat.value ? selectedFilters[cat.value as keyof typeof selectedFilters].filter(v => v !== '전체').length : 0;
                       return (
-                        <option key={cat.value} value={cat.value}>
+                        <option key={cat.value ?? 'null'} value={cat.value ?? ''}>
                           {cat.label} {count > 0 ? `(${count})` : ''}
                         </option>
                       );
                     })}
                   </select>
-                  <ChevronDown size={16} className={styles.dropdownIcon} />
+                  <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-text-tertiary pointer-events-none" />
                 </div>
               </div>
-              
+
               {/* 필터 옵션 버튼 (선택된 카테고리) */}
               {activeFilterCategory && (
-                <div className={styles.filterOptionsSection}>
-                  <div className={styles.filterOptionsHeader}>
-                    <span className={styles.filterOptionsTitle}>
+                <div className="mt-md p-md bg-layer-1 border border-border/50 rounded-md animate-[slideDown_0.2s_ease] max-md:p-3 lg:p-5">
+                  <div className="flex justify-between items-center mb-sm">
+                    <span className="text-sm font-bold text-text-primary max-md:text-xs">
                       {FILTER_CATEGORIES.find(c => c.value === activeFilterCategory)?.label} 선택
                     </span>
                     <button
-                      className={styles.clearCategoryButton}
+                      className="py-1 px-2.5 bg-transparent border border-border rounded-full text-xs font-semibold text-text-secondary cursor-pointer transition-all duration-150 hover:border-primary hover:text-primary hover:bg-primary/5"
                       onClick={() => {
                         setSelectedFilters(prev => ({
                           ...prev,
@@ -429,11 +429,11 @@ export default function RankingPage() {
                       선택 해제
                     </button>
                   </div>
-                  <div className={styles.filterOptions}>
+                  <div className="flex flex-wrap gap-1.5">
                     {FILTER_CATEGORIES.find(c => c.value === activeFilterCategory)?.options.map(option => (
                       <button
                         key={option}
-                        className={`${styles.filterOption} ${selectedFilters[activeFilterCategory].includes(option) ? styles.active : ''}`}
+                        className={`py-[7px] px-3.5 bg-white border border-border rounded-[20px] text-xs font-medium text-text-secondary cursor-pointer transition-all duration-200 whitespace-nowrap leading-[1.4] max-md:py-1.5 max-md:px-3 max-md:text-[11px] lg:py-2 lg:px-4 lg:text-[13px] hover:border-text-secondary hover:bg-layer-1 hover:-translate-y-px ${selectedFilters[activeFilterCategory].includes(option) ? 'bg-primary text-white border-primary font-semibold shadow-[0_2px_4px_rgba(30,58,95,0.15)]' : ''}`}
                         onClick={() => toggleFilter(activeFilterCategory, option)}
                       >
                         {option}
@@ -442,7 +442,7 @@ export default function RankingPage() {
                   </div>
                 </div>
               )}
-              
+
               {/* 선택된 필터 표시 */}
               <SelectedFilters
                 filters={selectedFilterChips}
@@ -451,78 +451,78 @@ export default function RankingPage() {
               />
             </Card>
           )}
-          
+
           {rankedETFs.length > 0 ? (
-            <div className={styles.etfList}>
+            <div className="flex flex-col gap-sm">
               {rankedETFs.map((etf, index) => (
-              <div 
+              <div
                 key={etf.id}
-                className={styles.etfCard}
+                className="flex items-start gap-md bg-layer-1 border border-border rounded-md p-md cursor-pointer transition-all duration-200 max-md:p-md max-md:gap-sm hover:bg-white hover:border-primary hover:shadow-[0_4px_12px_rgba(30,58,95,0.1)] hover:translate-x-1"
                 onClick={() => navigate(`/etf/${etf.id}`)}
               >
                 {/* 순위 배지 */}
-                <span className={styles.rankBadge}>
+                <span className={`w-7 text-base font-bold text-text-tertiary text-center flex-shrink-0 font-mono pt-0.5 max-md:w-5 max-md:text-sm ${index < 3 ? 'text-primary' : ''}`}>
                   {index + 1}
                 </span>
-                
-                <div className={styles.etfContent}>
+
+                <div className="flex-1 min-w-0">
                   {/* Primary Info */}
-                  <div className={styles.primaryInfo}>
-                    <div className={styles.nameBlock}>
-                      <h3 className={styles.name}>{etf.name}</h3>
-                      <span className={styles.code}>{etf.ticker}</span>
+                  <div className="flex justify-between items-center gap-md mb-sm max-md:flex-col max-md:items-start max-md:gap-sm max-md:mb-md">
+                    <div className="flex items-baseline gap-2 flex-1 min-w-0 max-md:w-full max-md:mb-0.5">
+                      <h3 className="text-base font-bold text-text-primary m-0 leading-[1.3] overflow-hidden text-ellipsis whitespace-nowrap max-md:text-base max-md:leading-[1.5] max-md:mb-0.5">{etf.name}</h3>
+                      <span className="text-xs font-semibold text-text-secondary font-mono flex-shrink-0 max-md:text-[11px]">{etf.ticker}</span>
                     </div>
-                    <div className={styles.priceBlock}>
+                    <div className="flex items-baseline gap-2 flex-shrink-0 max-md:w-auto max-md:justify-start">
                       {rankingCategory === 'return' && (
                         <>
-                          <div className={styles.priceMain}>{formatPrice(etf.price)}원</div>
-                          <div className={`${styles.changeMain} ${etf.changePercent >= 0 ? 'number-up' : 'number-down'}`}>
+                          <div className="text-base font-bold text-text-primary tracking-[-0.01em] font-mono max-md:text-base">{formatPriceByMarket(etf.price, selectedMarket)}</div>
+                          <div className={`text-xs font-bold font-mono max-md:text-sm ${etf.changePercent >= 0 ? 'number-up' : 'number-down'}`}>
                             {etf.changePercent >= 0 ? '▲' : '▼'} {formatPercent(Math.abs(etf.changePercent))}
                           </div>
                         </>
                       )}
                       {rankingCategory === 'dividend' && (
                         <>
-                          <div className={styles.priceMain}>{formatPercent(etf.dividendYield)}</div>
-                          <div className={styles.changeMain}>{formatPrice(etf.dividendPerShare)}원</div>
+                          <div className="text-base font-bold text-text-primary tracking-[-0.01em] font-mono max-md:text-base">{formatPercent(etf.dividendYield)}</div>
+                          <div className="text-xs font-bold font-mono max-md:text-sm">{formatPriceByMarket(Math.round(etf.price * etf.dividendYield / 100), selectedMarket)}</div>
                         </>
                       )}
                       {rankingCategory === 'aum' && (
-                        <div className={styles.priceMain}>{formatLargeNumber(etf.aum)}</div>
+                        <div className="text-base font-bold text-text-primary tracking-[-0.01em] font-mono max-md:text-base">{formatLargeNumberByMarket(etf.aum, selectedMarket)}</div>
                       )}
                       {rankingCategory === 'flow' && (
-                        <div className={styles.priceMain}>{formatLargeNumber(etf.rankingValue)}</div>
+                        <div className="text-base font-bold text-text-primary tracking-[-0.01em] font-mono max-md:text-base">{formatLargeNumberByMarket(etf.rankingValue, selectedMarket)}</div>
                       )}
                     </div>
                   </div>
-                  
+
                   {/* Secondary Info */}
-                  <div className={styles.secondaryInfo}>
-                    <div className={styles.tagGroup}>
-                      <span className={styles.primaryTag}>{etf.category}</span>
+                  <div className="grid grid-cols-[auto_1fr] items-center gap-md pt-sm border-t border-border/50 max-md:grid-cols-1 max-md:gap-md max-md:pt-sm">
+                    <div className="flex gap-1.5 flex-shrink-0 flex-wrap justify-start items-center max-md:justify-start max-md:gap-1">
+                      <span className="py-1 px-2 bg-primary text-white rounded-sm text-[10px] font-bold tracking-[0.02em] whitespace-nowrap leading-[1.4] max-md:text-[9px] max-md:py-[3px] max-md:px-1.5">{etf.category}</span>
                       {etf.themes.slice(0, 2).map(theme => (
-                        <span key={theme} className={styles.secondaryTag}>{theme}</span>
+                        <span key={theme} className="py-1 px-2 bg-layer-2 whitespace-nowrap leading-[1.4] text-text-secondary rounded-sm text-[10px] font-semibold max-md:text-[9px] max-md:py-[3px] max-md:px-1.5">{theme}</span>
                       ))}
                     </div>
-                    <div className={styles.metaGroup}>
-                      <span className={styles.metaItem}>
-                        <span className={styles.metaLabel}>시가총액</span>
-                        <span className={styles.metaValue}>{formatLargeNumber(etf.marketCap)}</span>
+                    <div className="flex items-center gap-md flex-wrap justify-end min-w-0 max-md:grid max-md:grid-cols-2 max-md:gap-sm max-md:justify-start">
+                      <span className="flex items-center gap-1.5 whitespace-nowrap max-md:flex-col max-md:gap-[3px] max-md:items-start">
+                        <span className="text-[10px] font-semibold text-text-tertiary min-w-[52px] inline-block uppercase tracking-[0.02em] max-md:text-[10px] max-md:min-w-auto max-md:normal-case">시가총액</span>
+                        <span className="text-xs font-bold text-primary font-mono max-md:text-sm max-md:p-0">{formatLargeNumberByMarket(etf.marketCap, selectedMarket)}</span>
                       </span>
-                      <span className={styles.metaItem}>
+                      <span className="flex items-center gap-1.5 whitespace-nowrap max-md:flex-col max-md:gap-[3px] max-md:items-start">
                         {(rankingCategory === 'return' || rankingCategory === 'flow') ? (
                           <>
-                            <span className={styles.metaLabel}>
+                            <span className="text-[10px] font-semibold text-text-tertiary min-w-[52px] inline-block uppercase tracking-[0.02em] max-md:text-[10px] max-md:min-w-auto max-md:normal-case">
                               {categoryLabel} ({periodLabel})
                             </span>
-                            <span className={`${styles.metaValue} ${etf.rankingValue >= 0 ? 'number-up' : 'number-down'}`}>
+                            <span className={`text-xs font-bold font-mono max-md:text-sm max-md:p-0 ${etf.rankingValue >= 0 ? 'number-up' : 'number-down'}`}>
                               {formatRankingValue(etf.rankingValue)}
                             </span>
                           </>
                         ) : (
                           <>
-                            <span className={styles.metaLabel}>수익률 (1년)</span>
-                            <span className={`${styles.metaValue} ${getReturns(etf.id).year1 >= 0 ? 'number-up' : 'number-down'}`}>
+                            <span className="text-[10px] font-semibold text-text-tertiary min-w-[52px] inline-block uppercase tracking-[0.02em] max-md:text-[10px] max-md:min-w-auto max-md:normal-case">수익률 (1년)</span>
+                            <span className={`text-xs font-bold font-mono max-md:text-sm max-md:p-0 ${getReturns(etf.id).year1 >= 0 ? 'number-up' : 'number-down'}`}>
                               {formatPercent(getReturns(etf.id).year1)}
                             </span>
                           </>
@@ -535,12 +535,11 @@ export default function RankingPage() {
             ))}
           </div>
           ) : (
-            <Card padding="md" className={styles.emptyState}>
-              <p className={styles.emptyText}>해당 조건의 ETF가 없습니다.</p>
+            <Card padding="md" className="text-center p-2xl">
+              <p className="text-base text-text-tertiary m-0">해당 조건의 ETF가 없습니다.</p>
             </Card>
           )}
         </div>
     </PageContainer>
   );
 }
-

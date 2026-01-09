@@ -1,14 +1,13 @@
 import { useMemo } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { 
-  Flame, Snowflake, TrendingUp, TrendingDown, 
+import {
+  Flame, Snowflake, TrendingUp, TrendingDown,
   Activity, AlertTriangle, ArrowLeft
 } from 'lucide-react';
 import { Card } from '../components/common';
-import { koreanETFs, usETFs, getPhaseAnalysis } from '../data/etfs';
+import { koreanETFs, usETFs, getPhaseAnalysis } from '../data';
 import { useETFStore } from '../store/etfStore';
-import { formatPrice, formatPercent, getChangeClass } from '../utils/format';
-import styles from './PhaseDetailPage.module.css';
+import { formatPriceByMarket, formatPercent, getChangeClass } from '../utils/format';
 
 const CATEGORY_CONFIG = {
   oversold: {
@@ -87,102 +86,104 @@ export default function PhaseDetailPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { selectedMarket } = useETFStore();
-  
+
   const category = searchParams.get('category') || 'overheated';
   const config = CATEGORY_CONFIG[category as keyof typeof CATEGORY_CONFIG];
-  
+
   const etfs = selectedMarket === 'korea' ? koreanETFs : usETFs;
-  
+
   // 모든 ETF 분석 데이터
   const allETFsWithAnalysis = useMemo(() => {
     return etfs.map(e => ({ ...e, analysis: getPhaseAnalysis(e.id) }));
   }, [etfs]);
-  
+
   // 카테고리별 필터링 및 정렬
   const filteredETFs = useMemo(() => {
     if (!config) return [];
-    
+
     return allETFsWithAnalysis
       .filter(e => config.filter(e.analysis))
       .sort(config.sort);
   }, [allETFsWithAnalysis, config]);
-  
+
   const handleETFClick = (etfId: string) => {
     navigate(`/etf/${etfId}`);
   };
-  
+
   const handleBack = () => {
     navigate('/phase');
   };
-  
+
   if (!config) {
     return (
-      <div className={styles.page}>
-        <Card padding="xl">
+      <div className="flex flex-col gap-lg p-lg">
+        <Card padding="lg">
           <p>잘못된 카테고리입니다.</p>
           <button onClick={handleBack}>돌아가기</button>
         </Card>
       </div>
     );
   }
-  
+
   const Icon = config.icon;
-  
+
   return (
-    <div className={styles.page}>
+    <div className="flex flex-col gap-lg p-lg max-md:p-md max-md:gap-md">
       {/* Header */}
-      <div className={styles.header}>
-        <button className={styles.backButton} onClick={handleBack}>
+      <div className="flex flex-col gap-md">
+        <button
+          className="flex items-center gap-xs text-text-secondary text-sm font-medium bg-transparent border-none cursor-pointer transition-all hover:text-primary p-0"
+          onClick={handleBack}
+        >
           <ArrowLeft size={20} />
           <span>국면분석</span>
         </button>
-        
-        <div className={styles.titleGroup}>
-          <Icon size={24} className={styles.headerIcon} />
+
+        <div className="flex items-center gap-sm">
+          <Icon size={24} className="text-primary shrink-0" />
           <div>
-            <h1 className={styles.title}>{config.title}</h1>
-            <p className={styles.description}>{config.description}</p>
+            <h1 className="text-xl font-bold text-text-primary m-0 tracking-[-0.02em] md:text-2xl">{config.title}</h1>
+            <p className="text-sm text-text-secondary m-0 mt-0.5">{config.description}</p>
           </div>
         </div>
-        
-        <div className={styles.count}>
-          총 <strong>{filteredETFs.length}</strong>개
+
+        <div className="text-sm text-text-tertiary">
+          총 <strong className="text-primary font-semibold">{filteredETFs.length}</strong>개
         </div>
       </div>
-      
+
       {/* ETF List */}
       {filteredETFs.length > 0 ? (
-        <Card className={styles.listCard}>
+        <Card className="!p-0 overflow-hidden">
           {filteredETFs.map((etf, idx) => (
             <button
               key={etf.id}
-              className={styles.listItem}
+              className="flex items-center gap-md px-lg py-md text-left w-full border-b border-border/50 transition-all last:border-b-0 hover:bg-layer-0 max-md:gap-sm max-md:px-md max-md:py-sm"
               onClick={() => handleETFClick(etf.id)}
             >
-              <span className={styles.listRank}>{idx + 1}</span>
-              <div className={styles.listInfo}>
-                <span className={styles.listName}>{etf.name}</span>
-                <span className={styles.listMeta}>
+              <span className={`w-5 text-sm font-bold text-center shrink-0 max-md:w-4 max-md:text-[11px] ${idx < 3 ? 'text-primary' : 'text-text-tertiary'}`}>{idx + 1}</span>
+              <div className="flex-1 min-w-0 flex flex-col gap-0.5">
+                <span className="text-sm font-medium text-text-primary whitespace-nowrap overflow-hidden text-ellipsis max-md:text-[13px]">{etf.name}</span>
+                <span className="font-mono text-xs text-text-tertiary tabular-nums max-md:text-[11px]">
                   RSI {etf.analysis.rsi.toFixed(0)} · {etf.issuer}
                 </span>
               </div>
-              <div className={styles.listPriceGroup}>
-                <span className={`${styles.listChange} ${getChangeClass(etf.changePercent)}`}>
+              <div className="flex flex-col items-end gap-0.5 shrink-0">
+                <span className={`font-mono text-base font-semibold tabular-nums max-md:text-sm ${getChangeClass(etf.changePercent)}`}>
                   {formatPercent(etf.changePercent)}
                 </span>
-                <span className={styles.listPrice}>
-                  {formatPrice(etf.price, selectedMarket)}{selectedMarket === 'korea' ? '원' : ''}
+                <span className="font-mono text-xs text-text-tertiary tabular-nums max-md:text-[11px]">
+                  {formatPriceByMarket(etf.price, selectedMarket)}
                 </span>
               </div>
             </button>
           ))}
         </Card>
       ) : (
-        <Card className={styles.emptyCard}>
-          <p className={styles.emptyText}>해당 조건의 ETF가 없습니다</p>
+        <Card className="!p-xl text-center">
+          <p className="text-[13px] font-medium text-text-tertiary">해당 조건의 ETF가 없습니다</p>
         </Card>
       )}
     </div>
   );
 }
-

@@ -1,6 +1,5 @@
 import { SelectHTMLAttributes, forwardRef } from 'react';
 import { ChevronDown } from 'lucide-react';
-import styles from './Select.module.css';
 
 interface SelectOption {
   value: string;
@@ -16,6 +15,12 @@ interface SelectProps extends Omit<SelectHTMLAttributes<HTMLSelectElement>, 'siz
   size?: 'sm' | 'md' | 'lg';
 }
 
+const sizeClasses = {
+  sm: 'py-1.5 pl-2.5 pr-8 text-xs',
+  md: 'py-2 pl-3 pr-9 text-sm',
+  lg: 'py-2.5 pl-3.5 pr-10 text-base',
+};
+
 const Select = forwardRef<HTMLSelectElement, SelectProps>(({
   label,
   error,
@@ -28,19 +33,19 @@ const Select = forwardRef<HTMLSelectElement, SelectProps>(({
   ...props
 }, ref) => {
   const selectId = id || `select-${Math.random().toString(36).slice(2, 9)}`;
-  
+
   return (
-    <div className={`${styles.wrapper} ${fullWidth ? styles.fullWidth : ''}`}>
+    <div className={`flex flex-col gap-xs ${fullWidth ? 'w-full' : ''}`}>
       {label && (
-        <label htmlFor={selectId} className={styles.label}>
+        <label htmlFor={selectId} className="text-sm font-medium text-text-secondary">
           {label}
         </label>
       )}
-      <div className={`${styles.selectWrapper} ${error ? styles.hasError : ''}`}>
+      <div className={`relative flex items-center ${error ? '[&>select]:border-danger' : ''}`}>
         <select
           ref={ref}
           id={selectId}
-          className={`${styles.select} ${styles[size]} ${className}`}
+          className={`w-full bg-bg border border-border rounded-md font-semibold text-text-primary cursor-pointer appearance-none transition-all duration-fast hover:bg-white hover:border-primary focus:outline-none focus:bg-white focus:border-primary ${sizeClasses[size]} ${className}`}
           {...props}
         >
           {placeholder && (
@@ -54,9 +59,9 @@ const Select = forwardRef<HTMLSelectElement, SelectProps>(({
             </option>
           ))}
         </select>
-        <ChevronDown size={18} className={styles.icon} />
+        <ChevronDown size={18} className="absolute right-3 text-text-tertiary pointer-events-none" />
       </div>
-      {error && <p className={styles.error}>{error}</p>}
+      {error && <p className="text-xs text-danger m-0">{error}</p>}
     </div>
   );
 });
