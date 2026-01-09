@@ -6,7 +6,7 @@ import { Card, Button } from '../components/common';
 import PageContainer from '../components/layout/PageContainer';
 import { koreanThemes, usThemes, koreanETFs, usETFs, getReturns } from '../data';
 import { useETFStore } from '../store/etfStore';
-import { formatPercent, formatLargeNumber, formatPriceByMarket, formatLargeNumberByMarket } from '../utils/format';
+import { formatPercent, formatPriceByMarket, formatLargeNumberByMarket } from '../utils/format';
 import type { ThemeCategory } from '../types/etf';
 
 type ViewMode = 'list' | 'map';

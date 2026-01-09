@@ -27,17 +27,6 @@ export default function MarketSelectorCompact() {
           selectedMarket === 'us' ? 'text-text-primary' : 'text-text-secondary'
         }`}>미국</span>
       </button>
-      <button
-        className={`flex items-center justify-center gap-1 py-[7px] px-3 bg-transparent border-none rounded-sm cursor-pointer transition-all duration-fast text-xs md:gap-1.5 md:py-1.5 md:px-3 md:text-sm hover:bg-white ${
-          selectedMarket === 'all' ? 'bg-white shadow-sm' : ''
-        }`}
-        onClick={() => setSelectedMarket('all')}
-      >
-        <span className="text-lg leading-none md:text-base">🌐</span>
-        <span className={`hidden md:block font-semibold ${
-          selectedMarket === 'all' ? 'text-text-primary' : 'text-text-secondary'
-        }`}>전체</span>
-      </button>
     </div>
   );
 }

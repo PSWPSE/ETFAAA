@@ -18,7 +18,7 @@ export const formatUSDPrice = (value: number): string => {
 // 시장에 따른 가격 포맷 (KR: 원, US: $)
 export const formatPriceByMarket = (
   value: number,
-  market: 'korea' | 'us',
+  market: 'korea' | 'us' | 'all',
   showConversion?: boolean,
   exchangeRate?: number
 ): string => {
@@ -48,7 +48,7 @@ export const formatLargeNumber = (value: number): string => {
 };
 
 // 시장에 따른 큰 숫자 포맷 (KR: 조/억원, US: $T/B/M)
-export const formatLargeNumberByMarket = (value: number, market: 'korea' | 'us'): string => {
+export const formatLargeNumberByMarket = (value: number, market: 'korea' | 'us' | 'all'): string => {
   if (market === 'us') {
     if (value >= 1e12) return `$${(value / 1e12).toFixed(1)}T`;
     if (value >= 1e9) return `$${(value / 1e9).toFixed(1)}B`;

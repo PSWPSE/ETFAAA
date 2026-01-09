@@ -35,17 +35,6 @@ const MarketSelector: React.FC<MarketSelectorProps> = ({ className = '' }) => {
         <span className="text-lg leading-none max-md:text-base">🇺🇸</span>
         <span className="whitespace-nowrap">미국 ETF</span>
       </button>
-      <button
-        className={`flex items-center gap-1.5 py-sm px-md border-none rounded-xl bg-transparent cursor-pointer transition-all duration-normal text-sm font-medium text-text-secondary min-h-touch hover:bg-border max-md:py-1.5 max-md:px-3 max-md:text-[13px] max-md:min-h-10 ${
-          selectedMarket === 'all'
-            ? 'bg-primary text-white shadow-[0_2px_8px_rgba(30,58,95,0.25)] hover:bg-primary'
-            : ''
-        }`}
-        onClick={() => handleMarketChange('all')}
-      >
-        <span className="text-lg leading-none max-md:text-base">🌐</span>
-        <span className="whitespace-nowrap">전체</span>
-      </button>
     </div>
   );
 };

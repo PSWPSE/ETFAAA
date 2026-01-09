@@ -6,7 +6,7 @@ import type { FilterChip } from '../components/common';
 import PageContainer from '../components/layout/PageContainer';
 import { useETFStore } from '../store/etfStore';
 import { koreanETFs, usETFs, filterOptions, getReturns } from '../data';
-import { formatPercent, formatLargeNumber, getChangeClass, formatPriceByMarket, formatLargeNumberByMarket } from '../utils/format';
+import { formatPercent, getChangeClass, formatPriceByMarket, formatLargeNumberByMarket } from '../utils/format';
 
 type SearchType = 'name' | 'ai' | 'screener' | 'holdings';
 

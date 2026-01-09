@@ -6,7 +6,7 @@ import type { FilterChip } from '../components/common';
 import PageContainer from '../components/layout/PageContainer';
 import { useETFStore } from '../store/etfStore';
 import { koreanETFs, usETFs, getReturns } from '../data';
-import { formatPercent, formatLargeNumber, formatPriceByMarket, formatLargeNumberByMarket } from '../utils/format';
+import { formatPercent, formatPriceByMarket, formatLargeNumberByMarket } from '../utils/format';
 
 type Period = '1d' | '1m' | '3m' | '6m' | '1y';
 type RankingType = 'top' | 'bottom';

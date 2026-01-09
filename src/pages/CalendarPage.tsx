@@ -5,7 +5,7 @@ import { Card, Badge } from '../components/common';
 import PageContainer from '../components/layout/PageContainer';
 import { koreanETFs, usETFs, getDividends, getReturns } from '../data';
 import { useETFStore } from '../store/etfStore';
-import { formatPrice, formatPriceByMarket, formatPercent } from '../utils/format';
+import { formatPriceByMarket, formatPercent } from '../utils/format';
 
 interface DividendEvent {
   etfId: string;
