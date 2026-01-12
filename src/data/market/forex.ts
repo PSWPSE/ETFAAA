@@ -1,4 +1,4 @@
-// 환율 데이터 (2026-01-09 종가 기준, 네이버 금융)
+// 환율 데이터 (2026-01-12 기준, 네이버 금융)
 
 export interface ForexRate {
   symbol: string;
@@ -9,10 +9,10 @@ export interface ForexRate {
 }
 
 export const forexRates: ForexRate[] = [
-  { symbol: 'KRW=X', name: 'USD/KRW', value: 1456.70, change: 3.70, changePercent: 0.25 },
-  { symbol: 'EURKRW=X', name: 'EUR/KRW', value: 1697.64, change: 3.37, changePercent: 0.20 },
-  { symbol: 'JPYKRW=X', name: 'JPY/KRW', value: 9.26, change: -0.01, changePercent: -0.01 },
-  { symbol: 'CNYKRW=X', name: 'CNY/KRW', value: 208.69, change: 0.59, changePercent: 0.28 },
+  { symbol: 'KRW=X', name: 'USD/KRW', value: 1460.30, change: 3.60, changePercent: 0.25 },
+  { symbol: 'EURKRW=X', name: 'EUR/KRW', value: 1700.01, change: 2.37, changePercent: 0.14 },
+  { symbol: 'JPYKRW=X', name: 'JPY/KRW', value: 9.25, change: -0.01, changePercent: -0.11 },
+  { symbol: 'CNYKRW=X', name: 'CNY/KRW', value: 209.37, change: 0.68, changePercent: 0.33 },
 ];
 
 // MARKET_DATA 형식으로 export (HomePage.tsx 호환)
